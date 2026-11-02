@@ -1,8 +1,10 @@
 import { spawn, type ChildProcess } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { createServer } from 'node:net';
 import { fileURLToPath } from 'node:url';
 
 const APP_DIRECTORY = fileURLToPath(new URL('../../../packages/app', import.meta.url));
+const NEXT_BIN = createRequire(`${APP_DIRECTORY}/`).resolve('next/dist/bin/next');
 const HEALTH_PATH = '/api/health';
 const STARTUP_TIMEOUT_MS = 60_000;
 const POLL_INTERVAL_MS = 250;
@@ -49,7 +51,7 @@ async function waitUntilHealthy(url: string, app: ChildProcess): Promise<void> {
 export async function startApp(env: Record<string, string>): Promise<RunningApp> {
   const port = await findFreePort();
   const url = `http://127.0.0.1:${port}`;
-  const app = spawn('npx', ['next', 'start', '--port', String(port)], {
+  const app = spawn(process.execPath, [NEXT_BIN, 'start', '--port', String(port)], {
     cwd: APP_DIRECTORY,
     env: { ...process.env, ...env, PORT: String(port) },
     stdio: 'inherit',

@@ -29,3 +29,8 @@ Todo: phase 3 (MikroORM and migrations), phase 4 (Awilix), phase 4b (http and ui
 Added a pre-commit hook running lint, typecheck and unit tests with coverage, installed through the prepare script.
 Decision: dependency-free hook in .githooks instead of husky; origin switched to SSH.
 Todo: branch protection with required CI checks, phase 3 (MikroORM).
+
+## 2026-11-02 (CI hang fix)
+First CI run hung in the integration job: tests passed, but the app started through npx left an orphaned server holding the Vitest worker.
+Fix: spawn Next.js directly with the Node binary so SIGTERM reaches the server; added a 15 minute timeout to every CI job.
+Todo: branch protection with required checks (needs gh auth, done), phase 3 (MikroORM).
