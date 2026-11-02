@@ -6,9 +6,24 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "migration:create": "node --import tsx --env-file-if-exists=../../.env ../../node_modules/@mikro-orm/cli/cli.js migration:create --blank",
+    "migration:up": "node --import tsx --env-file-if-exists=../../.env ../../node_modules/@mikro-orm/cli/cli.js migration:up",
+    "migration:down": "node --import tsx --env-file-if-exists=../../.env ../../node_modules/@mikro-orm/cli/cli.js migration:down"
   },
   "dependencies": {
-    "@aitl/core": "*"
+    "@aitl/core": "*",
+    "@mikro-orm/core": "^7.2.6",
+    "@mikro-orm/migrations": "^7.2.6",
+    "@mikro-orm/postgresql": "^7.2.6"
+  },
+  "devDependencies": {
+    "@mikro-orm/cli": "^7.2.6",
+    "tsx": "^4.23.15"
+  },
+  "mikro-orm": {
+    "configPaths": [
+      "./mikro-orm.config.ts"
+    ]
   }
 }

@@ -14,11 +14,11 @@ export class ValidationError extends AppError {
   readonly code = 'validation_error';
   readonly statusCode = 400;
 
-  constructor(
-    message: string,
-    readonly fieldErrors?: FieldErrors,
-  ) {
+  readonly fieldErrors: FieldErrors | undefined;
+
+  constructor(message: string, fieldErrors?: FieldErrors) {
     super(message);
+    this.fieldErrors = fieldErrors;
   }
 }
 

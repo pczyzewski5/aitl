@@ -48,6 +48,16 @@ Nowy komponent wielokrotnego użytku ma jedno miejsce: prymityw shadcn w `ui/src
 - Poprawka błędu i zmiana zachowania wymagają testu regresyjnego, który pada bez zmiany.
 - Przed prośbą o review: `npm run typecheck`, `npm run lint`, `npm run test:coverage`, `npm run build` oraz `npm audit`.
 
+## Workflow git
+
+- Gałąź `main` jest chroniona na GitHubie: zmiany wchodzą wyłącznie przez PR, z zielonymi checkami (Build, Lint, Unit tests, Integration tests) i aktualną gałęzią. Bezpośredni push na `main` jest zablokowany (także dla administratorów), force-push i usuwanie zabronione.
+- Pracuj na gałęzi `feature/<opis>` i otwieraj PR przez `gh pr create`.
+
+## Baza danych (lokalnie)
+
+- `docker compose up -d postgres` startuje PostgreSQL, a `.env` (kopia `.env.example`, ignorowany przez git) przekazuje `DATABASE_URL`.
+- Migracje: `npm run migration:create|migration:up|migration:down -w @aitl/db`. Pliki migracji są generowane do `packages/db/migrations` (poza `src`, więc poza progiem pokrycia); ich poprawność sprawdza test integracyjny `tests/integration/migrations.test.ts`.
+
 ## Testy i CI
 
 - **Każda nowa funkcja musi mieć 100% pokrycia testami jednostkowymi** (statements, branches, functions, lines). Bez wyjątków i bez wyłączania plików z pokrycia. Próg 100% jest wymuszony w `vitest.config.ts`, a `npm run test:coverage` pada przy każdej niepokrytej linii lub gałęzi.
