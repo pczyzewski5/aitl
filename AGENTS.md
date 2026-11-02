@@ -54,6 +54,7 @@ Nowy komponent wielokrotnego użytku ma jedno miejsce: prymityw shadcn w `ui/src
 - Testy jednostkowe: Vitest, pliki `*.test.ts(x)` obok kodu w `packages/*/src`. Uruchomienie: `npm test` (lub `npm run test:coverage`).
 - Testy integracyjne: Vitest + testcontainers w `tests/integration/`. Globalny setup startuje PostgreSQL w kontenerze i udostępnia `inject('databaseUrl')`; `tests/integration/support/app-server.ts` uruchamia tymczasową instancję zbudowanej aplikacji (`next start`) na wolnym porcie. Wymagają Dockera i wcześniejszego `npm run build`. Uruchomienie: `npm run test:integration`.
 - Tymczasowa instancja aplikacji z bazą do testów przeglądarkowych (agent-browser): `npm run test:integration:app` wypisuje URL i działa do Ctrl+C.
+- Hook pre-commit (`.githooks/pre-commit`, instalowany przez `npm install` skryptem `prepare`) uruchamia lint, typecheck i testy z pokryciem 100%. Nie omijaj go przez `--no-verify`.
 - CI (`.github/workflows/ci.yml`) dla każdego PR-a: build (typecheck + `next build`), lint, testy jednostkowe z pokryciem, testy integracyjne. Przed prośbą o review uruchom lokalnie `npm run typecheck`, `npm run lint`, `npm run test:coverage` i `npm run build`.
 
 ## Struktura `.ai/`
