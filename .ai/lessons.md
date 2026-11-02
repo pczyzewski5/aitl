@@ -6,4 +6,4 @@ Format wpisu w indeksie: `- [tytuł](lessons/YYYY-MM-DD-slug.md) – jednolinijk
 
 ## Indeks
 
-_(brak wpisów)_
+- [Integration tests hang when the app is started through npx](lessons/2026-11-02-integration-tests-hang-with-npx.md) – spawn servers directly with Node, add timeout-minutes to CI jobs

@@ -34,3 +34,8 @@ Todo: branch protection with required CI checks, phase 3 (MikroORM).
 First CI run hung in the integration job: tests passed, but the app started through npx left an orphaned server holding the Vitest worker.
 Fix: spawn Next.js directly with the Node binary so SIGTERM reaches the server; added a 15 minute timeout to every CI job.
 Todo: branch protection with required checks (needs gh auth, done), phase 3 (MikroORM).
+
+## 2026-11-02 (first lesson)
+Recorded the first lesson (hanging CI integration job) in the lessons index.
+Pitfall: branch protection and rulesets are unavailable for private repos on the free GitHub plan (HTTP 403), so main is not protected server-side.
+Todo: decide on GitHub Pro or public repo for branch protection, phase 3 (MikroORM).
