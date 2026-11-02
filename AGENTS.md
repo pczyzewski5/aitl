@@ -14,7 +14,47 @@ AITL: aplikacja webowa do śledzenia oraz analizy wydatków. Opis dla ludzi w `R
   - `app` może zależeć od pozostałych pakietów, żaden pakiet nie zależy od `app`. Nowe pakiety dodawaj w `packages/` pod nazwą `@aitl/<nazwa>`.
 - **Baza danych**: PostgreSQL przez MikroORM. Zmiany schematu wyłącznie przez migracje, nigdy ręcznie ani przez synchronizację schematu.
 - **Dependency Injection**: Awilix. Zależności wstrzykiwane przez konstruktor, rejestracja w kontenerze w `app`. Bez globalnych singletonów i `new` serwisów w logice biznesowej.
+- **Kierunek zależności** (wymuszany docelowo przez ESLint `no-restricted-imports`): `app → {ui, core, db}`, `db → core`, `ui` samodzielne (nie importuje `core` ani `db`). Tylko `db` importuje `@mikro-orm/*`. Serwisy w `core` zależą od portów repozytoriów (`*-repository.port.ts`), `db` dostarcza adaptery, a kontener Awilix w `app` je wiąże.
 - **UI**: strony frontendowe stylujemy Tailwindem, strony backendowe (panel admina) budujemy na shadcn/ui. Komponenty współdzielone trafiają do `packages/ui`.
+
+### Konwencja konceptów domenowych
+
+Nie używamy `modules/`. Każdy koncept (np. `expenses`, `categories`, `budgets`) to podfolder o tej samej nazwie powtórzony w warstwach, które go potrzebują:
+
+- `packages/db/src/entities/<concept>/<name>.entity.ts` i `packages/db/src/repositories/<concept>/mikro-orm-<name>.repository.ts`
+- `packages/core/src/services/<concept>/<name>.service.ts` oraz `<name>-repository.port.ts`
+- `packages/core/src/validators/<concept>/` (współdzielone schematy Zod)
+- `packages/app/src/app/api/<concept>/route.ts` i odpowiadające `page.tsx`
+
+Folder konceptu tworzymy dopiero z jego pierwszym plikiem, bez pustych szkieletów. To konwencja katalogów, a nie runtime modułów: bez per-konceptowego setupu, ACL i auto-discovery. ID zdarzeń: `concept.entity.action` (np. `expenses.expense.created`), emitowane przez typowany emiter w `packages/core/src/events`, tylko w procesie, bez kolejek. Pełna tabela nazewnictwa, zasady bezpieczeństwa, checklist code review i procedura dodawania konceptu: `.ai/specs/2026-09-01-engineering-standards.md`.
+
+### Warstwa API i UI wielokrotnego użytku
+
+Każda route i strona korzysta ze wspólnych warstw zamiast własnej obsługi fetch/walidacji/auth/błędów:
+
+- `packages/core/src/http/`: `errors.ts` (hierarchia `AppError`), `apiHandler.ts` (mapuje błędy na status i kopertę JSON, loguje nieoczekiwane), `makeCrudRoute.ts` (CRUD ze schematu i serwisu), `auth.ts` (`requireSession`, `requireRole`, asercje własności).
+- `packages/ui/src/backend/`: `api/apiCall.ts` (jedyne miejsce z `fetch()` do `/api/*`), `forms/CrudForm.tsx`, `tables/DataTable.tsx`, `feedback/{LoadingMessage,ErrorMessage,EmptyState}.tsx`.
+
+Nowy komponent wielokrotnego użytku ma jedno miejsce: prymityw shadcn w `ui/src/components/ui/` (tylko przez `npx shadcn@latest add`), generyczny wzorzec panelu w `ui/src/backend/<category>/`, komponent konceptu w `ui/src/components/<concept>/`, komponent jednej strony obok jej `page.tsx`.
+
+### Zasady jakości i bezpieczeństwa
+
+- Serwisy rzucają tylko `AppError` i jego podklasy, nigdy nie budują odpowiedzi HTTP. Route nie ma własnego `try/catch`.
+- Auth i sprawdzenie własności rekordu wymuszamy po stronie serwera na każdej niepublicznej route. Błąd w decyzji bezpieczeństwa oznacza odmowę.
+- Route nie przekazuje surowego body do `em.create()`/`em.assign()`, tylko sparsowany wynik schematu Zod.
+- Kwoty jako liczby całkowite w jednostce podstawowej plus waluta, bez `float`. Sumy liczone po stronie serwera.
+- Sekrety tylko z env walidowanego Zodem. Logger nie zapisuje haseł ani tokenów.
+- Brak magicznych liczb i stringów, brak pustych `catch`, brak martwego kodu i debugowych `console.log`.
+- Poprawka błędu i zmiana zachowania wymagają testu regresyjnego, który pada bez zmiany.
+- Przed prośbą o review: `npm run typecheck`, `npm run lint`, `npm run test:coverage`, `npm run build` oraz `npm audit`.
+
+## Testy i CI
+
+- **Każda nowa funkcja musi mieć 100% pokrycia testami jednostkowymi** (statements, branches, functions, lines). Bez wyjątków i bez wyłączania plików z pokrycia. Próg 100% jest wymuszony w `vitest.config.ts`, a `npm run test:coverage` pada przy każdej niepokrytej linii lub gałęzi.
+- Testy jednostkowe: Vitest, pliki `*.test.ts(x)` obok kodu w `packages/*/src`. Uruchomienie: `npm test` (lub `npm run test:coverage`).
+- Testy integracyjne: Vitest + testcontainers w `tests/integration/`. Globalny setup startuje PostgreSQL w kontenerze i udostępnia `inject('databaseUrl')`; `tests/integration/support/app-server.ts` uruchamia tymczasową instancję zbudowanej aplikacji (`next start`) na wolnym porcie. Wymagają Dockera i wcześniejszego `npm run build`. Uruchomienie: `npm run test:integration`.
+- Tymczasowa instancja aplikacji z bazą do testów przeglądarkowych (agent-browser): `npm run test:integration:app` wypisuje URL i działa do Ctrl+C.
+- CI (`.github/workflows/ci.yml`) dla każdego PR-a: build (typecheck + `next build`), lint, testy jednostkowe z pokryciem, testy integracyjne. Przed prośbą o review uruchom lokalnie `npm run typecheck`, `npm run lint`, `npm run test:coverage` i `npm run build`.
 
 ## Struktura `.ai/`
 
