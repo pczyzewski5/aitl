@@ -39,3 +39,13 @@ Todo: branch protection with required checks (needs gh auth, done), phase 3 (Mik
 Recorded the first lesson (hanging CI integration job) in the lessons index.
 Pitfall: branch protection and rulesets are unavailable for private repos on the free GitHub plan (HTTP 403), so main is not protected server-side.
 Todo: decide on GitHub Pro or public repo for branch protection, phase 3 (MikroORM).
+
+## 2026-11-02 (phase 3: MikroORM)
+Added MikroORM setup in the db package: pool config, shared entity properties, blank initial migration, migration scripts, docker compose PostgreSQL, .env.example and an integration test applying migrations.
+Pitfalls: MikroORM refuses to start with zero entities (disabled the check until the first concept); the CLI needs configPaths and the tsx loader to read a TS config; parameter properties in the errors class broke the erasable-syntax check once tests imported package code.
+Todo: phase 4 (Awilix composition root), phase 4b, first domain concept (expenses).
+
+## 2026-11-02 (secret scanner)
+GitGuardian flagged one secret on the phase 3 PR, most likely the database URL with a password; removed passwords from example URLs and test fixtures and switched local PostgreSQL to trust auth.
+Pitfall: the finding details are visible only in the GitGuardian dashboard, so the exact line was inferred.
+Todo: confirm the check turns green; phase 4.

@@ -26,8 +26,9 @@ Kryteria ukończenia:
 ## Faza 3: `packages/db` (PostgreSQL + MikroORM)
 
 Kryteria ukończenia:
-- [ ] konfiguracja MikroORM z pulą połączeń, pierwsza encja i migracja
-- [ ] skrypty migracji, lokalny PostgreSQL (docker compose) i zmienne środowiskowe w `.env.example`
+- [x] konfiguracja MikroORM z pulą połączeń, wspólne właściwości encji (UUID, znaczniki czasu) i pierwsza (pusta) migracja; pierwsza encja domenowa dopiero z pierwszym konceptem
+- [x] skrypty migracji, lokalny PostgreSQL (docker compose) i zmienne środowiskowe w `.env.example`
+- [x] test integracyjny stosujący migracje na PostgreSQL z testcontainers
 
 ## Faza 4: Awilix w `packages/app`
 
