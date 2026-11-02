@@ -19,3 +19,8 @@ Do zrobienia: inicjalizacja Next.js w `packages/app`, konfiguracja MikroORM w `p
 Added the monorepo migration plan and the AITL-adapted engineering standards spec, plus the matching rules in AGENTS.md.
 Decision: dependency direction stays db -> core (persistence through repository ports); the original spec's app -> core -> db was rejected.
 Todo: workspace skeleton, Next.js app, lint, tests and CI.
+
+## 2026-11-02 (workspace, app, CI)
+Added the npm workspace skeleton, minimal Next.js app, ESLint with dependency-boundary rules, Vitest unit tests at 100% coverage, testcontainers integration tests and the GitHub CI workflow.
+Pitfalls: typescript-eslint caps TypeScript at 6.0.x; Vitest needs the automatic JSX runtime because the app tsconfig uses preserve.
+Todo: phase 3 (MikroORM and migrations), phase 4 (Awilix), phase 4b (http and ui/backend layers), phase 5 (Tailwind and shadcn/ui); CI not yet run on GitHub (no remote).
