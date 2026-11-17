@@ -8,6 +8,10 @@ Praca wchodzi dwiema ścieżkami: swobodnym opisem zadania przekazanym agentowi 
 
 Przed przyjęciem zadania praca jest kształtowana: `om-brainstorm` zamienia pomysł lub pytanie w decyzję o dalszej drodze i krótki brief, a skille specyfikacji (`om-spec-writing`, `om-auto-write-spec`) zamieniają funkcję w dokument projektowy zanim cokolwiek powstanie. Specyfikacje trafiają do `.ai/specs/` (aktywne), po wdrożeniu do `.ai/specs/implemented/`, po porzuceniu do `.ai/specs/archive/`. Te kroki zasilają tabelę poniżej, ale nie są samym przepływem zgłoszenia.
 
+<!-- discovery:start -->
+Zanim cokolwiek z tego nastąpi, `om-discover` ustala kontekst produktu, z którego korzysta każda późniejsza decyzja: `.ai/specs/product-brief.md` opisuje, kim są użytkownicy, co ich boli, czym produkt nie jest oraz jakie reguły i decyzje wiążą pracę. Definicja gotowości poniżej jest umową między tym kontekstem a przyjęciem zgłoszenia.
+<!-- discovery:end -->
+
 ## Konwencje
 
 - **Gałąź**: `feature/<opis>` (patrz `AGENTS.md`). `main` jest chroniona: zmiany wchodzą wyłącznie przez PR, z zielonymi checkami (Build, Lint, Unit tests, Integration tests) i aktualną gałęzią. Bezpośredni push na `main`, force-push i usuwanie są zablokowane, także dla administratorów.
@@ -21,6 +25,7 @@ Przed przyjęciem zadania praca jest kształtowana: `om-brainstorm` zamienia pom
 - **Reviewer**: czyta diff i zatwierdza albo żąda zmian. Może to być człowiek lub skill `om-auto-review-pr`; checklista `om-code-review` obowiązuje w obu przypadkach (reguły repo w `CODE_REVIEW.md`). Reviewer jest też drugą osobą, której wymaga zmiana `risk-high`, i akceptuje specyfikację, gdy funkcja jej wymaga.
 - **Designer**: odpowiada za przepływ i jego stany, zanim powstanie kod. Może to być człowiek, `om-ux-shape`, `om-ux-design` albo `om-ux-review-pr`.
 - **Recenzent QA**: sprawdza zmiany widoczne dla użytkownika przed merge, używając `om-prepare-test-env` (jednorazowy start aplikacji) i `om-auto-qa-pr` (przejście w prawdziwej przeglądarce). Odwołujemy się do roli, nigdy do imienia ani loginu.
+- **Product owner**: odpowiada za "dlaczego" i wartość: brief produktu, podział zakresu (teraz, później, nie robimy), kryteria sukcesu oraz poziom zgłoszenia w Definicji gotowości. Potwierdza brief przed jego zapisaniem i drzewo backlogu przed założeniem zgłoszeń; jest właścicielem każdej decyzji w briefie, która nie wskazuje innego właściciela. Odwołujemy się do roli, nigdy do imienia. <!-- discovery -->
 - **Maintainer**: rozstrzyga spory, może zwolnić z wymogu na PR-ze (jawnie i z uzasadnieniem), czyści osierocone claimy, prowadzi changelog.
 
 ## Etapy przepływu
@@ -28,7 +33,7 @@ Przed przyjęciem zadania praca jest kształtowana: `om-brainstorm` zamienia pom
 | Etap | Co się dzieje | Prowadzi | Gotowe, gdy |
 |---|---|---|---|
 | Odkrywanie | Pomysł lub pytanie jest omawiane, zanim powstanie jakikolwiek artefakt: kwestionujemy problem, ważymy alternatywy (w tym nic nie budować), kończymy decyzją o drodze. | `om-brainstorm` lub człowiek | Rozmowa skierowana dalej; brief, gdy praca trwa |
-| Przyjęcie | Zgłoszenie lub brief zadania jest założone w GitHubie z wystarczającą ilością szczegółów: co jest źle lub czego brakuje, dla kogo, jak wygląda "zrobione". `om-prepare-issue` zakłada je z etykietami SDLC. | Każdy, `om-prepare-issue` | Zgłoszenie istnieje |
+| Przyjęcie | Zgłoszenie lub brief zadania jest założone w GitHubie i spełnia Definicję gotowości poniżej. `om-prepare-issue` i `om-backlog` zakładają je z etykietami SDLC i wymaganymi sekcjami; `om-auto-manage-issues` raportuje, czego istniejącemu zgłoszeniu jeszcze brakuje. | Każdy, `om-prepare-issue`, `om-backlog`, `om-auto-manage-issues` | Zgłoszenie istnieje i jest gotowe albo jego braki są nazwane na zgłoszeniu <!-- discovery --> |
 | Triage | Potwierdzenie, że problem jest realny, nadal nienaprawiony na `main`, nieprzejęty i nieobjęty otwartym PR-em. Tylko odczyt. | `om-verify-in-repo` lub człowiek | Potwierdzone jako do zrobienia albo zamknięte jako bez akcji |
 | Claim | Autor przejmuje zgłoszenie, by współbieżni agenci się wycofali (protokół poniżej). | `om-fix` / `om-auto-create-pr` lub człowiek | Claim widoczny na zgłoszeniu |
 | Projekt | Dla zmiany widocznej w UI przepływ i jego stany są ustalone przed kodem: stan pusty, ładowanie, błąd, brak uprawnień, czego zmiana celowo nie robi. Zgłoszenie bez UI pomija etap. | `om-ux-shape`, opcjonalnie `om-ux-design`, lub człowiek | Przepływ i stany ustalone albo zgłoszenie bez UI |
@@ -40,6 +45,40 @@ Przed przyjęciem zadania praca jest kształtowana: `om-brainstorm` zamienia pom
 | Sprzątanie po merge | Zamknięcie zgłoszeń naprawionych przez PR, komentarz przy zgłoszeniach, których PR zamknięto bez merge, zgłoszenia follow-up dla pozostałych uwag. | `om-close-fixed-issues`, `om-followup-issue-from-pr` | Tracker uzgodniony, follow-upy założone |
 
 Po merge ten proces się kończy. Wdrożenie, monitoring i rollback należą do procesu wydawniczego zespołu, nie do tego dokumentu; maintainer redaguje changelog przez `om-auto-update-changelog`, a `om-pipeline-retro` czyta zakończone przebiegi.
+
+<!-- discovery:start -->
+## Definicja gotowości
+
+Zgłoszenie jest gotowe do implementacji, gdy odpowiedzi poniżej znajdują się na zgłoszeniu albo w linkowanej specyfikacji. Są dwa poziomy, bo specyfikacja może uzupełnić drugi, ale nigdy pierwszy.
+
+**Poziom zgłoszenia, który może dostarczyć tylko człowiek:**
+
+- problem lub potrzeba oraz to, kto ją ma (użytkownik lub rola);
+- oczekiwany rezultat i sposób jego sprawdzenia;
+- co jest poza zakresem;
+- otwarte pytania, każde oznaczone jako blokujące lub nieblokujące, bez żadnego blokującego pytania bez odpowiedzi;
+- każde autonomiczne założenie potwierdzone przez człowieka (komentarz z rozstrzygniętymi założeniami na PR-ze specyfikacji).
+
+**Poziom specyfikacji, który dostarcza pokrywająca ją specyfikacja (`om-auto-write-spec` pisze go, gdy brakuje):**
+
+- kryteria akceptacji;
+- reguły biznesowe;
+- ścieżka szczęśliwa i główne ścieżki błędów;
+- wpływ na dane i uprawnienia;
+- zależności;
+- link do prototypu lub makiet, gdy zmiana jest widoczna dla użytkownika.
+
+Dla błędu gotowość oznacza możliwość odtworzenia: bramką jest `om-verify-in-repo`, a powyższa lista dotyczy tylko jego elementów poziomu zgłoszenia. Egzekwowanie: `om-prepare-issue` zakłada zgłoszenia z tymi sekcjami; `om-auto-manage-issues` zapisuje `READY_STATUS` dla każdego zgłoszenia i dodaje komentarz o braku gotowości z wymienionymi brakami; ścieżka funkcji w `om-auto-fix-issue` zatrzymuje się na zgłoszeniu, które nie spełnia poziomu zgłoszenia, zamiast pisać specyfikację wokół luki, tak jak `om-verify-in-repo` zatrzymuje się na błędzie, który nie jest realny. Braki poziomu specyfikacji nie zatrzymują pracy, bo specyfikacja jest pisana. Maintainer może zwolnić z pojedynczego elementu, mówiąc o tym na zgłoszeniu. Ta sekcja jest tym, co czytają wymienione skille: repozytorium, którego `SDLC.md` nie ma Definicji gotowości, nie dostaje sprawdzenia gotowości.
+
+## Decyzje produktowe jako chroniony kontrakt
+
+Gdy `om-discover` zapisał `.ai/specs/product-brief.md`, jego tabele **Non-goals**, **Business rules** i **Decisions** są chronione tak, jak `BACKWARD_COMPATIBILITY.md` chroni powierzchnie kontraktowe. Każdy wpis ma stabilne id (`N01`, `R03`, `D07`), właściciela, status (`active` lub `superseded`), datę przeglądu i wymaganą ścieżkę zmiany. Zasady:
+
+- PR, który buduje coś, co wyklucza non-goal, albo przeczy regule biznesowej lub decyzji, bez wpisu zastępującego w tym samym PR-ze, jest **blokerem** w review, z cytatem wpisu i jego id. Wyjściem nigdy nie jest "usuń kod", tylko "zmień decyzję jawnie": wiersz zastępujący zatwierdzony przez właściciela wpisu, a spór rozstrzyga maintainer, jak w sekcji Role.
+- Decyzje w grze są pokazywane tam, gdzie ludzie pracują, a nie zapamiętywane: `om-auto-manage-issues` wymienia je w komentarzu z notatkami implementacyjnymi, `om-spec-writing` prowadzi sekcję *Decisions in play*, a każdy opis PR-a zawiera *Decisions touched*. Nowa osoba lub nowy agent czyta je na zgłoszeniu, w specyfikacji albo na PR-ze, nie w historii czatu.
+- Autonomiczne założenie potwierdzone przez człowieka na PR-ze specyfikacji (komentarz z rozstrzygniętymi założeniami) jest zapisywane jako decyzja przy następnym `om-discover --refresh`, z potwierdzającym jako właścicielem, żeby powód obecnego stanu rzeczy przetrwał osoby, które go ustaliły.
+- Decyzje się starzeją: wpis po dacie przeglądu jest w review oznaczany jako wymagający przeglądu, a nie egzekwowany na ślepo. Które wpisy blokują bardziej, niż chronią, to pytanie na retro.
+<!-- discovery:end -->
 
 ## Maszyna stanów etykiet
 
@@ -143,6 +182,10 @@ CI (`.github/workflows/ci.yml`) odtwarza bramkę na każdym PR-ze: job `Build` (
 ## Zmiana tego procesu
 
 Ten dokument i `.ai/agentic.config.json` opisują ten sam proces: zmieniaj je razem i uruchom ponownie skill `om-setup-agent-pipeline`, gdy zmienia się toolchain lub taksonomia etykiet.
+
+<!-- discovery:start -->
+Bloki warstwy produktowej między `<!-- discovery:start -->` a `<!-- discovery:end -->` należą do `om-setup-discovery-pipeline`: uruchom go ponownie, żeby je dodać lub odświeżyć, a wszystko inne edytuj ręcznie.
+<!-- discovery:end -->
 
 Odstępstwa od pojedynczych skilli (dodatkowe reguły review, inny szablon opisu PR-a, dodatkowy krok bramki) należą do repo-lokalnego skilla o tej samej nazwie w `.ai/skills/<skill-name>/SKILL.md`, który ma pierwszeństwo przed zainstalowanym; nie może jednak przyznać tego, czego zabraniają reguły bezpieczeństwa zainstalowanego skilla.
 
