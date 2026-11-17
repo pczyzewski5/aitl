@@ -14,6 +14,7 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-muted: var(--muted);
+  --color-muted-hover: var(--muted-hover);
   --color-muted-foreground: var(--muted-foreground);
   --color-form-surface: var(--form-surface);
   --color-primary: var(--primary);
@@ -25,6 +26,7 @@
   --color-income: var(--income);
   --color-expense: var(--expense);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-badge-shared: var(--badge-shared-bg);
   --color-badge-shared-foreground: var(--badge-shared-fg);
   --color-badge-personal: var(--badge-personal-bg);
@@ -34,6 +36,10 @@
   --text-base: var(--font-size-base);
   --text-lg: var(--font-size-lg);
   --text-xl: var(--font-size-xl);
+
+  --leading-base: var(--line-height-base);
+
+  --spacing-control: var(--control-height);
 
   --radius-control: var(--radius);
   --radius-card: var(--radius-surface);
@@ -46,10 +52,20 @@
     color: var(--foreground);
     font-family: var(--font-sans);
     font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
   }
 
   :focus-visible {
     outline: var(--ring-width) solid var(--ring);
     outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
   }
 }

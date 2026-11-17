@@ -116,3 +116,7 @@ Pitfall: tsc include does not pick up files under .storybook, so the *.css?raw d
 ## 2026-11-17 (required checks)
 Added "Storybook tests" and "Check tokens" to the required status checks of the protected main branch (verified by reading the protection back: six checks, strict, admins enforced) and updated AGENTS.md and SDLC.md to list all six.
 Todo: stage 2 of the design system (base components) after the owner approves the list of differences from the default shadcn/ui.
+
+## 2026-11-17 (design system, PR E: component infrastructure and Button)
+Added hand-written components.json, the cn helper (clsx + tailwind-merge with the project radius/control names) and the shadcn Button adapted to tokens (variants default/secondary/ghost/destructive, sizes default/icon, loading prop, no shadows/ring/500 weight); dependencies class-variance-authority, clsx, tailwind-merge, radix-ui and react/react-dom peers. Added a Polish 13-section Button docs page, stories with preview states and play tests, and token proposals (--muted-hover, --destructive-foreground, --control-height, --line-height-base) plus global prefers-reduced-motion.
+Pitfall: shadcn CLI wrote to a literal @/ directory (lesson added); user-event cannot trigger CSS :hover. Todo: owner accepts token proposals and decides the destructive hover color; PR F (Input, Label/Field), PR G (Card, Badge, Alert).
