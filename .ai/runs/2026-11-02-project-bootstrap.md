@@ -69,3 +69,8 @@ Todo: om-backlog dry run and backlog; issue #2; phase 4 (Awilix); phase 4b.
 Filed the first backlog on GitHub (#6-#23: 4 epics, 7 stories, 7 tasks) from the product brief and mapped it in .ai/specs/backlog.md. Brief refreshed with R03 (remainder computed per account), D02 (spouse login story filed despite partially supported A02) and Q08.
 Pitfall: needs-qa was not put on the risk-high stories; it is a PR label, so it is applied when their PRs are opened.
 Todo: issue #2 (npm run setup); start with E01-S01 (#10) and its tasks (#17-#20); phase 4 (Awilix) is task #17.
+
+## 2026-11-17 (spec: auth and app foundation)
+Wrote the specification for E01-S01 (login) and the framework underneath it (.ai/specs/2026-11-17-auth-and-app-foundation.md, data model view in .ai/data-model/): server-side sessions in PostgreSQL, own thin auth layer, argon2id, BankAccount and membership model, two phases and one PR per step. Passed a cross-model review (Opus) and a grill-me session; decisions Q1-Q22 recorded in the spec.
+Pitfall: Auth.js Credentials only supports JWT sessions and its MikroORM adapter targets MikroORM 5/6, so it conflicted with server-side sessions; the owner chose the own layer.
+Todo: rename follow-ups for BankAccount in the backlog, brief and issues; update issues #10, #18, #20; add a production-readiness story; then implement phase 1 (steps 1.1-1.3).

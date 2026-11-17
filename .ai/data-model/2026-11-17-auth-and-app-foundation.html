@@ -1,0 +1,17 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><title>Data model: auth i fundament</title>
+<style>body{margin:0;font:14px system-ui}svg{width:100vw;height:90vh;cursor:grab;background:#fafafa}text{font-size:13px;pointer-events:none}.dim{opacity:.2}</style></head>
+<body><p style="margin:8px">Przeciągnij: pan, kółko: zoom, klik węzła: fokus sąsiadów. Niebieskie: nowe encje.</p>
+<svg id="s"><g id="v"></g></svg>
+<script type="application/json" id="d">{"nodes":[{"id":"entity_1","label":"User","x":80,"y":60},{"id":"entity_2","label":"BankAccount","x":480,"y":60},{"id":"entity_3","label":"BankAccountMembership","x":280,"y":220},{"id":"entity_4","label":"Session","x":80,"y":380},{"id":"entity_5","label":"LoginThrottle","x":480,"y":380}],"edges":[["entity_1","entity_3","1-n"],["entity_2","entity_3","1-n"],["entity_1","entity_2","1-0..1 owner (personal)"],["entity_1","entity_4","1-n"]]}</script>
+<script>
+const data=JSON.parse(document.getElementById('d').textContent),NS='http://www.w3.org/2000/svg',v=document.getElementById('v'),s=document.getElementById('s');
+const el=(n,a)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);return e};
+const pos={};data.nodes.forEach(n=>pos[n.id]=n);const edgeEls=[],nodeEls={};
+data.edges.forEach(([a,b,l])=>{const g=el('g',{});const A=pos[a],B=pos[b];g.append(el('line',{x1:A.x+80,y1:A.y+20,x2:B.x+80,y2:B.y+20,stroke:'#9ca3af','stroke-width':2}));const t=el('text',{x:(A.x+B.x)/2+80,y:(A.y+B.y)/2+16,fill:'#444'});t.textContent=l;g.append(t);v.append(g);edgeEls.push([a,b,g])});
+data.nodes.forEach(n=>{const g=el('g',{});g.append(el('rect',{x:n.x,y:n.y,width:190,height:40,rx:6,fill:'#2f6feb',stroke:'#1b4fb0'}));const t=el('text',{x:n.x+8,y:n.y+24,fill:'#fff'});t.textContent=n.label;g.append(t);g.style.cursor='pointer';g.addEventListener('click',e=>{e.stopPropagation();const keep=new Set([n.id]);edgeEls.forEach(([a,b])=>{if(a===n.id||b===n.id){keep.add(a);keep.add(b)}});for(const id in nodeEls)nodeEls[id].classList.toggle('dim',!keep.has(id));edgeEls.forEach(([a,b,ge])=>ge.classList.toggle('dim',!(a===n.id||b===n.id)))});v.append(g);nodeEls[n.id]=g});
+s.addEventListener('click',()=>document.querySelectorAll('.dim').forEach(e=>e.classList.remove('dim')));
+let x=0,y=0,k=1,d=null;const ap=()=>v.setAttribute('transform',`translate(${x},${y}) scale(${k})`);
+s.addEventListener('mousedown',e=>d=[e.clientX-x,e.clientY-y]);addEventListener('mouseup',()=>d=null);
+addEventListener('mousemove',e=>{if(d){x=e.clientX-d[0];y=e.clientY-d[1];ap()}});
+s.addEventListener('wheel',e=>{e.preventDefault();k*=e.deltaY<0?1.1:.9;ap()},{passive:false});
+</script></body></html>
