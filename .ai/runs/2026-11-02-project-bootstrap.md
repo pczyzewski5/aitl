@@ -84,3 +84,8 @@ Todo: implement phase 1 of the auth spec first (E02 depends on it); owner provid
 Clarified "konto" in the brief and backlog: glossary now separates the user account (login) from the bank account (shared or personal); issues #6-#16 and #20-#23 reworded accordingly, #20 widened to the five tables from the spec, #10, #11, #17, #18, #19 now link the spec and its steps.
 Added the parked epic E05 (production readiness, issue #26) for the items the spec deferred (Q15-Q18).
 Todo: implement phase 1 of the auth spec (steps 1.1-1.3).
+
+## 2026-11-17 (design system, stage 0)
+Added the approved design decisions (.ai/specs/design/2026-11-17-referencje.md and 2026-11-17-tokeny.md) and the stage 0 plan in packages/ui/POSTEP.md: inventory, decisions, open questions, component list, docs menu tree and the PR sequence A-D. Docs only, nothing installed.
+Decisions: Storybook 10.6.7 with react-vite, Tailwind 4.3.5, Playwright 1.65.1, Vitest pinned at 5.0.5, docs in Polish, dark theme structure only.
+Todo: owner answers the open questions and says "dalej"; then PR B (Storybook tooling).
