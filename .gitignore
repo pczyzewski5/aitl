@@ -5,3 +5,6 @@ coverage
 *.tsbuildinfo
 .env*
 !.env.example
+.ai/qa/artifacts_*/
+.ai/qa/test-env.json
+.ai/qa/test-env.env
