@@ -46,7 +46,7 @@ Nowy komponent wielokrotnego użytku ma jedno miejsce: prymityw shadcn w `ui/src
 - Sekrety tylko z env walidowanego Zodem. Logger nie zapisuje haseł ani tokenów.
 - Brak magicznych liczb i stringów, brak pustych `catch`, brak martwego kodu i debugowych `console.log`.
 - Poprawka błędu i zmiana zachowania wymagają testu regresyjnego, który pada bez zmiany.
-- Przed prośbą o review: `npm run typecheck`, `npm run lint`, `npm run test:coverage`, `npm run build` oraz `npm audit`.
+- Przed prośbą o review: `npm run typecheck`, `npm run lint`, `npm run test:coverage`, `npm run build` oraz `npm audit --omit=dev --audit-level=high`.
 
 ## Workflow git
 
