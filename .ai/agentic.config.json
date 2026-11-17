@@ -52,5 +52,6 @@
   "closeKeywords": [],
   "dependencyAudit": { "minSeverity": "high", "ignore": [] },
   "prTitleTemplate": "{summary}{issueRef}",
-  "ticketKeyPattern": ""
+  "ticketKeyPattern": "",
+  "discovery": { "enabled": true, "roles": { "domainExpert": false, "designer": false } }
 }

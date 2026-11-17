@@ -55,3 +55,7 @@ Configured the agent PR pipeline: .ai/agentic.config.json (GitHub tracker, agent
 Decisions: pipeline execution plans go to .ai/pipeline-runs to avoid clashing with these journals; plain English commit and PR titles without prefixes; installed skills (.agents, .claude/skills, skills-lock.json) are not committed.
 Todo: issue #2 (npm run setup installer), phase 4 (Awilix), phase 4b.
 Pitfall: the pre-commit lint scanned the locally installed skills in .agents (third-party code, 250 errors); excluded .agents and .claude from ESLint.
+
+## 2026-11-17 (discovery layer)
+Added the product layer to the agent pipeline: discovery block in .ai/agentic.config.json (no domain expert, no designer), Product owner role, Definition of Ready and protected product decisions in SDLC.md, .ai/specs/research/. AGENTS.md has no task-routing table, so no routing row was added.
+Todo: run /om-discover to write .ai/specs/product-brief.md; issue #2; phase 4 (Awilix); phase 4b.
