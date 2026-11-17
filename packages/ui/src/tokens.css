@@ -55,6 +55,7 @@
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
 
+  --space-label-field: var(--space-1);
   --space-within-group: var(--space-2);
   --space-between-fields: var(--space-3);
   --space-between-groups: var(--space-4);

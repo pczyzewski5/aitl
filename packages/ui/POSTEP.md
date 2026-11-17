@@ -10,12 +10,12 @@ Etap 0 (ten plik) niczego nie instaluje i nie zmienia kodu. Zainstalowane zależ
 |---|---|---|
 | 0 | Inwentaryzacja i plan (ten plik) | PR A, do przeglądu |
 | 1 | Fundamenty: Storybook, tokeny, Tailwind, przełącznik motywu, Foundations, skrypt `check:tokens` | zrobiony: PR B, PR C i PR D (Foundations, `check:tokens`, joby CI); PR D do przeglądu |
-| 2 | Komponenty bazowe, partiami po ok. sześć | w toku: partia 1 (Button, Input, Label+Field, Alert, Card, Badge); PR E (infrastruktura + Button) gotowy do przeglądu |
+| 2 | Komponenty bazowe, partiami po ok. sześć | w toku: partia 1 (Button, Input, Label+Field, Alert, Card, Badge); PR E (infrastruktura + Button) i PR F (Input, Label+Field) zrobione; następny PR G |
 | 3 | Komponenty produktu, wzorce, ekrany epików | nie rozpoczęty |
 | 4 | Strony, które uczą, plik dla agentów | nie rozpoczęty |
 | 5 | Sprawdzenie i raport | nie rozpoczęty |
 
-Następny krok: właściciel przegląda PR E (infrastruktura komponentów i Button) i akceptuje propozycje tokenów z `.ai/specs/design/2026-11-17-tokeny.md` (sekcja "Propozycje z PR E"); potem PR F (Input + Label/Field, rozmiar tekstu pól 16/14 px) i PR G (Card, Badge, Alert).
+Następny krok: właściciel przegląda PR F (Input, Label i Field); potem PR G (Card, Badge, Alert); do PR G potrzebne: tło plakietki neutralnej (brak tokenu) i `role=status` dla neutralnego Alertu (patrz tabela PR-ów).
 
 ## Materiały (źródła)
 
@@ -81,9 +81,9 @@ Decyzje z referencji (skrót, 10 linii):
 | B (zrobiony, do przeglądu) | Narzędzia Storybooka: Storybook 10.6.7 (`react-vite`), Vitest 5.0.5 i Playwright 1.65.1 z Chromium, osobna konfiguracja testów Storybooka, `.gitignore` i `globalIgnores`, pusta strona startowa; bez tokenów | "dalej" do etapu 1; zgoda na pobranie Chromium (już udzielona w zasadzie, potwierdzenie przy PR); decyzja o `npm audit` jeśli padnie |
 | C (zrobiony, do przeglądu) | Tokeny (`packages/ui/src/tokens.css`, trzy warstwy, wartości bez zmian względem `2026-11-17-tokeny.md`) + Tailwind 4.3.5 (`styles.css`, `@theme inline`) + przełącznik motywu w Storybooku (jasny; ciemny tylko pusty blok `[data-theme='dark']`, pozycja w menu opisana jako brak wartości, L3); bez komponentów | zatwierdzenie przeliczonego kontrastu, jeśli jakaś para spadnie poniżej progu; potwierdzenie, że aplikacja nie ma mieć jeszcze motywu ciemnego |
 | D (zrobiony, do przeglądu) | Strony Fundamenty: Kolory (z tabelą kontrastu liczoną na żywo z tokenów), Typografia, Odstępy, Promienie i powierzchnie, Ruch, Motyw (ciemny = luka L3); skrypt `check:tokens` (ui + korzeń) z testami; joby CI "Storybook tests" i "Check tokens"; `test:storybook` bez `passWithNoTests`. Ikony i układ (szerokości 320/768/1440) bez osobnych stron: ikony dojdą z etapem 2 (`lucide-react`), układ czeka na decyzje o tabeli na wąskim ekranie | decyzja, czy joby "Storybook tests" i "Check tokens" wchodzą do wymaganych checków `main` (ustawienie ochrony gałęzi robi właściciel; zrobione, sześć wymaganych checków) |
-| E (zrobiony, do przeglądu) | Infrastruktura komponentów (ręczny `components.json`, `cn` z testami, zależności `class-variance-authority`, `clsx`, `tailwind-merge`, `radix-ui`, peer `react`/`react-dom`) + Button (shadcn dopasowany do tokenów, strona dokumentacji z 13 sekcjami, stories, testy interakcji); nowe tokeny jako propozycje | akceptacja propozycji tokenów (`--muted-hover`, `--destructive-foreground`, `--control-height`, `--line-height-base`); decyzja o kolorze hover dla `destructive` |
-| F (następny) | Input + Label/Field (formularz logowania jako story typowa); tekst pól 16 px poniżej 768 px i 14 px od 768 px | decyzje z tabeli różnic: odstęp etykieta-pole 4 px (brak tokenu), wygląd błędu i "(opcjonalne)" |
-| G | Card, Badge, Alert | tło plakietki neutralnej (brak tokenu), `role=status` dla neutralnego Alertu |
+| E (zrobiony) | Infrastruktura komponentów (ręczny `components.json`, `cn` z testami, zależności `class-variance-authority`, `clsx`, `tailwind-merge`, `radix-ui`, peer `react`/`react-dom`) + Button (shadcn dopasowany do tokenów, strona dokumentacji z 13 sekcjami, stories, testy interakcji); nowe tokeny jako propozycje | tokeny zaakceptowane 2026-11-17 (`--muted-hover`, `--destructive-foreground`, `--control-height`, `--line-height-base`, `prefers-reduced-motion`); kolor hover dla `destructive` nadal otwarty |
+| F (zrobiony, do przeglądu) | Input (text, email, password, amount) + Label + Field (etykieta, podpowiedź, błąd pod polem, "(opcjonalne)"), token `--space-label-field` 4 px, tekst pól 16 px poniżej 768 px i 14 px od 768 px, dwie strony dokumentacji z 13 sekcjami, stories i testy interakcji | przegląd; propozycje do potwierdzenia: stan `readOnly` (tło `--form-surface`), odstęp podpowiedź-błąd 4 px |
+| G (następny) | Card, Badge, Alert | tło plakietki neutralnej (brak tokenu), `role=status` dla neutralnego Alertu |
 
 Każdy PR: jeden temat, zielone checki (typecheck, lint, test:coverage, build, audit), wpis w `.ai/runs/`, lekcja przy napotkanej pułapce.
 
@@ -97,6 +97,13 @@ Rozstrzygnięte przez właściciela produktu, 2026-11-17:
 5. CI Storybooka: build i testy dostępności w przeglądarce jako osobne joby wymagane do merge, a11y blokuje.
 
 4. Odwołanie do `docs/design-system.md` (etap 4) w lokalnym `AGENTS.md` repozytorium AITL (nie w plikach globalnych): tak; krótka sekcja trafi do PR-a etapu 4 i jest zatwierdzana przy review.
+
+Decyzje właściciela produktu, 2026-11-17 (PR F):
+
+6. Tokeny z PR E zatwierdzone: `--muted-hover`, `--destructive-foreground`, `--control-height` 36 px, `--line-height-base` 1,5, globalne `prefers-reduced-motion`. Zapisane w `.ai/specs/design/2026-11-17-tokeny.md`.
+7. Odstęp etykieta-pole 4 px jako token znaczeniowy `--space-label-field` (= `var(--space-1)`).
+8. Wymagane/opcjonalne: tekst "(opcjonalne)" zamiast gwiazdki, pola wymagane domyślnie. Błąd pola pod polem (nie w dymku), z `aria-describedby` i `aria-invalid`, treść mówi co zrobić.
+9. Tekst w polach 16 px poniżej 768 px i 14 px od 768 px; wysokość 36 px; tło `bg-card`, ramka `--input`; pole musi leżeć na `--card` lub `--form-surface` (na tle strony ramka ma 2,89:1); bez cieni; fokus globalny 2 px; wagi 400/600. Hover `destructive` bez zmian (luka).
 
 Nadal otwarte: brak.
 

@@ -41,13 +41,13 @@ export const MEANING_COLORS: readonly TokenEntry[] = [
   { name: '--muted', origin: 'R01.1', use: 'przycisk drugoplanowy, hover', avoid: 'separacja kart' },
   {
     name: '--muted-hover',
-    origin: 'propozycja z PR E, czeka na akceptację właściciela',
+    origin: 'propozycja z PR E, zatwierdzona przez właściciela produktu, 2026-11-17',
     use: 'hover przycisku drugoplanowego',
     avoid: 'stan spoczynku',
   },
   {
     name: '--destructive-foreground',
-    origin: 'propozycja z PR E, czeka na akceptację właściciela',
+    origin: 'propozycja z PR E, zatwierdzona przez właściciela produktu, 2026-11-17',
     use: 'tekst na przycisku usuwającym (na --destructive)',
     avoid: '—',
   },
@@ -162,6 +162,12 @@ export const SPACE_SCALE: readonly string[] = [
 
 export const SPACE_MEANINGS: readonly TokenEntry[] = [
   {
+    name: '--space-label-field',
+    origin: 'decyzja właściciela 2026-11-17 (4 px)',
+    use: 'etykieta, pole, podpowiedź i błąd w jednym polu formularza (Field)',
+    avoid: 'odstęp między polami (to --space-between-fields)',
+  },
+  {
     name: '--space-within-group',
     origin: 'R01.4',
     use: 'przyciski obok siebie, element obok elementu',
@@ -184,7 +190,7 @@ export const SHAPE_TOKENS: readonly TokenEntry[] = [
   { name: '--radius-badge', origin: 'R01.5', use: 'plakietki (Tailwind: rounded-pill)', avoid: 'karty' },
   {
     name: '--control-height',
-    origin: 'decyzja właściciela 2026-11-17 (36 px); token to propozycja z PR E',
+    origin: 'decyzja właściciela 2026-11-17 (36 px); token zatwierdzony przez właściciela produktu, 2026-11-17',
     use: 'wysokość przycisków i pól (Tailwind: h-control, size-control)',
     avoid: 'wysokości spoza skali',
   },

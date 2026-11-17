@@ -1,0 +1,186 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './field.stories';
+
+<Meta of={Stories} />
+
+# Label i Field
+
+`Label` to widoczna etykieta pola, `Field` składa etykietę, pole (slot), podpowiedź, błąd i oznaczenie "(opcjonalne)" w jedną całość z poprawnie powiązanymi identyfikatorami. Źródło reguł: R01.5, A3, tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-17, audyt (błąd bez wskazania pola), WCAG 2.2 i WAI-ARIA. Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Mówi użytkownikowi, co wpisać w polu (etykieta, podpowiedź), czy pole jest wymagane, i wskazuje przy samym polu, co poprawić, gdy wartość jest błędna.
+
+## 2. Kiedy używać
+
+- Każde pole formularza logowania (E-mail, Hasło). Źródło: E01-S01.
+- Każde pole formularza wpisu: Nazwa wpisu, Kwota, Opis (opcjonalny). Źródło: E02.
+- Samej `Label` używaj, gdy pole nie jest `Input` ze slotem Field i trzeba ręcznie powiązać etykietę (`htmlFor` + `id`).
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Błąd całego formularza lub błąd serwera (np. 429, "zbyt wiele wpisów" z E02, które nie dotyczy jednego pola) | Alert (PR G) |
+| Potwierdzenie zapisu | Toast (partia 2) |
+| Grupa opcji radio lub checkboxów (jedna etykieta na kilka pól) | `fieldset` z `legend` (partia 2, RadioGroup) |
+| Pole bez etykiety, nazwane placeholderem | nie wolno: zawsze widoczna etykieta (AUDYT, R01.5) |
+| Informacja niezbędna do wypełnienia pola ukryta w dymku | podpowiedź w Field, widoczna zawsze |
+
+## 4. Anatomia
+
+1. Etykieta (`Label`): tekst 14 px, waga 600, nad polem; wymagana. Zawsze widoczna.
+2. Oznaczenie "(opcjonalne)": tekst 14 px, waga 400, `--muted-foreground`, w tej samej etykiecie; tylko dla pól opcjonalnych.
+3. Pole (slot): jeden element, np. `Input`; Field nadaje mu `id`, `aria-describedby`, `aria-invalid`, `aria-required`.
+4. Podpowiedź: opcjonalna, pod polem, `--muted-foreground` 14 px.
+5. Błąd: opcjonalny, pod polem (pod podpowiedzią), `--destructive` 14 px, `role="alert"`.
+
+Odstęp między częściami: `--space-label-field` (4 px, decyzja właściciela 2026-11-17). Odstęp między polami: `--space-between-fields` (12 px).
+
+## 5. Warianty
+
+Field nie ma wariantów wyglądu. Parametry znaczenia:
+
+| Parametr | Kiedy wybrać | Źródło |
+|---|---|---|
+| domyślnie (wymagane) | pole, bez którego nie da się zapisać; bez żadnego oznaczenia, `aria-required="true"` | decyzja właściciela 2026-11-17 (pola wymagane domyślnie) |
+| `optional` | pole, które można zostawić puste; dopisuje "(opcjonalne)" do etykiety | decyzja właściciela 2026-11-17 (tekst zamiast gwiazdki; gwiazdka to symbol bez nazwy, A3) |
+| `hint` | format, przykład lub powód zablokowania, potrzebny przed wpisaniem | R01.5 |
+| `error` | gdy wartość jest błędna; tekst mówi, co zrobić | R01.5, R01.7, AUDYT |
+
+Orientacja pozioma (etykieta obok checkboxa) dojdzie z Checkboxem w partii 2.
+
+<Canvas of={Stories.Required} />
+<Canvas of={Stories.Optional} />
+<Canvas of={Stories.LabelOnly} />
+
+## 6. Stany
+
+| Stan | Wygląd | Źródło |
+|---|---|---|
+| Domyślny | etykieta, pole | tokeny |
+| Z podpowiedzią | tekst pomocniczy pod polem | R01.5 |
+| Opcjonalny | "(opcjonalne)" obok etykiety | decyzja właściciela 2026-11-17 |
+| Fokus | globalny obrys 2 px na polu (`:focus-visible`); kliknięcie etykiety przenosi fokus do pola | tokeny, WCAG 2.4.7 |
+| Zablokowany | stan pola (`disabled`); powód podaj w podpowiedzi | A3 |
+| Tylko do odczytu | stan pola (`readOnly`) | propozycja z PR F |
+| Błąd | `aria-invalid`, ramka `--destructive`, tekst błędu pod polem, `role="alert"` | R01.5, A3, audyt |
+| Hover, wciśnięty, ładowanie, wybrany | nie dotyczy | R01.6 |
+
+Błąd nigdy nie jest samym kolorem ramki: zawsze towarzyszy mu komunikat tekstowy (A3). Błąd pokazujemy pod polem, a nie w dymku, który znika i nie jest czytany przy fokusie (decyzja właściciela 2026-11-17, audyt).
+
+<Canvas of={Stories.WithError} />
+<Canvas of={Stories.StatesMatrix} />
+
+### Walidacja po opuszczeniu pola
+
+Wzorzec formularza (etap 3) wymaga walidacji po opuszczeniu pola i przy wysłaniu, z fokusem na pierwszym błędzie. Ta story pokazuje tylko wiązanie `error` z polem.
+
+<Canvas of={Stories.ValidateOnBlur} />
+
+## 7. Zachowanie i dostępność
+
+- Nazwa dostępna: `Label` jest powiązana z polem przez `htmlFor` i `id` (Field generuje `id` przez `useId` albo używa podanego `id`). Kliknięcie etykiety fokusuje pole.
+- Wymagane: `aria-required="true"` na polu wymaganym; pole opcjonalne nie ma tego atrybutu, a jego nazwa zawiera słowo "opcjonalne" (czytnik: "Opis, opcjonalne, pole tekstowe").
+- Błąd: pole dostaje `aria-invalid="true"` i `aria-describedby` wskazujący na podpowiedź i błąd (w tej kolejności; istniejące `aria-describedby` pola jest zachowane). Czytnik ekranu przy fokusie czyta nazwę, "nieprawidłowe" i treść. Komunikat ma `role="alert"`, więc pojawienie się błędu po opuszczeniu pola jest ogłaszane (WCAG 3.3.1, 4.1.3).
+- Błąd pod polem, nie w dymku (decyzja właściciela).
+- Klawiatura: kolejność fokusu = kolejność w DOM (etykieta nie przyjmuje fokusu, pole tak). Label i komunikaty nie są elementami interaktywnymi.
+- Autouzupełnianie: ustaw `autoComplete` na polu (WCAG 1.3.5).
+- Walidację natywną przeglądarki wyłącz na formularzu (`noValidate`), żeby dymki nie dublowały błędów Field.
+- Cel kliknięcia: etykieta jest dodatkowym celem fokusu pola; pole ma 36 px wysokości (WCAG 2.5.8).
+- Kontrast: etykieta `--foreground` na `--card` 14,68:1; podpowiedź i "(opcjonalne)" `--muted-foreground` 7,56:1; błąd `--destructive` 6,47:1. Pole leży na `--card` lub `--form-surface`, nie na tle strony (ramka 2,89:1 < 3:1).
+
+## 8. Treść
+
+- Etykieta: rzeczownik, bez dwukropka i bez wykrzyknika, do ok. 30 znaków: "E-mail", "Nazwa wpisu", "Kwota". Dłuższa zawija się (nie jest ucinana).
+- Nie powtarzaj w etykiecie "(wymagane)"; wymagane to domyślnie każde pole. Opcjonalne dostaje "(opcjonalne)" (tekst zmienisz propsem `optionalText`, np. przy tłumaczeniu).
+- Podpowiedź: format lub przykład w jednym zdaniu ze znakiem końca: "Podaj kwotę w złotych, np. 1234,50." Nie ukrywaj w niej informacji koniecznych (jest widoczna zawsze).
+- Błąd: powiedz, co zrobić, nie tylko co jest źle; rozkaźnik, bez ozdobników i wykrzykników (R01.7). Źle: "Błąd.", "Nieprawidłowe dane." Dobrze: "Podaj adres e-mail w formacie nazwa@domena.pl." i "Wpisz kwotę większą od zera, np. 1234,50."
+- Błąd bez przypisywania winy użytkownikowi ("Podałeś zły..." unikaj).
+- Liczby i waluty w podpowiedziach: "1234,50", waluta w treści ("w złotych").
+- Dłuższy język: etykieta, podpowiedź i błąd zawijają się; nie ustawiaj stałej szerokości.
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | pole i teksty w jednej kolumnie; długa etykieta, podpowiedź i błąd zawijają się |
+| 768 px | tekst w polu 14 px, układ bez zmian |
+| 1440 px | bez zmian; szerokość treści ogranicza układ strony (R01.4, kolumna do 960 px) |
+
+<Canvas of={Stories.LongLabelNarrowScreen} />
+
+## 10. API
+
+`Field`:
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `label` | `ReactNode` | wymagany | tekst etykiety |
+| `children` | jeden element | wymagany | pole (np. `Input`); dostaje `id`, `aria-describedby`, `aria-invalid`, `aria-required` |
+| `hint` | `ReactNode` | brak | podpowiedź pod polem |
+| `error` | `ReactNode` | brak | błąd pod polem; ustawia `aria-invalid` na polu |
+| `optional` | `boolean` | `false` | dopisuje oznaczenie opcjonalności i zdejmuje `aria-required` |
+| `optionalText` | `string` | `'(opcjonalne)'` | tekst oznaczenia (do tłumaczenia) |
+| `id` | `string` | `useId()` | identyfikator pola; `-hint` i `-error` dla komunikatów |
+| `className` | `string` | brak | dodatkowe klasy kontenera |
+
+`Label`: element `label` (Radix) z atrybutami natywnymi (`htmlFor`, `className` itd.).
+
+## 11. Kod
+
+Minimalny przykład:
+
+```tsx
+import { Field, Input } from '@aitl/ui';
+
+<Field label="E-mail">
+  <Input type="email" autoComplete="email" />
+</Field>;
+```
+
+Typowy przykład z produktu, formularz wpisu:
+
+```tsx
+<form noValidate>
+  <Field label="Nazwa wpisu" error={errors.name}>
+    <Input name="name" />
+  </Field>
+  <Field label="Kwota" hint="Podaj kwotę w złotych, np. 1234,50." error={errors.amount}>
+    <Input name="amount" type="amount" />
+  </Field>
+  <Field label="Opis" optional>
+    <Input name="description" />
+  </Field>
+</form>
+```
+
+<Canvas of={Stories.EntryForm} />
+<Canvas of={Stories.LoginForm} />
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: Alert (błąd całego formularza lub serwera, nie jednego pola), Toast (potwierdzenie), `fieldset` z `legend` (grupa opcji).
+- Występuje we wzorcach: formularz logowania, formularz wpisu (partia 2: z Checkboxem, Selectem i RadioGroup).
+- Pole w środku: [Input](?path=/docs/elementy-bazowe-input--docs).
+- Dalsze zasady wyboru komponentu pojawią się na stronie "Jak wybrać komponent" w etapie 4.
+
+## Czego brakuje
+
+- Orientacja pozioma (checkbox obok etykiety), `fieldset`/`legend` dla grup: dojdą z Checkboxem i RadioGroup (partia 2).
+- Fokus na pierwszym błędzie po nieudanym wysłaniu i blokada podwójnego wysłania: wzorzec formularza (etap 3); Field tego nie robi.
+- Tablica błędów dla jednego pola: brak potrzeby w specyfikacjach; Field przyjmuje jeden komunikat.
+- Odstęp podpowiedź-błąd (4 px, ten sam token co etykieta-pole): wybór agenta, do potwierdzenia przy przeglądzie.
+- Ikona błędu: brak decyzji o ikonach (L5), błąd to sam tekst.
+- Jeśli `children` pola ma własne `id`, Field je nadpisuje; nie ustawiaj `id` na polu, tylko na Field.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: etykieta nazywa pole i fokusuje je po kliknięciu, "(opcjonalne)" jest częścią nazwy, błąd jest pod polem, powiązany przez `aria-describedby` i ogłaszany, walidacja po opuszczeniu pola pokazuje i usuwa błąd, odstęp etykieta-pole 4 px, zablokowane pole nie przyjmuje fokusu, pole tylko do odczytu przyjmuje fokus.
