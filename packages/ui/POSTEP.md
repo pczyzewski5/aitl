@@ -9,13 +9,13 @@ Etap 0 (ten plik) niczego nie instaluje i nie zmienia kodu. Zainstalowane zależ
 | Etap | Zakres | Status |
 |---|---|---|
 | 0 | Inwentaryzacja i plan (ten plik) | PR A, do przeglądu |
-| 1 | Fundamenty: Storybook, tokeny, Tailwind, przełącznik motywu, Foundations, skrypt `check:tokens` | w toku: PR B (narzędzia Storybooka) do przeglądu; PR C i D czekają |
+| 1 | Fundamenty: Storybook, tokeny, Tailwind, przełącznik motywu, Foundations, skrypt `check:tokens` | w toku: PR B (narzędzia Storybooka) zrobiony; PR C (tokeny, Tailwind, przełącznik motywu) do przeglądu; PR D czeka |
 | 2 | Komponenty bazowe, partiami po ok. sześć | nie rozpoczęty |
 | 3 | Komponenty produktu, wzorce, ekrany epików | nie rozpoczęty |
 | 4 | Strony, które uczą, plik dla agentów | nie rozpoczęty |
 | 5 | Sprawdzenie i raport | nie rozpoczęty |
 
-Następny krok: właściciel przegląda PR B (narzędzia Storybooka) i pisze "dalej" do PR C (tokeny, Tailwind, przełącznik motywu).
+Następny krok: właściciel przegląda PR C (tokeny, Tailwind, przełącznik motywu) i pisze "dalej" do PR D (Foundations, `check:tokens`, CI).
 
 ## Materiały (źródła)
 
@@ -79,7 +79,7 @@ Decyzje z referencji (skrót, 10 linii):
 |---|---|---|
 | A (ten) | Tylko dokumenty: referencje, tokeny, POSTEP.md, wpis w dzienniku | przegląd i odpowiedzi na pytania poniżej |
 | B (zrobiony, do przeglądu) | Narzędzia Storybooka: Storybook 10.6.7 (`react-vite`), Vitest 5.0.5 i Playwright 1.65.1 z Chromium, osobna konfiguracja testów Storybooka, `.gitignore` i `globalIgnores`, pusta strona startowa; bez tokenów | "dalej" do etapu 1; zgoda na pobranie Chromium (już udzielona w zasadzie, potwierdzenie przy PR); decyzja o `npm audit` jeśli padnie |
-| C | Tokeny + Tailwind 4.3.5 + przełącznik motywu (wartości jasne, ciemny tylko struktura) | zatwierdzenie przeliczonego kontrastu, jeśli jakaś para spadnie poniżej progu; potwierdzenie, że aplikacja nie ma mieć jeszcze motywu ciemnego |
+| C (zrobiony, do przeglądu) | Tokeny (`packages/ui/src/tokens.css`, trzy warstwy, wartości bez zmian względem `2026-11-17-tokeny.md`) + Tailwind 4.3.5 (`styles.css`, `@theme inline`) + przełącznik motywu w Storybooku (jasny; ciemny tylko pusty blok `[data-theme='dark']`, pozycja w menu opisana jako brak wartości, L3); bez komponentów | zatwierdzenie przeliczonego kontrastu, jeśli jakaś para spadnie poniżej progu; potwierdzenie, że aplikacja nie ma mieć jeszcze motywu ciemnego |
 | D | Strony Foundations (kolor z tabelą kontrastu, typografia, odstępy, kształt i głębia, ruch, ikony, układ, motywy) + skrypt `check:tokens` + zadania CI | decyzja o zestawie ikon (L5); decyzja, czy zadania Storybooka (testy przeglądarkowe, `check:tokens`) wchodzą do wymaganych checków `main` |
 
 Każdy PR: jeden temat, zielone checki (typecheck, lint, test:coverage, build, audit), wpis w `.ai/runs/`, lekcja przy napotkanej pułapce.
@@ -171,3 +171,11 @@ Design system nie istnieje. Nic do usunięcia. Jedyny istniejący element, `pack
 ## Zasady pracy (przypomnienie)
 
 Reguły bez źródła są propozycjami do decyzji. Każda wartość z tokenu. Stories używają prawdziwych komponentów. Nowa zależność tylko po zatwierdzeniu w planie. Niczego nie publikujemy poza PR-ami do `main` z zielonymi checkami.
+
+## Notatki z PR C (tokeny i Tailwind)
+
+- Pochodzenie wartości tokenów jest w `.ai/specs/design/2026-11-17-tokeny.md` (kolumna Pochodzenie); w kodzie nie ma komentarzy, a strony Foundations (PR D) pokażą to samo z tabelą kontrastu.
+- Odstępstwa od nazw z tabeli tokenów, wymuszone przez Tailwinda: rozmiary czcionki to `--font-size-sm/base/lg/xl` (nazwy `--text-*` kolidują z przestrzenią nazw Tailwinda i tworzyłyby zapętlone `var()`); w Tailwindzie klasy to `text-sm`...`text-xl`. Promienie w Tailwindzie: `rounded-control` (6 px), `rounded-card` (8 px), `rounded-pill` (10 px). Skala odstępów to `--space-1, 2, 3, 4, 6, 8, 12` (mnożnik 4 px). `--shadow-card: none` jest tokenem, bez klasy Tailwinda (zwykły `shadow-none` wystarcza).
+- Do warstwy 1 dodano `--raw-white` i `--raw-gray-300` (źródła dla `--card`, `--primary-foreground`, `--border`), żeby znaczenia nie zawierały surowych wartości.
+- Domyślna paleta, cienie, promienie i rozmiary Tailwinda są wyzerowane (`initial`), więc klasy typu `bg-blue-500` nie istnieją; dostępne są tylko znaczenia.
+- Tryb ciemny (L3): `[data-theme='dark']` jest pustym blokiem, bez wymyślonych wartości. Przełącznik w Storybooku ustawia `data-theme` na `html`; pozycja "Ciemny" ma w nazwie informację, że wartości nie istnieją i wygląd jest jak jasny. Po powstaniu wartości trzeba policzyć kontrasty od nowa.

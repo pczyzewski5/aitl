@@ -1,0 +1,55 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+@theme {
+  --color-*: initial;
+  --shadow-*: initial;
+  --radius-*: initial;
+  --text-*: initial;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-form-surface: var(--form-surface);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-income: var(--income);
+  --color-expense: var(--expense);
+  --color-destructive: var(--destructive);
+  --color-badge-shared: var(--badge-shared-bg);
+  --color-badge-shared-foreground: var(--badge-shared-fg);
+  --color-badge-personal: var(--badge-personal-bg);
+  --color-badge-personal-foreground: var(--badge-personal-fg);
+
+  --text-sm: var(--font-size-sm);
+  --text-base: var(--font-size-base);
+  --text-lg: var(--font-size-lg);
+  --text-xl: var(--font-size-xl);
+
+  --radius-control: var(--radius);
+  --radius-card: var(--radius-surface);
+  --radius-pill: var(--radius-badge);
+}
+
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-base);
+  }
+
+  :focus-visible {
+    outline: var(--ring-width) solid var(--ring);
+    outline-offset: 2px;
+  }
+}

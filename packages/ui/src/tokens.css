@@ -1,0 +1,72 @@
+:root {
+  --raw-white: #ffffff;
+  --raw-gray-50: #f9fafb;
+  --raw-gray-100: #f3f4f6;
+  --raw-gray-200: #e5e7eb;
+  --raw-gray-300: #d1d5db;
+  --raw-gray-400: #8a919c;
+  --raw-gray-600: #4b5563;
+  --raw-gray-900: #1f2937;
+  --raw-blue-100: #dbeafe;
+  --raw-blue-600: #2563eb;
+  --raw-blue-700: #1d4ed8;
+  --raw-green-700: #15803d;
+  --raw-red-700: #b91c1c;
+  --raw-violet-100: #ede9fe;
+  --raw-violet-700: #6d28d9;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  --background: var(--raw-gray-100);
+  --foreground: var(--raw-gray-900);
+  --card: var(--raw-white);
+  --card-foreground: var(--raw-gray-900);
+  --muted: var(--raw-gray-200);
+  --muted-foreground: var(--raw-gray-600);
+  --form-surface: var(--raw-gray-50);
+  --primary: var(--raw-blue-600);
+  --primary-foreground: var(--raw-white);
+  --primary-hover: var(--raw-blue-700);
+  --ring: var(--raw-blue-600);
+  --ring-width: 2px;
+  --input: var(--raw-gray-400);
+  --border: var(--raw-gray-300);
+  --income: var(--raw-green-700);
+  --expense: var(--raw-red-700);
+  --destructive: var(--raw-red-700);
+
+  --font-sans: -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 20px;
+  --font-size-xl: 28px;
+  --font-weight-normal: 400;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --space-within-group: var(--space-2);
+  --space-between-fields: var(--space-3);
+  --space-between-groups: var(--space-4);
+  --space-panel: var(--space-4);
+  --space-section: var(--space-8);
+
+  --radius: 6px;
+  --radius-surface: 8px;
+  --shadow-card: none;
+  --duration-feedback: 150ms;
+
+  --badge-shared-bg: var(--raw-blue-100);
+  --badge-shared-fg: var(--raw-blue-700);
+  --badge-personal-bg: var(--raw-violet-100);
+  --badge-personal-fg: var(--raw-violet-700);
+  --radius-badge: 10px;
+}
+
+[data-theme='dark'] {
+}

@@ -102,3 +102,8 @@ Todo: PR C (tokens, Tailwind, theme switch) after the owner says "dalej"; the de
 ## 2026-11-17 (next security upgrade)
 Upgraded next from 16.4.3 to 16.4.6 in packages/app to fix GHSA-mfr8-8qww-v76h and GHSA-vc7v-qv4w-wrv8 (use cache advisories, affected 16.2.0 - 16.4.4); no eslint-config-next in the repo.
 Verified typecheck, lint, coverage (100%), build and integration tests; npm audit --omit=dev now reports 0 vulnerabilities.
+
+## 2026-11-17 (design system, PR C: tokens, Tailwind, theme switch)
+Added tokens.css (three layers, approved values unchanged), styles.css (Tailwind 4.3.5 via @tailwindcss/vite, @theme inline, default palette/radius/shadow/text reset) and a Storybook theme switch that sets data-theme on html; dark is an empty block (L3), the toolbar item says the values are not defined.
+Pitfall: Tailwind theme names equal to token names (--text-*, --radius-surface) produce self-referencing var() cycles, so font sizes became --font-size-* and radii map to rounded-control/card/pill.
+Todo: PR D (Foundations pages, check:tokens, CI jobs).
