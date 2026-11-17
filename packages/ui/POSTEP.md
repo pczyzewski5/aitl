@@ -86,11 +86,16 @@ Każdy PR: jeden temat, zielone checki (typecheck, lint, test:coverage, build, a
 
 ## Pytania otwarte (do właściciela)
 
-1. Czy shadcn/ui na Radix zostaje bazą komponentów (propozycja agenta: tak, bo AGENTS.md już przewiduje shadcn/ui; kod i styl i tak z tokenów)?
-2. Zestaw ikon (L5): czy `lucide-react` (dependency shadcn) może wejść do planu, czy zostają tylko znaki tekstowe? Propozycja, do decyzji.
-3. Marka (L4): czy Storybook ma w tytule tylko tekst "AITL" bez logo (propozycja: tak)?
-4. Czy plik `docs/design-system.md` dla agentów (etap 4) ma być wprost linkowany z `AGENTS.md` (prompt tego wymaga)? Wymaga zmiany `AGENTS.md`, więc potrzebna zgoda.
-5. Czy zadania CI Storybooka (build, testy przeglądarkowe) mają być osobnymi jobami wymaganymi do merge, czy tylko informacyjnymi na start?
+Rozstrzygnięte przez właściciela produktu, 2026-11-17:
+
+1. Baza komponentów: shadcn/ui na Radix (zgodnie ze stackiem z `AGENTS.md`).
+2. Ikony (L5): `lucide-react`, dodawany dopiero w etapie 2, gdy komponenty go potrzebują.
+3. Marka (L4): w Storybooku sam tekst "AITL", bez logo; luka o marce zostaje otwarta.
+5. CI Storybooka: build i testy dostępności w przeglądarce jako osobne joby wymagane do merge, a11y blokuje.
+
+Nadal otwarte:
+
+4. Czy plik `docs/design-system.md` dla agentów (etap 4) ma być wprost linkowany z `AGENTS.md` (prompt tego wymaga)? Wymaga zmiany `AGENTS.md`, więc potrzebna zgoda; pytanie wraca w etapie 4.
 
 ## Komponenty (lista wyprowadzona z ekranów w specyfikacjach)
 
