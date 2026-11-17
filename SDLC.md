@@ -14,7 +14,7 @@ Zanim cokolwiek z tego nastąpi, `om-discover` ustala kontekst produktu, z któr
 
 ## Konwencje
 
-- **Gałąź**: `feature/<opis>` (patrz `AGENTS.md`). `main` jest chroniona: zmiany wchodzą wyłącznie przez PR, z zielonymi checkami (Build, Lint, Unit tests, Integration tests) i aktualną gałęzią. Bezpośredni push na `main`, force-push i usuwanie są zablokowane, także dla administratorów.
+- **Gałąź**: `feature/<opis>` (patrz `AGENTS.md`). `main` jest chroniona: zmiany wchodzą wyłącznie przez PR, z zielonymi checkami (Build, Lint, Unit tests, Integration tests, Storybook tests, Check tokens) i aktualną gałęzią. Bezpośredni push na `main`, force-push i usuwanie są zablokowane, także dla administratorów.
 - **Commity i tytuł PR-a**: krótki opis po angielsku w trybie rozkazującym, bez prefiksu typu, bez klucza zgłoszenia i bez nazw klas, np. `Set up MikroORM with PostgreSQL, migrations and integration test`. Tytuł PR-a ma ten sam styl (konfiguracja `prTitleTemplate`: `{summary}{issueRef}`). Bez linii `Co-Authored-By`.
 - **Dziennik zadania**: każdy commit zadania zawiera wpis w `.ai/runs/YYYY-MM-DD-slug.md` (zasady w `AGENTS.md`). Po naprawie błędu lub odkryciu pułapki dodaj lekcję w `.ai/lessons/` i wpis w `.ai/lessons.md`.
 - **Hook pre-commit** (`.githooks/pre-commit`) uruchamia lint, typecheck i testy z pokryciem 100%. Nie omijaj go przez `--no-verify`.
@@ -177,7 +177,7 @@ Każdy PR przechodzi pełną bramkę walidacji przed akceptacją review, w tej k
 
 Każdy niezerowy kod wyjścia oblewa bramkę i blokuje PR. Skille implementujące uruchamiają bramkę przed otwarciem PR-a, a `om-check-and-commit` przed pushem ręcznie prowadzonej gałęzi. Testy jednostkowe wymagają 100% pokrycia (statements, branches, functions, lines), próg jest wymuszony w `vitest.config.ts`. Testy integracyjne wymagają Dockera i wcześniejszego `npm run build`.
 
-CI (`.github/workflows/ci.yml`) odtwarza bramkę na każdym PR-ze: job `Build` (typecheck i `next build`), `Lint` (lint oraz `npm audit --omit=dev --audit-level=high`, który oblewa przy podatnościach zależności produkcyjnych o poziomie high i wyższym; podatności w narzędziach deweloperskich nie blokują, bo nie trafiają do działającej aplikacji), `Unit tests (100% coverage)` i `Integration tests`. Lista komend żyje w `.ai/agentic.config.json`; przy jej zmianie zaktualizuj ją tam i w tej sekcji razem.
+CI (`.github/workflows/ci.yml`) odtwarza bramkę na każdym PR-ze: job `Build` (typecheck i `next build`), `Lint` (lint oraz `npm audit --omit=dev --audit-level=high`, który oblewa przy podatnościach zależności produkcyjnych o poziomie high i wyższym; podatności w narzędziach deweloperskich nie blokują, bo nie trafiają do działającej aplikacji), `Unit tests (100% coverage)`, `Integration tests`, `Storybook tests` (testy stories w Chromium, dostępność blokuje) i `Check tokens` (wartości wyglądu poza tokenami). Lista komend żyje w `.ai/agentic.config.json`; przy jej zmianie zaktualizuj ją tam i w tej sekcji razem.
 
 ## Zmiana tego procesu
 
