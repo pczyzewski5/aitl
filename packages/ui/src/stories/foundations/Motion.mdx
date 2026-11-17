@@ -1,0 +1,22 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './Motion.stories';
+
+<Meta of={Stories} />
+
+# Ruch
+
+Decyzja z R01.6: prawie bez ruchu. Jedyne ruchy to hover i potwierdzenie po zapisie wpisu. Animacje dekoracyjne są zabronione.
+
+## Token
+
+<Canvas of={Stories.Tokens} />
+
+## Hover
+
+Hover zmienia kolor przycisku głównego z `--primary` na `--primary-hover` w czasie `--duration-feedback`.
+
+<Canvas of={Stories.Hover} />
+
+## Czego brakuje
+
+Zatwierdzone tokeny nie zawierają reguły dla `prefers-reduced-motion`. To otwarte pytanie do decyzji, a nie zasada. Potwierdzenie po zapisie (widoczne ok. 3 s) powstanie razem z komponentem Toast w etapie 2.

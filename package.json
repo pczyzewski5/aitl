@@ -15,7 +15,8 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:integration:app": "node tests/integration/support/serve.ts",
     "test:storybook": "npm run test:storybook --workspace @aitl/ui",
-    "prepare": "git config core.hooksPath .githooks"
+    "prepare": "git config core.hooksPath .githooks",
+    "check:tokens": "npm run check:tokens --workspace @aitl/ui"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

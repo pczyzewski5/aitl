@@ -9,7 +9,8 @@
     "typecheck": "tsc -p tsconfig.json",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test:storybook": "vitest run --config vitest.storybook.config.ts"
+    "test:storybook": "vitest run --config vitest.storybook.config.ts",
+    "check:tokens": "node scripts/check-tokens.ts"
   },
   "devDependencies": {
     "@storybook/addon-a11y": "10.6.7",

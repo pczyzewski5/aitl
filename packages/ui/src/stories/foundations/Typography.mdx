@@ -1,0 +1,32 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './Typography.stories';
+
+<Meta of={Stories} />
+
+# Typografia
+
+Decyzja z R01.3: czcionka systemowa i 4 rozmiary zamiast 7 z makiety (bez 12, 13 i 18 px). Wartości są odczytywane na żywo z pliku tokenów.
+
+W Tailwindzie rozmiary są klasami `text-sm`, `text-base`, `text-lg` i `text-xl`. Tokeny nazywają się `--font-size-*`, bo nazwy `--text-*` kolidują z przestrzenią nazw Tailwinda.
+
+## Czcionka
+
+Bez plików czcionek i bez CDN.
+
+<Canvas of={Stories.Family} />
+
+## Rozmiary i ich role
+
+Role wynikają z kolumny "Gdzie używać" zatwierdzonych tokenów. Najważniejsza hierarchia (R01.3): duża kwota wyniku, potem nagłówek, potem tekst.
+
+<Canvas of={Stories.Sizes} />
+
+## Grubości
+
+Grubość 700 jest tylko dla kwoty wyniku. Zakres użycia grubości 400 i 600 nie jest opisany w zatwierdzonych tokenach.
+
+<Canvas of={Stories.Weights} />
+
+## Czego brakuje
+
+Zatwierdzone tokeny nie opisują wysokości linii ani maksymalnej długości linii tekstu ciągłego. Są to luki do decyzji, a nie reguły.

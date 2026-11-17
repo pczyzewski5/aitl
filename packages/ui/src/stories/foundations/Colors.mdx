@@ -1,0 +1,46 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './Colors.stories';
+
+<Meta of={Stories} />
+
+# Kolory
+
+Wszystkie wartości na tej stronie są odczytywane na żywo z pliku tokenów (`tokens.css`), więc strona nie może się rozjechać z kodem. Kolumna "Pochodzenie" odsyła do decyzji: R01.x to referencje, A1-A5 to antyreferencje, K1-K2 to rozstrzygnięte konflikty (`.ai/specs/design/2026-11-17-referencje.md`).
+
+## Zasady
+
+1. Jasne tło, białe powierzchnie i jeden kolor akcji (R01.1). Niebieski akcji zostaje, a jego wartość jest tokenem (K1).
+2. Zielony i czerwony stanu są przyciemnione, żeby spełniały próg kontrastu na używanych tłach (R01.2, K2): czytelność wygrywa nad odcieniem.
+3. Kolor nigdy nie jest jedynym nośnikiem znaczenia (A3): kwoty mają znak "+" lub "-" albo etykietę, aktywne konto ma znacznik tekstowy i `aria-pressed`.
+4. Powierzchnie oddziela ramka lub tło, nie sam cień (A2).
+5. Komponenty używają wyłącznie warstwy 2 (znaczenia) i 3 (tokeny komponentów). Warstwa 1 jest źródłem wartości. Wartości spoza tokenów wykrywa `npm run check:tokens`.
+6. Po każdej zmianie wartości koloru trzeba przeliczyć kontrast przed zapisem (tabele poniżej robią to automatycznie, ale nie zastępują decyzji).
+
+## Warstwa 1: surowe wartości
+
+<Canvas of={Stories.RawColors} />
+
+## Warstwa 2: znaczenia
+
+<Canvas of={Stories.MeaningColors} />
+
+## Warstwa 3: tokeny komponentów
+
+<Canvas of={Stories.ComponentColors} />
+
+## Kontrast
+
+Kontrast jest liczony na żywo ze wzoru WCAG z wartości w pliku tokenów. Kolumna "Kontrast" pokazuje wynik; gdyby różnił się od wartości zatwierdzonej w dokumencie tokenów, obok pojawi się wartość zatwierdzona. Test jednostkowy pilnuje, że wszystkie wartości zgadzają się z dokumentem.
+
+Pary tekstu muszą mieć co najmniej 4,5:1, elementy interfejsu co najmniej 3:1.
+
+<Canvas of={Stories.TextContrast} />
+
+<Canvas of={Stories.InterfaceContrast} />
+
+Dwa wiersze nie spełniają progu 3:1 i są to znane, zatwierdzone przypadki, nie błędy: ramka pól na tle strony nie jest dozwolona (pola muszą leżeć na białej karcie lub tle formularza), a separatory `--border` są dekoracją, która nie niesie informacji.
+
+## Czego brakuje
+
+- Tryb ciemny (luka L3): patrz strona Motyw.
+- Marka, logo i kolor wyróżnika "AITL" (luka L4): bez wymyślania.

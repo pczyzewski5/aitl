@@ -6,7 +6,6 @@ export default defineConfig({
   plugins: [storybookTest({ configDir: new URL('./.storybook', import.meta.url).pathname })],
   test: {
     name: 'storybook',
-    passWithNoTests: true,
     browser: {
       enabled: true,
       headless: true,
