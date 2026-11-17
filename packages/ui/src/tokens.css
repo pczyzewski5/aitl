@@ -60,6 +60,7 @@
   --space-between-fields: var(--space-3);
   --space-between-groups: var(--space-4);
   --space-panel: var(--space-4);
+  --space-card-gap: var(--space-3);
   --space-section: var(--space-8);
 
   --radius: 6px;

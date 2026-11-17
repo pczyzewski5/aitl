@@ -1,0 +1,134 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './badge.stories';
+
+<Meta of={Stories} />
+
+# Badge
+
+Krótka plakietka z jednym słowem: typ konta ("Wspólne", "Osobiste") albo cykliczność wpisu ("Co miesiąc"). Źródło reguł: R01.2, R01.3, R01.5, A3 (referencje), tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-17, WCAG 2.2. Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Mówi jednym słowem, jakiego typu jest obiekt obok, żeby użytkownik odróżnił konto wspólne od osobistego bez czytania całego opisu.
+
+## 2. Kiedy używać
+
+- Typ konta na karcie konta: "Wspólne" lub "Osobiste". Źródło: R01.2, E01, E03.
+- Cykliczność wpisu w tabeli: "Co miesiąc", "Jednorazowy". Źródło: E02.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Akcja lub nawigacja | Button lub link: plakietka nie jest interaktywna |
+| Komunikat o błędzie lub sukcesie | Alert (Toast w partii 2) |
+| Zdanie lub opis dłuższy niż kilka słów | zwykły tekst obok |
+| Znaczenie niesione samym kolorem | zawsze dodaj tekst (A3) |
+| Licznik lub wartość liczbowa wyniku | tekst z formatem "3 975,50 zł", nie plakietka |
+
+## 4. Anatomia
+
+1. Plakietka: element `span`, tło z tokenu wariantu, tekst 14 px (`text-sm`), waga 400, padding 8 px w poziomie i 4 px w pionie, promień `rounded-pill` (10 px), bez ramki i bez cienia.
+2. Tekst: jedno krótkie słowo lub dwa; obowiązkowy (nośnik znaczenia).
+
+Brak części opcjonalnych: nie ma ikony (ikony wejdą z `lucide-react` w partii 2) ani przycisku zamknięcia.
+
+## 5. Warianty
+
+| Wariant | Tło / tekst | Kiedy wybrać | Kontrast tekstu |
+|---|---|---|---|
+| `neutral` (domyślny) | `--background` / `--foreground` | status bez rozróżnienia typu, np. "Co miesiąc" | 13,34:1 |
+| `shared` | `--badge-shared-bg` / `--badge-shared-fg` | konto wspólne | 5,49:1 |
+| `personal` | `--badge-personal-bg` / `--badge-personal-fg` | konto osobiste | 5,98:1 |
+
+Źródło: R01.2 (niebieska i fioletowa plakietka konta), wygląd z makiety; `neutral` zatwierdzone przez właściciela produktu 2026-11-17 (tło `--background`, tekst `--foreground`, bez nowego tokenu). Atrybut `data-variant` zapisuje wybrany wariant (tylko do testów).
+
+Wariant `neutral` ma tło `--background`, więc na karcie (`--card`) odróżnia się tylko o 1,10:1 jako kształt: to dopuszczalne, bo plakietka jest dekoracją tekstu, a znaczenie niesie słowo (A3). Nie umieszczaj `neutral` bezpośrednio na tle strony: zniknie.
+
+<Canvas of={Stories.Variants} />
+
+## 6. Stany
+
+| Stan | Wygląd |
+|---|---|
+| Domyślny | tło i tekst z wariantu |
+| Najechanie, fokus, wciśnięty, zablokowany, ładowanie, wybrany, błąd | nie dotyczy: plakietka nie jest interaktywna (tokeny: "gdzie nie używać: akcje") |
+
+Plakietka nie przyjmuje fokusu i nie reaguje na najechanie. Jeśli coś ma być klikalne, to nie jest Badge.
+
+<Canvas of={Stories.States} />
+
+## 7. Zachowanie i dostępność
+
+- Klawiatura: nie dotyczy, plakietka nie jest w kolejności fokusu.
+- Czytnik ekranu czyta tekst plakietki w kolejności dokumentu, jak zwykły tekst ("Konto wspólne, Wspólne"). Nie dodawaj `role` ani `aria-label`: widoczny tekst jest nazwą.
+- Znaczenie niesie tekst, nigdy sam kolor (A3, WCAG 1.4.1).
+- Kontrast tekstu >= 4,5:1 dla wszystkich wariantów (tabela w sekcji Warianty).
+- Cel kliknięcia nie dotyczy (element nieinteraktywny).
+
+## 8. Treść
+
+- Jedno słowo, maksymalnie dwa, ok. 20 znaków; wielka litera tylko na początku ("Wspólne", "Co miesiąc").
+- Rzeczownik lub przymiotnik opisujący typ, nie czasownik ani zdanie.
+- Dłuższy tekst zawija się (`break-words`, `max-w-full`), ale to znak, że treść nie należy do plakietki.
+- Tłumaczenie: plakietka nie ma stałej szerokości, więc dłuższe słowo po prostu poszerza ją do szerokości kontenera.
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | plakietka nie przekracza szerokości kontenera, długi tekst zawija się |
+| 768 px | bez zmian |
+| 1440 px | bez zmian |
+
+<Canvas of={Stories.LongTextNarrowScreen} />
+
+## 10. API
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `variant` | `'neutral' \| 'shared' \| 'personal'` | `'neutral'` | wygląd plakietki |
+| `className` | `string` | brak | dodatkowe klasy; konflikty rozwiązuje `cn` |
+| inne | atrybuty `span` | | `id`, `title`, `data-*` itd. trafiają na element |
+
+## 11. Kod
+
+Minimalny przykład:
+
+```tsx
+import { Badge } from '@aitl/ui';
+
+<Badge>Co miesiąc</Badge>;
+```
+
+Typowy przykład z produktu, typ konta na karcie:
+
+```tsx
+<CardHeader>
+  <CardTitle>Konto wspólne</CardTitle>
+  <Badge variant="shared">Wspólne</Badge>
+</CardHeader>
+```
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: Button (akcja), Alert (komunikat), zwykły tekst (opis dłuższy niż słowo).
+- Występuje we wzorcach: karta konta (E01, E03), wiersz tabeli wpisów (E02).
+
+## Czego brakuje
+
+- Wariant statusu z kolorem stanu (np. "Zapłacone"): flaga "zapłacone" dopiero w Fazie 4 (E02), brak decyzji o wyglądzie.
+- Plakietka z ikoną: czeka na `lucide-react` (partia 2).
+- Tło `neutral` ma tylko 1,10:1 jako kształt względem karty: jeśli użytkownicy nie zauważą takiej plakietki, potrzebny będzie osobny token lub ramka (do decyzji po zobaczeniu w aplikacji).
+- Wariant `neutral` zatwierdzony z tokenów istniejących; osobny token `--badge-neutral-*` nie powstał.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: tekst i wariant w drzewie dostępności, kolory każdego wariantu z tokenów, rozmiar 14 px, waga 400, promień 10 px, brak cienia, brak fokusu, długi tekst nie wychodzi poza kontener.

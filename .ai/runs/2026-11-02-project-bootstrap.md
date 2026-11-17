@@ -124,3 +124,7 @@ Pitfall: shadcn CLI wrote to a literal @/ directory (lesson added); user-event c
 ## 2026-11-17 (design system, PR F: Input, Label and Field)
 Added Input (text, email, password, amount as text with decimal input mode), Label (Radix) and Field (label, slot, hint, error below the field, "(opcjonalne)" marker, id and aria wiring through cloneElement) with the --space-label-field token (4 px), Polish 13-section docs pages, stories for every state and 320 px, play tests and unit tests at 100% coverage; the PR E tokens are recorded as approved by the owner.
 Pitfall: keyboard Tab focus selects the whole input value, so a Backspace play test needs End first. Components were hand-adapted from shadcn rather than fetched with the CLI to avoid the literal @/ directory and dead FieldError/Separator branches. Todo: PR G (Card, Badge, Alert).
+
+## 2026-11-17 (design system, PR G: Card, Badge and Alert)
+Added hand-written Card (Header/Title/Content), Badge (neutral/shared/personal) and Alert (neutral status, error alert; Title/Description) on the shadcn pattern, the --space-card-gap token (12 px), three Polish 13-section docs pages, stories (320 px, long text, login failure and 429 block) with play tests, and unit tests at 100% coverage; the PR F proposals and the PR G decisions are recorded as approved by the owner on 2026-11-17.
+No new dependencies; unused shadcn parts (CardDescription, CardFooter, CardAction) are documented as gaps instead of shipped. Todo: batch 2 (Checkbox, Select, RadioGroup with lucide-react), owner inputs listed in POSTEP.md.

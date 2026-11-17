@@ -1,0 +1,141 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './card.stories';
+
+<Meta of={Stories} />
+
+# Card
+
+Powierzchnia grupująca jedną rzecz: kartę konta z wynikiem, panel listy wpisów. Składa się z części `Card`, `CardHeader`, `CardTitle` i `CardContent`. Źródło reguł: R01.4, R01.5 (referencje), A2 (ramka zamiast cienia), tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-17, WCAG 2.2. Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Wyodrębnia z tła strony jedną całość (jedno konto, jeden panel), żeby użytkownik widział, co do czego należy.
+
+## 2. Kiedy używać
+
+- Karta konta na liście kont: nazwa, plakietka typu ("Wspólne"/"Osobiste") i wynik "ile zostanie". Źródło: E01, E03.
+- Panel listy wpisów z nagłówkiem sekcji (np. "Wpisy w listopadzie"). Źródło: E02.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Karta, którą da się kliknąć lub wybrać (karta konta z `aria-pressed`) | komponent produktu zbudowany na `button` (etap 3); Card nie jest interaktywna |
+| Pojedynczy komunikat o błędzie lub informacja | Alert |
+| Rozwijany formularz wpisu | komponent produktu EntryForm z tłem `--form-surface` (etap 3) |
+| Karta w karcie | płaska struktura: jedna karta na jeden obiekt |
+| Sama grupa pól formularza | `fieldset` z `legend` albo odstępy, bez ramki |
+
+## 4. Anatomia
+
+1. `Card`: ramka 1 px `--border`, tło `--card`, promień `rounded-card` (8 px), padding 16 px (`--space-panel`), odstęp między częściami 12 px (`--space-card-gap`), bez cienia.
+2. `CardHeader` (opcjonalny): wiersz z tytułem i dodatkiem (np. Badge); zawija się przy wąskim ekranie.
+3. `CardTitle` (opcjonalny): nagłówek `h3` (domyślnie), 16 px, waga 600; poziom zmienia prop `as` (`h2`, `h3`, `h4`).
+4. `CardContent`: treść karty, kolumna z odstępem 8 px (`--space-within-group`).
+
+Źródło odstępu 12 px: makieta (odstęp nagłówka panelu), token `--space-card-gap` zatwierdzony przez właściciela 2026-11-17; surowa wartość leży tylko w `tokens.css`.
+
+<Canvas of={Stories.Anatomy} />
+
+## 5. Warianty
+
+Card ma jeden wygląd. Nie ma wariantów koloru, cienia ani rozmiaru: ramka zamiast cienia (A2), jedna powierzchnia `--card`. Wariant na tle formularza (`--form-surface`) czeka na EntryForm (etap 3).
+
+## 6. Stany
+
+| Stan | Wygląd | Źródło |
+|---|---|---|
+| Domyślny | ramka `--border`, tło `--card` | A2, tokeny |
+| Najechanie, fokus, wciśnięty, zablokowany, ładowanie, wybrany, błąd | nie dotyczy: karta nie jest interaktywna | R01.6 |
+
+Aktywne konto na liście (ramka 2 px `--primary` z makiety) to stan komponentu produktu; zmiana grubości ramki 1->2 px przesuwa układ i zostanie rozwiązana w etapie 3.
+
+<Canvas of={Stories.States} />
+
+## 7. Zachowanie i dostępność
+
+- Klawiatura: karta nie przyjmuje fokusu; fokus trafia do elementów interaktywnych w środku (przyciski, linki).
+- Tytuł to prawdziwy nagłówek (`h3`, `h2` lub `h4`): czytnik ekranu pozwala skakać po kartach; dobierz poziom do struktury strony, nie do rozmiaru tekstu.
+- `Card` jest zwykłym `div` bez roli. Gdy karta ma być osobnym obszarem (landmark), dodaj `role="region"` i `aria-labelledby` wskazujące na tytuł (propozycja).
+- Kontrast: `--card-foreground` na `--card` 14,68:1; `--muted-foreground` na `--card` 7,56:1.
+- Ramka `--border` ma 1,47:1 na `--card` i 1,34:1 na `--background`: to dekoracja, nie nośnik znaczenia (znany przypadek z dokumentu tokenów); granicę zawartości niesie układ i odstępy.
+- Zawartość karty nie może polegać na samej ramce ani kolorze (A3).
+
+## 8. Treść
+
+- Tytuł: nazwa obiektu ("Konto wspólne") albo nagłówek sekcji, bez kropki; do ok. 40 znaków.
+- Długi tytuł zawija się (`break-words`), a plakietka przechodzi do następnego wiersza (`flex-wrap`).
+- Kwoty w formacie "3 975,50 zł"; dane przykładowe oznaczaj "(przykład)" (A5).
+- Tłumaczenie: nagłówek i treść mają elastyczną wysokość; nie ustawiaj stałej wysokości karty.
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | karta na pełną szerokość kontenera, tytuł zawija się, plakietka w następnym wierszu |
+| 768 px | bez zmian; układ siatki kart (kilka w wierszu) to zadanie wzorca listy kont, nie Card |
+| 1440 px | bez zmian; szerokość ogranicza układ strony (kolumna do 960 px, R01.4) |
+
+<Canvas of={Stories.LongContentNarrowScreen} />
+
+## 10. API
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `Card`, `CardHeader`, `CardContent`: atrybuty `div` | `ComponentProps<'div'>` | | `className` (konflikty rozwiązuje `cn`), `id`, `role`, `aria-*`, `data-*` |
+| `CardTitle` `as` | `'h2' \| 'h3' \| 'h4'` | `'h3'` | poziom nagłówka |
+| `CardTitle`: atrybuty nagłówka | `ComponentProps<'h3'>` | | `className`, `id` itd. |
+
+## 11. Kod
+
+Minimalny przykład:
+
+```tsx
+import { Card, CardContent } from '@aitl/ui';
+
+<Card>
+  <CardContent>Treść</CardContent>
+</Card>;
+```
+
+Typowy przykład z produktu, karta konta:
+
+```tsx
+import { Badge, Card, CardContent, CardHeader, CardTitle } from '@aitl/ui';
+
+<Card>
+  <CardHeader>
+    <CardTitle>Konto wspólne</CardTitle>
+    <Badge variant="shared">Wspólne</Badge>
+  </CardHeader>
+  <CardContent>
+    <p className="text-sm text-muted-foreground">Zostaje w tym miesiącu</p>
+    <p className="text-xl font-bold">3 975,50 zł</p>
+  </CardContent>
+</Card>;
+```
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: Alert (komunikat, nie powierzchnia treści), przyciskowa karta konta (komponent produktu), panel formularza na `--form-surface`.
+- Występuje we wzorcach: karta konta (E01, E03), panel listy wpisów (E02).
+- Zawiera: Badge (typ konta), a w przyszłości Button.
+
+## Czego brakuje
+
+- `CardDescription`, `CardFooter` i `CardAction` z shadcn nie ma: żaden udokumentowany przykład ich nie potrzebuje (brak ekranu, zasada: bez martwego kodu). Dojdą razem z ekranem, który ich wymaga.
+- Karta klikalna z aktywnym stanem (`aria-pressed`) i rozwiązanie przeskoku ramki 1->2 px: komponent produktu, etap 3.
+- Wariant na tle `--form-surface`: czeka na EntryForm (etap 3).
+- Rola `region` dla karty jako landmarku: propozycja bez decyzji.
+- Rozmiar tytułu `text-lg` dla nagłówków paneli działa przez `className`; osobnego propsa rozmiaru nie ma (do decyzji, jeśli wzorzec się powtórzy).
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: tytuł jest nagłówkiem, ramka, tło, promień, padding i odstęp z tokenów, brak cienia, rozmiar i waga tytułu, karta nie przyjmuje fokusu, długa nazwa zawija się przy 320 px bez poziomego przewijania.

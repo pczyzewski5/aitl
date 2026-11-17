@@ -181,6 +181,12 @@ export const SPACE_MEANINGS: readonly TokenEntry[] = [
     avoid: 'wartości spoza skali (2, 6, 14 px)',
   },
   { name: '--space-panel', origin: 'R01.4', use: 'padding panelu i karty', avoid: 'wartości spoza skali (2, 6, 14 px)' },
+  {
+    name: '--space-card-gap',
+    origin: 'decyzja właściciela 2026-11-17 (12 px, jak odstęp w nagłówku panelu w makiecie)',
+    use: 'odstęp między częściami wewnątrz karty (Card)',
+    avoid: 'padding karty (to --space-panel)',
+  },
   { name: '--space-section', origin: 'R01.4', use: 'między sekcjami strony', avoid: 'wartości spoza skali (2, 6, 14 px)' },
 ];
 
