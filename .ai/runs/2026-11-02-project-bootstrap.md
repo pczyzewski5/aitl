@@ -49,3 +49,9 @@ Todo: phase 4 (Awilix composition root), phase 4b, first domain concept (expense
 GitGuardian flagged one secret on the phase 3 PR, most likely the database URL with a password; removed passwords from example URLs and test fixtures and switched local PostgreSQL to trust auth.
 Pitfall: the finding details are visible only in the GitGuardian dashboard, so the exact line was inferred.
 Todo: confirm the check turns green; phase 4.
+
+## 2026-11-17 (agent pipeline)
+Configured the agent PR pipeline: .ai/agentic.config.json (GitHub tracker, agent-browser, 6-command validation gate including npm audit), tracker and browser descriptors, SDLC.md, CODE_REVIEW.md, BACKWARD_COMPATIBILITY.md, npm audit step in the Lint CI job.
+Decisions: pipeline execution plans go to .ai/pipeline-runs to avoid clashing with these journals; plain English commit and PR titles without prefixes; installed skills (.agents, .claude/skills, skills-lock.json) are not committed.
+Todo: issue #2 (npm run setup installer), phase 4 (Awilix), phase 4b.
+Pitfall: the pre-commit lint scanned the locally installed skills in .agents (third-party code, 250 errors); excluded .agents and .claude from ESLint.

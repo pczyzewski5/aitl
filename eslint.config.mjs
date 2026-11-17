@@ -6,7 +6,7 @@ const restrict = (name, patterns) => ({
 });
 
 export default tseslint.config(
-  { ignores: ['**/node_modules/**', '**/.next/**', '**/dist/**', '**/coverage/**', '**/next-env.d.ts'] },
+  { ignores: ['**/node_modules/**', '**/.next/**', '**/dist/**', '**/coverage/**', '**/next-env.d.ts', '.agents/**', '.claude/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
