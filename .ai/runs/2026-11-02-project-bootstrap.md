@@ -74,3 +74,8 @@ Todo: issue #2 (npm run setup); start with E01-S01 (#10) and its tasks (#17-#20)
 Wrote the specification for E01-S01 (login) and the framework underneath it (.ai/specs/2026-11-17-auth-and-app-foundation.md, data model view in .ai/data-model/): server-side sessions in PostgreSQL, own thin auth layer, argon2id, BankAccount and membership model, two phases and one PR per step. Passed a cross-model review (Opus) and a grill-me session; decisions Q1-Q22 recorded in the spec.
 Pitfall: Auth.js Credentials only supports JWT sessions and its MikroORM adapter targets MikroORM 5/6, so it conflicted with server-side sessions; the owner chose the own layer.
 Todo: rename follow-ups for BankAccount in the backlog, brief and issues; update issues #10, #18, #20; add a production-readiness story; then implement phase 1 (steps 1.1-1.3).
+
+## 2026-11-17 (specs: entries and monthly remainder)
+Wrote the specifications for E02 (income and expenses entries, recurring series, paid flag; issues #12-#15, #21, #22) and E03 (monthly remainder per bank account; #16, #23). Passed a cross-model review (Opus); decisions E02-Q1..Q16 and E03-Q5..Q10 recorded in the specs, PLN-only amounts in minor units, one PR per step, rollout order E02 F1-F3, E03 1.1, E02 F4, E03 1.2.
+Pitfall: a recurring entry without a series id could be counted twice after a revision; the review caught it and the model now has series_id, optimistic concurrency and a serialised series lock.
+Todo: implement phase 1 of the auth spec first (E02 depends on it); owner provides the spreadsheet extract for the A01 golden test (#23).
