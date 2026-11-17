@@ -1,0 +1,164 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './input.stories';
+
+<Meta of={Stories} />
+
+# Input
+
+Pole tekstowe w jednym wierszu: logowanie (e-mail, hasło) i formularz wpisu (nazwa, kwota). Źródło reguł: R01.x (referencje), A1-A5 (antyreferencje), tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-17, WCAG 2.2 i WAI-ARIA. Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+Input nie ma własnej etykiety ani komunikatu błędu: nazwę, podpowiedź i błąd dodaje [Field](?path=/docs/elementy-bazowe-label-i-field--docs). Samego `Input` używaj tylko wewnątrz `Field` albo z `aria-label`, gdy etykieta jest widoczna gdzie indziej.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Pozwala użytkownikowi wpisać krótką wartość tekstową (adres e-mail, hasło, nazwę wpisu, kwotę) i pokazuje, czy jest gotowa do edycji, zablokowana, tylko do odczytu albo błędna.
+
+## 2. Kiedy używać
+
+- Pola formularza logowania: e-mail i hasło. Źródło: E01-S01.
+- Nazwa wpisu i kwota w formularzu wpisu. Źródło: E02.
+- Wartość do odczytu, którą użytkownik ma móc zaznaczyć i skopiować (`readOnly`), np. e-mail konta.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Wybór jednej opcji z krótkiej listy | RadioGroup lub Select (partia 2) |
+| Włączenie lub wyłączenie ustawienia | Checkbox (partia 2) |
+| Wielowierszowy opis | Textarea (partia 2, do potwierdzenia) |
+| Wartość, której nie wolno edytować i nie trzeba kopiować | zwykły tekst |
+| Pole bez etykiety, nazwane tylko placeholderem | zawsze dodaj etykietę przez Field (AUDYT, R01.5) |
+| Kwota jako `type="number"` | `type="amount"`: parser kwoty działa na łańcuchach, przecinek dziesiętny musi działać (spec E02) |
+
+## 4. Anatomia
+
+1. Pole: element `input` o wysokości 36 px (`--control-height`), ramce 1 px `--input`, promieniu `rounded-control` (6 px), tle `--card`, wcięciu 8 px (`--space-2`), bez cienia.
+2. Wartość: tekst 16 px poniżej 768 px i 14 px od 768 px (`text-base md:text-sm`), waga 400.
+3. Placeholder: opcjonalny, kolor `--muted-foreground`; wyłącznie przykład formatu, nigdy nazwa pola.
+4. Etykieta, podpowiedź i błąd: poza komponentem, w Field.
+
+## 5. Warianty
+
+Pole ma jeden wygląd i cztery typy (`type`):
+
+| Typ | Natywnie | Kiedy wybrać | Atrybuty |
+|---|---|---|---|
+| `text` (domyślny) | `type="text"` | nazwa wpisu, opis | |
+| `email` | `type="email"` | adres e-mail | dodaj `autoComplete="email"` |
+| `password` | `type="password"` | hasło | dodaj `autoComplete="current-password"` (logowanie) lub `"new-password"` |
+| `amount` | `type="text"` + `inputMode="decimal"` | kwota w złotych | klawiatura dziesiętna na telefonie; bez `type="number"`, bo parser kwoty działa na łańcuchach (spec E02, Q11) |
+
+Źródło typów: tabela różnic etapu 2 (Input) i E01/E02. Atrybut `data-type` zapisuje wybrany typ (tylko do testów).
+
+<Canvas of={Stories.Types} />
+
+## 6. Stany
+
+| Stan | Wygląd | Źródło |
+|---|---|---|
+| Domyślny | tło `--card`, ramka `--input` | tokeny, A2 |
+| Najechanie (hover) | brak zmiany: hover tylko przy przyciskach | R01.6 |
+| Fokus (`:focus-visible`) | globalny obrys 2 px `--ring`, odstęp 2 px, ze `styles.css`; komponent nie dodaje własnego | tokeny (fokus widoczny, 2 px), WCAG 2.4.7 |
+| Zablokowany (`disabled`) | tło `--muted`, tekst `--muted-foreground`, kursor `not-allowed`; wypada z kolejności fokusu | propozycja z tabeli różnic (zamiast krycia 50%) |
+| Tylko do odczytu (`readOnly`) | tło `--form-surface` (3,04:1 ramki), normalny tekst; przyjmuje fokus i pozwala zaznaczyć wartość | propozycja z PR F |
+| Błąd (`aria-invalid`) | ramka `--destructive`; komunikat tekstowy pod polem dodaje Field (kolor nie jest jedynym nośnikiem) | R01.5, A3 |
+| Ładowanie, wciśnięty, wybrany | nie dotyczy pola | |
+
+Zablokowane pole: użytkownik dowiaduje się dlaczego z podpowiedzi w Field (np. "Konta nie da się zmienić po zapisaniu wpisu."), powiązanej przez `aria-describedby`. Wygląd samym kolorem to za mało (A3).
+
+Fokus w macierzy jest zamrożonym podglądem: te same deklaracje co `:focus-visible`, podpięte pod atrybut `data-preview-state` w `.storybook/preview-states.css` (tylko do dokumentacji).
+
+<Canvas of={Stories.StatesMatrix} />
+
+### Reguła powierzchni: pole tylko na karcie lub białej powierzchni
+
+Ramka `--input` ma kontrast 3,18:1 na `--card` (biel) i 3,04:1 na `--form-surface`, ale tylko **2,89:1 na tle strony `--background`**, czyli poniżej progu 3:1 dla elementów interfejsu (WCAG 1.4.11). Dlatego pole zawsze leży na `--card` albo `--form-surface`, nigdy bezpośrednio na tle strony. Źródło: tokeny ("pola bezpośrednio na tle strony" w kolumnie "Gdzie nie używać"), decyzja właściciela 2026-11-17.
+
+## 7. Zachowanie i dostępność
+
+- Klawiatura: `Tab` ustawia fokus, klawisze edytują wartość (natywne `input`, WAI-ARIA APG). Pole `readOnly` przyjmuje fokus, `disabled` nie.
+- Nazwa dostępna: wyłącznie z widocznej etykiety (`label` powiązana z `htmlFor` i `id`, robi to Field). Placeholder nie jest etykietą (AUDYT, WCAG 3.3.2, 1.3.1).
+- Błąd: `aria-invalid="true"` oraz `aria-describedby` wskazujący na komunikat pod polem (Field). Czytnik ekranu przy fokusie czyta nazwę, "nieprawidłowe" i treść błędu (WCAG 3.3.1).
+- Autouzupełnianie: ustaw `autoComplete` zgodnie z celem pola (`email`, `current-password`, `new-password`), WCAG 1.3.5. Dla kwoty i nazwy wpisu `autoComplete="off"` jest dopuszczalne.
+- Cel kliknięcia: 36 px wysokości i pełna szerokość kontenera, więc spełnia 24 x 24 px (WCAG 2.5.8).
+- Kontrast: tekst `--foreground` na `--card` 14,68:1; placeholder `--muted-foreground` na `--card` 7,56:1; ramka `--input` na `--card` 3,18:1; obrys fokusu `--ring` na `--card` 5,17:1.
+- Rozmiar tekstu 16 px poniżej 768 px zapobiega przybliżaniu strony przy fokusie w przeglądarkach iOS (zachowanie znane z dokumentacji, nie weryfikowane w tym repo).
+- Walidację natywną przeglądarki (dymki) wyłącz na formularzu (`noValidate`): błędy pokazuje Field pod polem.
+
+## 8. Treść
+
+- Placeholder: tylko przykład formatu ("np. 1234,50", "np. Czynsz (przykład)"). Dane przykładowe oznaczaj "(przykład)" (A5).
+- Wartość: bez zmiany wielkości liter i bez maski wymuszanej w trakcie pisania (użytkownik wpisuje "1234,50" lub "1234.50", walidacja i format po stronie logiki).
+- Długa wartość: nie zawija się, pole przewija tekst w poziomie; szerokość pola wynika z kontenera.
+- Liczby i waluty: format "3 975,50 zł" w odczycie; w polu kwoty bez symbolu waluty (waluta w etykiecie lub podpowiedzi).
+- Tłumaczenie: pole nie ma stałej szerokości; etykiety i błędy w dłuższym języku zawija Field.
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | pole na pełną szerokość kontenera, tekst 16 px, długa wartość przewija się w poziomie |
+| 768 px | tekst 14 px (od 768 px, `md:text-sm`), te same wymiary |
+| 1440 px | bez zmian; szerokość treści ogranicza układ strony (R01.4, kolumna do 960 px) |
+
+Źródło rozmiaru tekstu: decyzja właściciela, 2026-11-17 (16 px poniżej 768 px, 14 px od 768 px).
+
+<Canvas of={Stories.LongValueNarrowScreen} />
+
+## 10. API
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `type` | `'text' \| 'email' \| 'password' \| 'amount'` | `'text'` | typ pola; `amount` to `type="text"` z `inputMode="decimal"` |
+| `disabled` | `boolean` | `false` | natywne zablokowanie |
+| `readOnly` | `boolean` | `false` | tylko do odczytu, przyjmuje fokus |
+| `aria-invalid` | `boolean` | brak | stan błędu; ustawia go Field, gdy podano `error` |
+| `aria-describedby` | `string` | brak | powiązanie z podpowiedzią i błędem; Field dopisuje swoje identyfikatory |
+| `className` | `string` | brak | dodatkowe klasy; konflikty rozwiązuje `cn` (tailwind-merge) |
+| inne | atrybuty `input` | | `id`, `name`, `value`, `defaultValue`, `placeholder`, `autoComplete`, `inputMode`, `onChange`, `onBlur` itd. trafiają na element |
+
+## 11. Kod
+
+Minimalny przykład (pole zawsze w Field, który dodaje etykietę):
+
+```tsx
+import { Field, Input } from '@aitl/ui';
+
+<Field label="Nazwa wpisu">
+  <Input />
+</Field>;
+```
+
+Typowy przykład z produktu, kwota z podpowiedzią:
+
+```tsx
+<Field label="Kwota" hint="Podaj kwotę w złotych, np. 1234,50." error={amountError}>
+  <Input type="amount" value={amount} onChange={(event) => setAmount(event.target.value)} />
+</Field>
+```
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: Textarea (wiele wierszy), Select (wybór z listy), Checkbox (przełączenie), pole `type="number"` (nie używać dla kwot).
+- Występuje we wzorcach: formularz logowania i formularz wpisu (zawsze w Field).
+- Dalsze zasady wyboru komponentu pojawią się na stronie "Jak wybrać komponent" w etapie 4.
+
+## Czego brakuje
+
+- Pole z przyciskiem (pokaż hasło) i prefiks/sufiks waluty: brak źródła i decyzji; kwota ma walutę w etykiecie lub podpowiedzi.
+- Wygląd zablokowanego i tylko do odczytu to propozycje (`--muted`, `--form-surface`); do oceny po zobaczeniu w aplikacji.
+- Hover pola: brak (R01.6), do decyzji, jeśli użytkownicy nie rozpoznają pola po samej ramce.
+- Kolor hover wariantu `destructive` przycisku bez zmian (luka z PR E, nie dotyczy pola).
+- Maska i format kwoty w trakcie pisania (spacje tysięcy): decyzja przy wzorcu formularza (etap 3).
+- Przybliżanie strony na iOS przy tekście 14 px: reguła 16 px poniżej 768 px nie była sprawdzona na urządzeniu.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: wpisywanie, Tab i klawisze edycji, obrys fokusu 2 px, zablokowane nie przyjmuje fokusu ani tekstu, tylko do odczytu przyjmuje fokus, ale nie zmienia wartości, `aria-invalid` z kolorem ramki, kwota z `inputMode="decimal"`, wysokość 36 px, rozmiar tekstu zależny od szerokości, ramka i tło z tokenów, brak cienia.

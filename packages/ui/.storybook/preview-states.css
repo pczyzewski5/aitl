@@ -10,6 +10,7 @@
   background-color: var(--muted);
 }
 
+[data-slot='input'][data-preview-state='focus-visible'],
 [data-slot='button'][data-preview-state='focus-visible'] {
   outline: var(--ring-width) solid var(--ring);
   outline-offset: 2px;
