@@ -93,3 +93,8 @@ Todo: review dev-tool advisories manually when updating dependencies (Vitest, Vi
 Added the approved design decisions (.ai/specs/design/2026-11-17-referencje.md and 2026-11-17-tokeny.md) and the stage 0 plan in packages/ui/POSTEP.md: inventory, decisions, open questions, component list, docs menu tree and the PR sequence A-D. Docs only, nothing installed.
 Decisions: Storybook 10.6.7 with react-vite, Tailwind 4.3.5, Playwright 1.65.1, Vitest pinned at 5.0.5, docs in Polish, dark theme structure only.
 Todo: owner answers the open questions and says "dalej"; then PR B (Storybook tooling).
+
+## 2026-11-17 (design system, PR B: Storybook tooling)
+Added Storybook 10.6.7 (react-vite, docs, a11y with test: 'error', vitest addon), Vitest browser packages 5.0.5 and Playwright 1.65.1 as ui devDependencies, a separate vitest.storybook.config.ts, one Polish MDX intro page, and a build-storybook step in the CI Build job; coverage excludes stories and .storybook, storybook-static is ignored by git and ESLint.
+Pitfall: with only an MDX page there are no story tests, so test:storybook uses passWithNoTests; verified with a throwaway story that the browser run works and an a11y violation fails it. Prod audit gate unchanged (one pre-existing moderate next advisory, exit 0).
+Todo: PR C (tokens, Tailwind, theme switch) after the owner says "dalej"; the dedicated storybook-tests CI job comes in PR D.
