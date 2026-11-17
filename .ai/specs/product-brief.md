@@ -3,7 +3,7 @@
 - Date: 2026-11-17
 - Mode: own; Owner: właściciel produktu; Pass: Quick pass (jedna runda pytań, przegląd sceptyka wykonany w tym samym kontekście, bez niezależnego recenzenta)
 - Evidence basis: relacja właściciela produktu, który jest też pierwszym użytkownikiem, oraz jego relacja z drugiej ręki, że zakres uzgodnił po rozmowie z żoną (bez notatki z tej rozmowy); brak danych i dokumentów. Najbardziej brzemienne nieprzetestowane przekonanie: że żona ma ten sam problem i potrzebuje własnego logowania (A02, częściowo wsparte).
-- Coverage: 17 claims — 10 sourced (interview 7, data 0, document 1, product 2, benchmark 0), 0 synthetic, 7 assumed; 2 entries on the collection plan
+- Coverage: 19 claims — 12 sourced (interview 8, data 0, document 2, product 2, benchmark 0), 0 synthetic, 7 assumed; 2 entries on the collection plan
 - Synthetic hypotheses outside Coverage: 0
 - Definition of Ready signed by: jeszcze niepodpisane; brak otwartych pytań blokujących, ale A02 jest nietestowane; ready for: planowanie implementacji zakresu Now oraz zebranie materiału (rozmowa z żoną)
 - Sources: `.ai/specs/research/interviews/2026-11-17-wlasciciel-produktu.md`, `.ai/specs/research/decisions/D01-zakres-pierwszej-wersji.md`, `AGENTS.md`
@@ -76,6 +76,7 @@ Benchmark odłożony: niepotrzebny do bieżącej decyzji.
 | Id | Rule | Applies to | Source | Status | Review by | Required path to change | Owner | Supersedes |
 |---|---|---|---|---|---|---|---|---|
 | R02 | Ile zostanie w miesiącu = suma wpływów minus suma wydatków w tym miesiącu (tak liczy dziś arkusz); flaga „zapłacone" jest tylko informacją i nie zmienia sumy | obliczenie „ile zostanie" | `[INTERVIEW]` interviews/2026-11-17-wlasciciel-produktu.md | active | unknown | zgoda właściciela produktu na wiersz zastępujący | właściciel produktu | none |
+| R03 | „Ile zostanie" liczy się osobno dla każdego konta (wspólnego i osobistego), nie łącznie; wzór jak w R02 | obliczenie „ile zostanie" | `[INTERVIEW]` interviews/2026-11-17-wlasciciel-produktu.md | active | unknown | zgoda właściciela produktu na wiersz zastępujący | właściciel produktu | none |
 | R01 | Kwoty jako liczby całkowite w jednostce podstawowej plus waluta, bez float; sumy liczone po stronie serwera | wszystkie kwoty | `[PRODUCT]` AGENTS.md | active | unknown | zgoda właściciela produktu na wiersz zastępujący | właściciel produktu | none |
 
 ## Non-goals
@@ -90,6 +91,7 @@ Właściciel nie wykluczył jeszcze wprost żadnego zakresu; non-goals do uzupe�
 | Id | Date | Decision | Why | Owner | Status | Review by | Required path to change | Source | Supersedes |
 |---|---|---|---|---|---|---|---|---|---|
 | D01 | 2026-11-17 | Pierwsza wersja: zapisywanie wpływów i wydatków (cyklicznych i jednorazowych) z flagą zapłacone, z rozróżnieniem konta wspólnego i osobistego, osobnym logowaniem właściciela i żony oraz pokazanie, ile zostanie w miesiącu (R02) | taki zakres wskazał właściciel jako pierwszą wersję; rozważanych alternatyw nie omawiano | właściciel produktu | active | unknown | zgoda właściciela na wiersz zastępujący | `[DOCUMENT]` research/decisions/D01-zakres-pierwszej-wersji.md | none |
+| D02 | 2026-11-17 | Historia logowania żony jest zakładana w backlogu mimo częściowego wsparcia A02 | właściciel zdecydował o jej włączeniu do pierwszej wersji; wsparciem jest jego relacja z rozmowy z żoną, nadal bez notatki | właściciel produktu | active | unknown | zgoda właściciela na wiersz zastępujący | `[DOCUMENT]` research/decisions/D02-historia-zony-w-backlogu.md | none |
 
 ## Riskiest assumptions
 
@@ -118,6 +120,7 @@ Brak: nie użyto syntetycznych użytkowników.
 | Q05 | Czy wydatki jednorazowe muszą być w pierwszej wersji? | rozstrzygnięte: tak (D01) | właściciel produktu | closed |
 | Q06 | Czy żona ma mieć własne logowanie i widok w pierwszej wersji? | rozstrzygnięte: tak (D01) | właściciel produktu | closed |
 | Q07 | Czy do sumy liczą się wszystkie wydatki, czy tylko zapłacone? | rozstrzygnięte: wszystkie; „zapłacone" to tylko flaga informacyjna (R02) | właściciel produktu | closed |
+| Q08 | Czy „ile zostanie" liczy się osobno per konto, czy łącznie? | rozstrzygnięte: osobno per konto (R03) | właściciel produktu | closed |
 
 ## Definition of Ready addendum (own)
 
