@@ -75,6 +75,11 @@ Wrote the specification for E01-S01 (login) and the framework underneath it (.ai
 Pitfall: Auth.js Credentials only supports JWT sessions and its MikroORM adapter targets MikroORM 5/6, so it conflicted with server-side sessions; the owner chose the own layer.
 Todo: rename follow-ups for BankAccount in the backlog, brief and issues; update issues #10, #18, #20; add a production-readiness story; then implement phase 1 (steps 1.1-1.3).
 
+## 2026-11-17 (specs: entries and monthly remainder)
+Wrote the specifications for E02 (income and expenses entries, recurring series, paid flag; issues #12-#15, #21, #22) and E03 (monthly remainder per bank account; #16, #23). Passed a cross-model review (Opus); decisions E02-Q1..Q16 and E03-Q5..Q10 recorded in the specs, PLN-only amounts in minor units, one PR per step, rollout order E02 F1-F3, E03 1.1, E02 F4, E03 1.2.
+Pitfall: a recurring entry without a series id could be counted twice after a revision; the review caught it and the model now has series_id, optimistic concurrency and a serialised series lock.
+Todo: implement phase 1 of the auth spec first (E02 depends on it); owner provides the spreadsheet extract for the A01 golden test (#23).
+
 ## 2026-11-17 (bank account naming cleanup)
 Clarified "konto" in the brief and backlog: glossary now separates the user account (login) from the bank account (shared or personal); issues #6-#16 and #20-#23 reworded accordingly, #20 widened to the five tables from the spec, #10, #11, #17, #18, #19 now link the spec and its steps.
 Added the parked epic E05 (production readiness, issue #26) for the items the spec deferred (Q15-Q18).
