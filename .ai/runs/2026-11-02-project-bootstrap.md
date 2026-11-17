@@ -128,3 +128,7 @@ Pitfall: keyboard Tab focus selects the whole input value, so a Backspace play t
 ## 2026-11-17 (design system, PR G: Card, Badge and Alert)
 Added hand-written Card (Header/Title/Content), Badge (neutral/shared/personal) and Alert (neutral status, error alert; Title/Description) on the shadcn pattern, the --space-card-gap token (12 px), three Polish 13-section docs pages, stories (320 px, long text, login failure and 429 block) with play tests, and unit tests at 100% coverage; the PR F proposals and the PR G decisions are recorded as approved by the owner on 2026-11-17.
 No new dependencies; unused shadcn parts (CardDescription, CardFooter, CardAction) are documented as gaps instead of shipped. Todo: batch 2 (Checkbox, Select, RadioGroup with lucide-react), owner inputs listed in POSTEP.md.
+
+## 2026-11-17 (design system, PR H: Checkbox and lucide-react)
+Added the Checkbox (Radix primitive, 20 px box via the new --checkbox-size token inside a 36 px label click target, Check and Minus icons from lucide-react 1.74.0 imported per icon), a Polish 13-section docs page, stories for every state (320 px, table row, Field, select-all group), play tests and unit tests at 100% coverage; removed the unused `cn` dependency. Owner decisions for lucide-react and the Checkbox are recorded in the tokens file and POSTEP.md.
+Pitfalls: the shadcn `cn` placeholder had pulled a stray npm package (lesson added); outline-color is animated by transition-colors, so the focus test checks width/offset only. Todo: PR I (Select), PR J (RadioGroup).

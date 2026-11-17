@@ -1,0 +1,188 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './checkbox.stories';
+
+<Meta of={Stories} />
+
+# Checkbox
+
+Pole wyboru typu "tak / nie": flaga "Zapłacone" w wierszu wydatku (E02-S04, Faza 4) i zgody w formularzach. Źródło reguł: R01.x (referencje), A1-A5 (antyreferencje), tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-17, WCAG 2.2 i WAI-ARIA (wzorzec Checkbox). Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+Komponent łączy pole, widoczną etykietę i cel kliknięcia 36 px w jednym elemencie `label`: kliknięcie tekstu przełącza pole. Zbudowany na `Checkbox` z `radix-ui` (przycisk z rolą `checkbox`) z ikonami `Check` i `Minus` z `lucide-react`.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Pozwala użytkownikowi włączyć lub wyłączyć jedną niezależną opcję i pokazuje, czy jest zaznaczona, niezaznaczona albo częściowo zaznaczona (grupa).
+
+## 2. Kiedy używać
+
+- Flaga "Zapłacone" w wierszu wydatku w tabeli wpisów: informuje, że wydatek został opłacony (E02-S04, Faza 4; flaga jest informacyjna, R02).
+- Zgoda lub potwierdzenie w formularzu ("Akceptuję regulamin").
+- Opcja, którą można włączyć niezależnie od innych (można zaznaczyć kilka naraz).
+- Pole "Wszystkie" nad listą pól wyboru (stan pośredni, gdy zaznaczona jest tylko część).
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Wybór dokładnie jednej opcji z kilku (wpływ czy wydatek, cykliczność) | RadioGroup (partia 2) |
+| Wybór jednej wartości z długiej listy (miesiąc) | Select (partia 2) |
+| Akcja, która ma coś wykonać od razu | Button |
+| Włączenie ustawienia ze skutkiem natychmiastowym i stanem "włączone/wyłączone" jak przełącznik | przełącznik (Switch), jeśli pojawi się potrzeba; dziś brak źródła |
+| Pole bez etykiety i bez nazwy dostępnej | zawsze dodaj `label` albo `aria-label` |
+| Tylko kolor jako sygnał stanu | zaznaczenie zawsze ma ikonę (A3) |
+
+## 4. Anatomia
+
+1. Cel kliknięcia: element `label` o wysokości co najmniej 36 px (`--control-height`); samo pole bez etykiety ma cel 36 x 36 px.
+2. Pole: przycisk `role="checkbox"` 20 x 20 px (`--checkbox-size`), ramka 1 px `--input`, promień `rounded-control` (6 px), tło `--card`, bez cienia.
+3. Znacznik: ikona `Check` (zaznaczony) albo `Minus` (pośredni), 16 px, biała (`--primary-foreground`) na wypełnieniu `--primary`.
+4. Etykieta: tekst 14 px, waga 400, 8 px (`--space-within-group`) od pola; zawija się przy długiej treści, pole zostaje przy pierwszym wierszu.
+
+## 5. Warianty
+
+Komponent ma jeden wygląd i trzy wartości (`checked`): `false`, `true` i `'indeterminate'`.
+
+| Wartość | Wygląd | `aria-checked` | Kiedy |
+|---|---|---|---|
+| `false` | puste pole, ramka `--input` | `false` | opcja wyłączona |
+| `true` | wypełnienie `--primary`, biała ikona `Check` | `true` | opcja włączona |
+| `'indeterminate'` | wypełnienie `--primary`, biała ikona `Minus` (kreska) | `mixed` | tylko część elementów grupy zaznaczona; kliknięcie zaznacza całość |
+
+Etykieta jest widoczna (`label`) albo, w tabeli, zastąpiona nazwą dostępną z opisu wpisu (`aria-label`, np. "Zapłacone: Czynsz (przykład)"). Źródło: decyzja właściciela, 2026-11-17; spec E02 (Dostępność: "checkbox zapłacone z nazwą z opisu wpisu").
+
+<Canvas of={Stories.Indeterminate} />
+
+## 6. Stany
+
+| Stan | Wygląd | Źródło |
+|---|---|---|
+| Domyślny | tło `--card`, ramka `--input` (3,18:1 na `--card`) | A2, tokeny |
+| Najechanie (hover) | brak zmiany: hover tylko przy przyciskach | R01.6 |
+| Fokus (`:focus-visible`) | globalny obrys 2 px `--ring`, odstęp 2 px, ze `styles.css`; komponent nie dodaje własnego | tokeny (fokus widoczny, 2 px), WCAG 2.4.7 |
+| Zaznaczony | wypełnienie i ramka `--primary`, ikona `Check`; biały na `--primary` 5,17:1 | K1, tokeny |
+| Pośredni | jak zaznaczony, ikona `Minus` | decyzja właściciela, 2026-11-17 |
+| Zablokowany (`disabled`) | tło `--muted`, kursor `not-allowed`, tekst `--muted-foreground`; zaznaczony zablokowany ma wypełnienie `--muted-foreground` i ikonę; wypada z kolejności fokusu | propozycja spójna z Input |
+| Błąd (`aria-invalid`) | ramka `--destructive`; komunikat tekstowy dodaje Field (kolor nie jest jedynym nośnikiem) | R01.5, A3 |
+| Ładowanie, wciśnięty | nie dotyczy | |
+
+Błąd dotyczy pola niezaznaczonego (np. wymagana zgoda): zaznaczone pole przestaje być błędne, więc ramka zostaje `--primary`.
+
+Fokus w macierzy jest zamrożonym podglądem: te same deklaracje co `:focus-visible`, podpięte pod atrybut `data-preview-state` w `.storybook/preview-states.css` (tylko do dokumentacji).
+
+<Canvas of={Stories.StatesMatrix} />
+
+## 7. Zachowanie i dostępność
+
+- Klawiatura: `Tab` ustawia fokus, `Spacja` przełącza (wzorzec APG Checkbox). `Enter` nie przełącza (jak natywne pole wyboru).
+- Rola i stan: `role="checkbox"` z `aria-checked` `true`, `false` albo `mixed` (pośredni). Czytnik ekranu ogłasza "zaznaczone", "niezaznaczone" albo "częściowo zaznaczone".
+- Nazwa dostępna: z widocznej etykiety (`label`) albo z `aria-label`. W tabeli nazwa musi wskazywać wpis: "Zapłacone: Czynsz (przykład)", bo samo "Zapłacone" w każdym wierszu nie mówi, który wpis zmieniasz (WCAG 2.4.6, 4.1.2).
+- Błąd: `aria-invalid="true"` oraz `aria-describedby` wskazujący na komunikat (Field). W Field pole dostaje `aria-required`.
+- Cel kliknięcia: pole 20 px jest mniejsze niż 24 px, ale cel (cały `label`) ma co najmniej 36 px wysokości, więc spełnia WCAG 2.5.8 (min. 24 x 24 px) z zapasem; w tabeli samo pole ma cel 36 x 36 px.
+- Znaczenie nie zależy od koloru: zaznaczenie ma ikonę, pośredni kreskę (A3).
+- Kontrast: ramka `--input` na `--card` 3,18:1 (WCAG 1.4.11), ikona `--primary-foreground` na `--primary` 5,17:1, tekst etykiety `--foreground` na `--card` 14,68:1, obrys fokusu `--ring` na `--card` 5,17:1.
+- Pole musi leżeć na `--card` albo `--form-surface`, nie na tle strony `--background` (ramka ma tam 2,89:1), tak samo jak Input.
+- W formularzu natywnym (`name`, `value`) komponent dodaje ukryte pole, więc wartość trafia do `FormData`.
+
+## 8. Treść
+
+- Etykieta opisuje opcję w stanie "włączona": "Zapłacone", "Akceptuję regulamin", nie "Czy zapłacone?" ani "Nie zapłacone".
+- Bez negacji ("Nie wysyłaj powiadomień") i bez podwójnych przeczeń.
+- Etykieta w jednym zdaniu, bez kropki na końcu. Dane przykładowe oznaczaj "(przykład)" (A5).
+- Długa etykieta zawija się w wielu wierszach; pole zostaje przy pierwszym wierszu.
+- W tabeli nazwa dostępna ma postać "Zapłacone: " plus opis wpisu.
+- Tłumaczenie: komponent nie ma stałej szerokości; etykieta w dłuższym języku zawija się.
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | etykieta zawija się w kilku wierszach, cel kliknięcia nie wychodzi poza kontener (`max-w-full`), brak poziomego przewijania |
+| 768 px | bez zmian |
+| 1440 px | bez zmian; szerokość wynika z układu strony (R01.4) |
+
+<Canvas of={Stories.LongLabelNarrowScreen} />
+
+## 10. API
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `label` | `ReactNode` | brak | widoczna etykieta; część celu kliknięcia |
+| `aria-label` | `string` | brak | nazwa dostępna, gdy nie ma widocznej etykiety (tabela); wymagana, gdy brak `label` |
+| `checked` | `boolean \| 'indeterminate'` | brak | wartość kontrolowana |
+| `defaultChecked` | `boolean \| 'indeterminate'` | `false` | wartość początkowa (niekontrolowany) |
+| `onCheckedChange` | `(checked: boolean \| 'indeterminate') => void` | brak | wywoływane przy zmianie |
+| `disabled` | `boolean` | `false` | zablokowanie |
+| `aria-invalid` | `boolean` | brak | stan błędu; ustawia go Field, gdy podano `error` |
+| `aria-describedby` | `string` | brak | powiązanie z podpowiedzią i błędem |
+| `name`, `value`, `required`, `form` | atrybuty formularza | | trafiają do ukrytego pola w formularzu |
+| `className` | `string` | brak | dodatkowe klasy na polu; konflikty rozwiązuje `cn` (tailwind-merge) |
+
+Brak `label` i `aria-label` to błąd dostępności: wychwytuje go test a11y w Storybooku.
+
+## 11. Kod
+
+Minimalny przykład:
+
+```tsx
+import { Checkbox } from '@aitl/ui';
+
+<Checkbox label="Akceptuję regulamin" />;
+```
+
+Wiersz tabeli wpisów, nazwa z opisu wpisu:
+
+```tsx
+<Checkbox
+  aria-label={`Zapłacone: ${entry.description}`}
+  checked={entry.paid}
+  onCheckedChange={(checked) => markPaid(entry.id, checked === true)}
+/>
+```
+
+Zgoda w polu formularza z błędem:
+
+```tsx
+<Field label="Zgody" error={consentError}>
+  <Checkbox label="Akceptuję regulamin" />
+</Field>
+```
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+W tabeli:
+
+<Canvas of={Stories.InTableRow} />
+
+W polu formularza (podpowiedź i błąd pod polem):
+
+<Canvas of={Stories.InField} />
+
+Grupa z polem "Wszystkie" i stanem pośrednim:
+
+<Canvas of={Stories.SelectAllGroup} />
+
+## 13. Powiązane
+
+- Z czym się go myli: RadioGroup (jedna z kilku opcji), przełącznik Switch (efekt natychmiastowy; dziś brak w systemie), Button z `aria-pressed` (akcja z trwałym stanem).
+- Występuje we wzorcach: tabela wpisów ("Zapłacone", E02-S04), formularz ze zgodą.
+- Etykietę, podpowiedź i błąd pod polem dodaje [Field](?path=/docs/elementy-bazowe-label-i-field--docs), jeśli grupa pól potrzebuje wspólnej etykiety.
+- Dalsze zasady wyboru komponentu pojawią się na stronie "Jak wybrać komponent" w etapie 4.
+
+## Czego brakuje
+
+- Układ poziomy etykiety i pola w Field: Field ma etykietę nad polem, więc przy Checkboxie nazwa dostępna składa się z etykiety Field i etykiety pola; do rozstrzygnięcia przy wzorcu formularza (etap 3).
+- Grupa pól wyboru z `fieldset` i `legend` jako gotowy komponent: dziś składana ręcznie (patrz grupa z "Wszystkie"); decyzja razem z RadioGroup (PR J).
+- Hover pola: brak (R01.6), do decyzji, jeśli użytkownicy nie rozpoznają pola po samej ramce.
+- Wygląd zablokowanego (tło `--muted`, zaznaczony `--muted-foreground`) to propozycja do oceny w aplikacji.
+- Wymiar pola 20 px nie leży na skali odstępów 4/8/12/16/24/32/48: osobny token `--checkbox-size` zatwierdzony przez właściciela produktu, 2026-11-17.
+- Animacja zaznaczenia i potwierdzenie po zapisie flagi "Zapłacone" (Toast): poza tym PR.
+- Kolor hover wariantu `destructive` przycisku bez zmian (luka z PR E, nie dotyczy pola).
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: kliknięcie pola i etykiety przełącza, `Tab` ustawia fokus, spacja przełącza, a `Enter` nie, obrys fokusu 2 px, stan pośredni (`mixed`, kreska, kliknięcie zaznacza), zablokowane nie przyjmuje fokusu ani kliknięcia, `aria-invalid` z kolorem ramki, nazwa dostępna z etykiety i z `aria-label` w tabeli, opis podpowiedzią i błędem w Field, wymiary pola 20 px i celu 36 px (min. 24 px), kolory, ramka, promień i brak cienia z tokenów.

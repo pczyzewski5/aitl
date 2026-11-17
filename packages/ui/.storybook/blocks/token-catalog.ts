@@ -200,6 +200,12 @@ export const SHAPE_TOKENS: readonly TokenEntry[] = [
     use: 'wysokość przycisków i pól (Tailwind: h-control, size-control)',
     avoid: 'wysokości spoza skali',
   },
+  {
+    name: '--checkbox-size',
+    origin: 'zatwierdzone przez właściciela produktu, 2026-11-17 (pole 20 px, cel kliknięcia 36 px = --control-height)',
+    use: 'wymiar pola Checkbox (Tailwind: size-checkbox)',
+    avoid: 'wysokość kontrolek (to --control-height)',
+  },
   { name: '--shadow-card', origin: 'A2', use: 'brak cienia, separacja ramką --border', avoid: 'cień jako jedyny separator' },
 ];
 

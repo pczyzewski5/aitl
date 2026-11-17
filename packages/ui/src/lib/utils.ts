@@ -5,7 +5,7 @@ const mergeClasses = extendTailwindMerge({
   extend: {
     theme: {
       radius: ['control', 'card', 'pill'],
-      spacing: ['control'],
+      spacing: ['control', 'checkbox'],
     },
   },
 });
