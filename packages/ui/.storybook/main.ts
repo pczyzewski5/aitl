@@ -1,4 +1,5 @@
 import type { StorybookConfig } from '@storybook/react-vite';
+import tailwindcss from '@tailwindcss/vite';
 import remarkGfm from 'remark-gfm';
 
 const config: StorybookConfig = {
@@ -12,6 +13,7 @@ const config: StorybookConfig = {
       options: { mdxPluginOptions: { mdxCompileOptions: { remarkPlugins: [remarkGfm] } } },
     },
   ],
+  viteFinal: (viteConfig) => ({ ...viteConfig, plugins: [...(viteConfig.plugins ?? []), tailwindcss()] }),
   core: { disableTelemetry: true, disableWhatsNewNotifications: true },
 };
 
