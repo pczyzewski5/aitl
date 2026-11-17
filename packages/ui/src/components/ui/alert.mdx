@@ -1,0 +1,156 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './alert.stories';
+
+<Meta of={Stories} />
+
+# Alert
+
+Komunikat w treści strony: błąd logowania, blokada z czasem, informacja. Składa się z części `Alert`, `AlertTitle` (opcjonalny) i `AlertDescription`. Źródło reguł: R01.5, R01.7, A3 (referencje), tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-17, WCAG 2.2 i WAI-ARIA. Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Mówi użytkownikowi, że coś poszło nie tak (albo że warto coś wiedzieć), i co ma zrobić dalej, w miejscu, gdzie nie da się tego powiązać z jednym polem.
+
+## 2. Kiedy używać
+
+- Ogólny błąd logowania: "Nie udało się zalogować" (401, ten sam komunikat dla złego e-maila i hasła). Źródło: E01-S01.
+- Blokada logowania z czasem: "Zbyt wiele prób logowania", czas z `retryAfterSeconds` (429). Źródło: E01-S01.
+- Błąd całego formularza lub serwera, np. nieudany zapis wpisu albo zbyt wiele wpisów (422). Źródło: E02.
+- Neutralna informacja po zdarzeniu w treści strony, np. po wylogowaniu.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Błąd jednego pola | błąd pod polem w Field (`aria-invalid` + `aria-describedby`) |
+| Potwierdzenie zapisu, które samo znika | Toast (partia 2) |
+| Potwierdzenie destrukcyjnej akcji | Dialog potwierdzenia (etap 3) |
+| Stan pusty listy lub błąd ładowania listy | EmptyState i ErrorState (etap 3) |
+| Ozdoba lub reklama | nie używać: Alert zawsze niesie informację |
+
+## 4. Anatomia
+
+1. `Alert`: kontener z ramką 1 px, tłem `--card`, promieniem `rounded-card` (8 px), paddingiem 16 px (`--space-panel`), tekstem 14 px; rola zależy od wariantu.
+2. `AlertTitle` (opcjonalny): jedno zdanie, waga 600, mówi co się stało.
+3. `AlertDescription`: waga 400, mówi co zrobić.
+
+Bez ikony w tej partii (decyzja właściciela; `lucide-react` dochodzi z Checkboxem w partii 2). Rodzaj komunikatu odróżniają tekst i ramka, nie sama ikona ani kolor.
+
+<Canvas of={Stories.Variants} />
+
+## 5. Warianty
+
+| Wariant | Ramka | Tekst | Rola | Kiedy wybrać |
+|---|---|---|---|---|
+| `neutral` (domyślny) | `--border` | `--foreground` | `status` | informacja, która nie jest błędem |
+| `error` | `--destructive` | `--destructive` | `alert` | błąd, po którym użytkownik musi coś zrobić |
+
+Źródło: tokeny (kolory), decyzja właściciela 2026-11-17 (warianty `neutral` i `error`, role); rola `status` dla neutralnego to zatwierdzona propozycja z tabeli różnic (WAI-ARIA). Sukces to Toast (partia 2), ostrzeżenie nie istnieje (brak decyzji).
+
+Typ `error` odróżnia od `neutral` ramka w kolorze `--destructive` oraz treść słowna (tytuł mówi, że to błąd). Kolor nie jest jedynym nośnikiem (A3). Atrybut `data-variant` zapisuje wybrany wariant (tylko do testów).
+
+## 6. Stany
+
+| Stan | Wygląd |
+|---|---|
+| Domyślny | wariant jak w tabeli powyżej |
+| Najechanie, fokus, wciśnięty, zablokowany, ładowanie, wybrany | nie dotyczy: komunikat nie jest interaktywny |
+| Błąd | to wariant `error`, nie stan |
+
+Komunikat pojawia się i znika razem ze stanem formularza lub strony: nie ma własnego przycisku zamknięcia (brak decyzji, patrz "Czego brakuje").
+
+### Logowanie: dwa główne przypadki
+
+<Canvas of={Stories.LoginFailed} />
+<Canvas of={Stories.LoginBlocked} />
+
+<Canvas of={Stories.WithoutTitle} />
+<Canvas of={Stories.States} />
+
+## 7. Zachowanie i dostępność
+
+- Klawiatura: komunikat nie przyjmuje fokusu i nie przenosi go; formularz zostawia fokus tam, gdzie był, a użytkownik czytnika ekranu dostaje treść przez ogłoszenie.
+- `error` ma `role="alert"`: czytnik ogłasza treść natychmiast po pojawieniu się w drzewie (assertive). Renderuj go dopiero, gdy błąd wystąpi: alert obecny od początku strony nie jest ogłaszany.
+- `neutral` ma `role="status"`: ogłoszenie grzeczne (polite), bez przerywania. Region `status` musi istnieć w DOM zanim treść się zmieni, żeby część czytników go ogłosiła (WAI-ARIA, propozycja: przy dynamicznych komunikatach renderuj pusty `Alert` wcześniej).
+- Kontrast: tekst `--destructive` na `--card` 6,47:1; ramka `--destructive` na `--card` 6,47:1 (element UI >= 3:1); tekst `--foreground` na `--card` 14,68:1. Ramka `--border` neutralnego (1,47:1) jest dekoracją, znaczenie niesie tekst.
+- Znaczenie niesie tekst i ramka, nie sam kolor (A3, WCAG 1.4.1).
+- Treść zawija się, więc przy 320 px nie ma przewijania poziomego (WCAG 1.4.10).
+
+## 8. Treść
+
+Zasada: **co się stało i co zrobić**, rozkaźnikiem, bez ozdobników (R01.7).
+
+- Tytuł (opcjonalny): co się stało, jedno zdanie, bez kropki wykrzyknika: "Nie udało się zalogować", "Zbyt wiele prób logowania".
+- Opis: co zrobić: "Sprawdź e-mail i hasło i spróbuj ponownie.", "Odczekaj 120 sekund i spróbuj ponownie."
+- Bez tytułu: opis mówi oba: "Nie udało się zapisać wpisu. Sprawdź połączenie i spróbuj ponownie."
+- Nie ujawniaj, które pole było złe przy logowaniu (ten sam komunikat dla nieznanego e-maila i złego hasła, spec E01).
+- Czas w blokadzie podawaj tekstem z liczbą z `retryAfterSeconds`; nie odliczaj na żywo bez decyzji.
+- Zabronione: "Coś poszło nie tak", "Błąd 500", sam kod błędu, wielkie litery, wykrzykniki.
+- Długość: do ok. 2 zdań; dłuższa instrukcja należy do osobnej strony.
+- Tłumaczenie: tekst zawija się i ma elastyczną wysokość; nie obcinaj go (`truncate`).
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | komunikat na pełną szerokość kontenera, długi tekst i długie słowa zawijają się (`break-words`), bez przewijania poziomego |
+| 768 px | bez zmian; szerokość ogranicza kontener formularza |
+| 1440 px | bez zmian; kolumna do 960 px (R01.4) |
+
+<Canvas of={Stories.LongTextNarrowScreen} />
+
+## 10. API
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `Alert` `variant` | `'neutral' \| 'error'` | `'neutral'` | wygląd i rola (`status` / `alert`) |
+| `Alert`: atrybuty `div` | `ComponentProps<'div'>` | | `className`, `id`, `aria-*`, `data-*`; można nadpisać `role` |
+| `AlertTitle`, `AlertDescription`: atrybuty `div` | `ComponentProps<'div'>` | | `className` itd. |
+
+## 11. Kod
+
+Minimalny przykład:
+
+```tsx
+import { Alert, AlertDescription } from '@aitl/ui';
+
+<Alert variant="error">
+  <AlertDescription>Nie udało się zapisać wpisu. Spróbuj ponownie za chwilę.</AlertDescription>
+</Alert>;
+```
+
+Typowy przykład z produktu, blokada logowania:
+
+```tsx
+import { Alert, AlertDescription, AlertTitle } from '@aitl/ui';
+
+<Alert variant="error">
+  <AlertTitle>Zbyt wiele prób logowania</AlertTitle>
+  <AlertDescription>Odczekaj {retryAfterSeconds} sekund i spróbuj ponownie.</AlertDescription>
+</Alert>;
+```
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: błąd pod polem w Field (dotyczy jednego pola), Toast (znika sam, partia 2), Dialog (wymaga decyzji użytkownika), Card (powierzchnia treści, nie komunikat).
+- Występuje we wzorcach: formularz logowania (E01), formularz wpisu (E02, błąd serwera, 422).
+
+## Czego brakuje
+
+- Ikona przy komunikacie: czeka na `lucide-react` (partia 2); do tego czasu rodzaj niosą tekst i ramka.
+- Wariant sukcesu i ostrzeżenia: brak decyzji; sukces ma być Toastem (partia 2).
+- Przycisk zamknięcia komunikatu: brak decyzji; dziś komunikat znika ze stanem strony.
+- Odliczanie czasu blokady na żywo: brak decyzji, patrz E01 (dziś stały tekst z `retryAfterSeconds`).
+- Ogłaszanie dynamicznych komunikatów `status`: wymaga renderowania pustego regionu przed zmianą; zachowanie nie było sprawdzone z czytnikiem ekranu w tym repo.
+- Kolor `--destructive` dla całego tekstu komunikatu (nie tylko tytułu) to wybór z tabeli różnic; do oceny po zobaczeniu w aplikacji.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: `error` ma rolę `alert`, `neutral` rolę `status`, blokada podaje czas tekstem, kolory ramki i tekstu z tokenów, tło `--card`, promień, padding, brak cienia, waga tytułu i opisu, długi tekst zawija się przy 320 px bez poziomego przewijania.

@@ -10,12 +10,12 @@ Etap 0 (ten plik) niczego nie instaluje i nie zmienia kodu. Zainstalowane zależ
 |---|---|---|
 | 0 | Inwentaryzacja i plan (ten plik) | PR A, do przeglądu |
 | 1 | Fundamenty: Storybook, tokeny, Tailwind, przełącznik motywu, Foundations, skrypt `check:tokens` | zrobiony: PR B, PR C i PR D (Foundations, `check:tokens`, joby CI); PR D do przeglądu |
-| 2 | Komponenty bazowe, partiami po ok. sześć | w toku: partia 1 (Button, Input, Label+Field, Alert, Card, Badge); PR E (infrastruktura + Button) i PR F (Input, Label+Field) zrobione; następny PR G |
+| 2 | Komponenty bazowe, partiami po ok. sześć | w toku: partia 1 zakończona (Button, Input, Label+Field, Card, Badge, Alert; PR E, F i G zrobione); następna partia 2: Checkbox, Select, RadioGroup + `lucide-react` |
 | 3 | Komponenty produktu, wzorce, ekrany epików | nie rozpoczęty |
 | 4 | Strony, które uczą, plik dla agentów | nie rozpoczęty |
 | 5 | Sprawdzenie i raport | nie rozpoczęty |
 
-Następny krok: właściciel przegląda PR F (Input, Label i Field); potem PR G (Card, Badge, Alert); do PR G potrzebne: tło plakietki neutralnej (brak tokenu) i `role=status` dla neutralnego Alertu (patrz tabela PR-ów).
+Następny krok: właściciel przegląda PR G (Card, Badge, Alert); potem partia 2 (Checkbox, Select, RadioGroup z `lucide-react`); czego potrzeba od właściciela: sekcja "Partia 2" niżej.
 
 ## Materiały (źródła)
 
@@ -82,8 +82,8 @@ Decyzje z referencji (skrót, 10 linii):
 | C (zrobiony, do przeglądu) | Tokeny (`packages/ui/src/tokens.css`, trzy warstwy, wartości bez zmian względem `2026-11-17-tokeny.md`) + Tailwind 4.3.5 (`styles.css`, `@theme inline`) + przełącznik motywu w Storybooku (jasny; ciemny tylko pusty blok `[data-theme='dark']`, pozycja w menu opisana jako brak wartości, L3); bez komponentów | zatwierdzenie przeliczonego kontrastu, jeśli jakaś para spadnie poniżej progu; potwierdzenie, że aplikacja nie ma mieć jeszcze motywu ciemnego |
 | D (zrobiony, do przeglądu) | Strony Fundamenty: Kolory (z tabelą kontrastu liczoną na żywo z tokenów), Typografia, Odstępy, Promienie i powierzchnie, Ruch, Motyw (ciemny = luka L3); skrypt `check:tokens` (ui + korzeń) z testami; joby CI "Storybook tests" i "Check tokens"; `test:storybook` bez `passWithNoTests`. Ikony i układ (szerokości 320/768/1440) bez osobnych stron: ikony dojdą z etapem 2 (`lucide-react`), układ czeka na decyzje o tabeli na wąskim ekranie | decyzja, czy joby "Storybook tests" i "Check tokens" wchodzą do wymaganych checków `main` (ustawienie ochrony gałęzi robi właściciel; zrobione, sześć wymaganych checków) |
 | E (zrobiony) | Infrastruktura komponentów (ręczny `components.json`, `cn` z testami, zależności `class-variance-authority`, `clsx`, `tailwind-merge`, `radix-ui`, peer `react`/`react-dom`) + Button (shadcn dopasowany do tokenów, strona dokumentacji z 13 sekcjami, stories, testy interakcji); nowe tokeny jako propozycje | tokeny zaakceptowane 2026-11-17 (`--muted-hover`, `--destructive-foreground`, `--control-height`, `--line-height-base`, `prefers-reduced-motion`); kolor hover dla `destructive` nadal otwarty |
-| F (zrobiony, do przeglądu) | Input (text, email, password, amount) + Label + Field (etykieta, podpowiedź, błąd pod polem, "(opcjonalne)"), token `--space-label-field` 4 px, tekst pól 16 px poniżej 768 px i 14 px od 768 px, dwie strony dokumentacji z 13 sekcjami, stories i testy interakcji | przegląd; propozycje do potwierdzenia: stan `readOnly` (tło `--form-surface`), odstęp podpowiedź-błąd 4 px |
-| G (następny) | Card, Badge, Alert | tło plakietki neutralnej (brak tokenu), `role=status` dla neutralnego Alertu |
+| F (zrobiony) | Input (text, email, password, amount) + Label + Field (etykieta, podpowiedź, błąd pod polem, "(opcjonalne)"), token `--space-label-field` 4 px, tekst pól 16 px poniżej 768 px i 14 px od 768 px, dwie strony dokumentacji z 13 sekcjami, stories i testy interakcji | propozycje zatwierdzone 2026-11-17: `readOnly` (tło `--form-surface`), odstęp podpowiedź-błąd 4 px, brak hovera pól, `aria-required` zamiast natywnego `required` |
+| G (zrobiony, do przeglądu) | Card (Card, CardHeader, CardTitle, CardContent), Badge (shared, personal, neutral), Alert (neutral `status`, error `alert`; Title, Description), token `--space-card-gap` 12 px, trzy strony dokumentacji z 13 sekcjami, stories (320 px, długi tekst, logowanie: błąd i blokada 429), testy interakcji | przegląd; decyzje zatwierdzone 2026-11-17 (patrz niżej) |
 
 Każdy PR: jeden temat, zielone checki (typecheck, lint, test:coverage, build, audit), wpis w `.ai/runs/`, lekcja przy napotkanej pułapce.
 
@@ -104,6 +104,13 @@ Decyzje właściciela produktu, 2026-11-17 (PR F):
 7. Odstęp etykieta-pole 4 px jako token znaczeniowy `--space-label-field` (= `var(--space-1)`).
 8. Wymagane/opcjonalne: tekst "(opcjonalne)" zamiast gwiazdki, pola wymagane domyślnie. Błąd pola pod polem (nie w dymku), z `aria-describedby` i `aria-invalid`, treść mówi co zrobić.
 9. Tekst w polach 16 px poniżej 768 px i 14 px od 768 px; wysokość 36 px; tło `bg-card`, ramka `--input`; pole musi leżeć na `--card` lub `--form-surface` (na tle strony ramka ma 2,89:1); bez cieni; fokus globalny 2 px; wagi 400/600. Hover `destructive` bez zmian (luka).
+
+Decyzje właściciela produktu, 2026-11-17 (PR G), zatwierdzone przez właściciela produktu:
+
+10. Cztery propozycje z PR F zatwierdzone: wygląd `readOnly` (tło `--form-surface`), odstęp podpowiedź-błąd 4 px (ten sam token), brak hovera pól, `aria-required` zamiast natywnego `required` (formularze dostaną `noValidate` w etapie 3).
+11. Badge: `shared` (`--badge-shared-bg/fg`), `personal` (`--badge-personal-bg/fg`), `neutral` (tło `--background`, tekst `--foreground`, jak w makiecie, bez nowego tokenu); znaczenie niesie tekst (A3); `rounded-pill`; waga 400.
+12. Card: ramka `--border` bez cienia (A2), `bg-card`, `rounded-card`, padding 16 px (`--space-panel`), odstęp wewnętrzny 12 px jako nowy token `--space-card-gap` (= `var(--space-3)`, pochodzenie: odstęp nagłówka panelu w makiecie).
+13. Alert: warianty `neutral` (`role="status"`) i `error` (`role="alert"`); tekst i ramka odróżniają rodzaj; bez ikony w partii 1; tytuł opcjonalny plus opis; treść "co się stało i co zrobić".
 
 Nadal otwarte: brak.
 
@@ -217,3 +224,18 @@ Reguły bez źródła są propozycjami do decyzji. Każda wartość z tokenu. St
 - `cn` używa `extendTailwindMerge` z nazwami `rounded-control/card/pill` i `h-control`/`size-control`, inaczej tailwind-merge nie zna naszych klas i nie rozwiązuje konfliktów.
 - Najechanie nie da się przetestować w `play` (user-event nie uruchamia `:hover` w CSS); hover jest pokazany jako zamrożony podgląd (`data-preview-state`, `.storybook/preview-states.css`), a istnienie reguły sprawdzone w zbudowanym CSS.
 - Nowe tokeny (propozycje): `--muted-hover`, `--destructive-foreground`, `--control-height`, `--line-height-base`; szczegóły i kontrast w `.ai/specs/design/2026-11-17-tokeny.md`. Brak koloru hover dla `destructive` zapisany jako luka.
+
+## Notatki z PR G (Card, Badge, Alert)
+
+- Komponenty napisane ręcznie na wzorcu shadcn (bez CLI), bez martwego kodu: z Card tylko `Card`, `CardHeader`, `CardTitle` (prop `as` dla poziomu nagłówka, domyślnie `h3`) i `CardContent`; `CardDescription`, `CardFooter` i `CardAction` zapisane w "Czego brakuje". Bez nowych zależności.
+- Neutralny Badge używa istniejących tokenów (`--background`/`--foreground`), więc na karcie ma tylko 1,10:1 jako kształt; znaczenie niesie tekst. Zapisane jako luka na stronie Badge.
+- Alert: rola wynika z wariantu (`ALERT_ROLES`), można ją nadpisać atrybutem `role`. Brak ikony, brak przycisku zamknięcia, brak odliczania czasu blokady (luki na stronie Alert).
+- Karta i Alert używają `border-border`/`border-destructive` jawnie (Tailwind 4: `border` bez koloru to `currentColor`).
+
+## Partia 2: czego potrzeba od właściciela (Checkbox, Select, RadioGroup + `lucide-react`)
+
+- Zgoda na zależność `lucide-react` (rozmiar ikony i grubość kreski; ikona w Checkboxie i strzałka w Select) oraz decyzja, czy ikony wejdą też do Alert i Badge (dziś bez ikon).
+- Checkbox: wymiar pola (cel >= 24 px, propozycja 20 px z obszarem klikalnym 36 px), wygląd stanu zaznaczonego i pośredniego (`--primary`), kolor ramki (`--input`, 3,18:1 na `--card`), zachowanie "Zapłacone" w wierszu tabeli (E02-S04, Faza 4).
+- Select: natywny `select` czy Radix Select (stack zatwierdzony: shadcn/Radix); wybór miesiąca i typu wpisu (E02); wygląd listy rozwijanej (tło `--card`, ramka, bez cienia, A2), wybór opcji klawiaturą.
+- RadioGroup: układ poziomy czy pionowy dla typu wpisu (wpływ/wydatek) i cykliczności; `fieldset` z `legend` jako etykieta grupy.
+- Zamrożone podglądy hover/fokus dla nowych kontrolek; kolor hover dla `destructive` nadal otwarty (luka z PR E).
