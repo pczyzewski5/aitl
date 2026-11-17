@@ -12,9 +12,9 @@
 
 Do ustalenia było, co wchodzi do pierwszej wersji AITL. Zakres jest uzgodniony z właścicielem (D01), ale oparty na jego własnej relacji.
 Problem ma właściciel: wydatki prowadzi w arkuszu Google, dodawanie jest niewygodne, reguły obliczania poprawia ręcznie, nic nie dzieje się automatycznie (P01, P02).
-Teraz: zapisywanie wpływów i wydatków (cyklicznych i jednorazowych) z oznaczeniem zapłacone, z rozróżnieniem konta wspólnego i osobistego i z osobnym logowaniem żony, oraz pokazanie, ile zostanie, czyli wpływy minus wydatki w danym miesiącu (D01, R02). Flaga „zapłacone" jest tylko informacją i nie zmienia sumy.
+Teraz: zapisywanie wpływów i wydatków (cyklicznych i jednorazowych) z oznaczeniem zapłacone, z rozróżnieniem wspólnego i osobistego konta bankowego i z osobnym logowaniem żony, oraz pokazanie, ile zostanie, czyli wpływy minus wydatki w danym miesiącu (D01, R02). Flaga „zapłacone" jest tylko informacją i nie zmienia sumy.
 Największa niepewność: zakres Now obejmuje własny dostęp żony; wsparciem jest tylko relacja właściciela z jego rozmowy z nią, bez notatki i bez jej własnych słów (A02).
-Następny krok: właściciel zapisuje, co żona powiedziała o korzystaniu z konta wspólnego, i dostarcza kopię arkusza do porównania wyników; termin otwarty.
+Następny krok: właściciel zapisuje, co żona powiedziała o korzystaniu ze wspólnego konta bankowego, i dostarcza kopię arkusza do porównania wyników; termin otwarty.
 
 ## Vision
 
@@ -53,7 +53,7 @@ Benchmark odłożony: niepotrzebny do bieżącej decyzji.
 
 ## Scope
 
-- **Now:** zapisywanie wpływów i wydatków (powtarzających się co miesiąc i jednorazowych) z oznaczeniem, czy zapłacone, z rozróżnieniem konta wspólnego i osobistego, osobnym logowaniem właściciela i żony, oraz pokazanie, ile zostanie w danym miesiącu (D01, R01, R02)
+- **Now:** zapisywanie wpływów i wydatków (powtarzających się co miesiąc i jednorazowych) z oznaczeniem, czy zapłacone, z rozróżnieniem wspólnego i osobistego konta bankowego, osobnym logowaniem (konto użytkownika) właściciela i żony, oraz pokazanie, ile zostanie w danym miesiącu (D01, R01, R02)
 - **Later:** prognoza i planowanie wykraczające poza bieżący miesiąc
 - **Not doing:** see Non-goals
 
@@ -61,10 +61,12 @@ Benchmark odłożony: niepotrzebny do bieżącej decyzji.
 
 | Term | Meaning | Owned by | Visible to |
 |---|---|---|---|
-| wpływ | pieniądze wpływające na konto | właściciel produktu | użytkownik |
+| wpływ | pieniądze wpływające na konto bankowe | właściciel produktu | użytkownik |
 | wydatek cykliczny | wydatek powtarzający się co miesiąc | właściciel produktu | użytkownik |
 | ile zostanie | suma wpływów minus suma wydatków w danym miesiącu (R02) | właściciel produktu | użytkownik |
-| konto wspólne / osobiste | konta, z których pochodzą wpisy; w Now rozróżniane (D01) | właściciel produktu | użytkownik |
+| konto użytkownika | dane logowania osoby (e-mail i hasło), dzięki którym wchodzi do aplikacji; właściciel i żona mają osobne konta użytkownika (D01) | właściciel produktu | użytkownik |
+| konto bankowe | konto pieniędzy, z którego pochodzą wpisy; wspólne albo osobiste; w Now rozróżniane (D01); to samo co „konto wspólne / osobiste” w tym dokumencie | właściciel produktu | użytkownik |
+| konto wspólne / osobiste | rodzaje konta bankowego: wspólne (dostępne dla właściciela i żony) i osobiste (tylko właściciel); w tym dokumencie samo „konto” bez przymiotnika oznacza konto bankowe, a logowanie to konto użytkownika | właściciel produktu | użytkownik |
 
 ## Key flows
 
@@ -76,7 +78,7 @@ Benchmark odłożony: niepotrzebny do bieżącej decyzji.
 | Id | Rule | Applies to | Source | Status | Review by | Required path to change | Owner | Supersedes |
 |---|---|---|---|---|---|---|---|---|
 | R02 | Ile zostanie w miesiącu = suma wpływów minus suma wydatków w tym miesiącu (tak liczy dziś arkusz); flaga „zapłacone" jest tylko informacją i nie zmienia sumy | obliczenie „ile zostanie" | `[INTERVIEW]` interviews/2026-11-17-wlasciciel-produktu.md | active | unknown | zgoda właściciela produktu na wiersz zastępujący | właściciel produktu | none |
-| R03 | „Ile zostanie" liczy się osobno dla każdego konta (wspólnego i osobistego), nie łącznie; wzór jak w R02 | obliczenie „ile zostanie" | `[INTERVIEW]` interviews/2026-11-17-wlasciciel-produktu.md | active | unknown | zgoda właściciela produktu na wiersz zastępujący | właściciel produktu | none |
+| R03 | „Ile zostanie" liczy się osobno dla każdego konta bankowego (wspólnego i osobistego), nie łącznie; wzór jak w R02 | obliczenie „ile zostanie" | `[INTERVIEW]` interviews/2026-11-17-wlasciciel-produktu.md | active | unknown | zgoda właściciela produktu na wiersz zastępujący | właściciel produktu | none |
 | R01 | Kwoty jako liczby całkowite w jednostce podstawowej plus waluta, bez float; sumy liczone po stronie serwera | wszystkie kwoty | `[PRODUCT]` AGENTS.md | active | unknown | zgoda właściciela produktu na wiersz zastępujący | właściciel produktu | none |
 
 ## Non-goals
