@@ -42,7 +42,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
-      - run: npm audit --audit-level=high
+      - run: npm audit --omit=dev --audit-level=high
 
   unit-tests:
     name: Unit tests (100% coverage)

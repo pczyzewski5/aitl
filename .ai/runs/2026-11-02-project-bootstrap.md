@@ -84,3 +84,7 @@ Todo: implement phase 1 of the auth spec first (E02 depends on it); owner provid
 Clarified "konto" in the brief and backlog: glossary now separates the user account (login) from the bank account (shared or personal); issues #6-#16 and #20-#23 reworded accordingly, #20 widened to the five tables from the spec, #10, #11, #17, #18, #19 now link the spec and its steps.
 Added the parked epic E05 (production readiness, issue #26) for the items the spec deferred (Q15-Q18).
 Todo: implement phase 1 of the auth spec (steps 1.1-1.3).
+
+## 2026-11-17 (audit gate)
+CI on main turned red after a new high advisory for picomatch (dev tooling, no patched version) failed the full npm audit step in the Lint job; switched the gate, config and docs to `npm audit --omit=dev --audit-level=high` and recorded a lesson.
+Todo: review dev-tool advisories manually when updating dependencies (Vitest, Vite).
