@@ -93,9 +93,9 @@ Rozstrzygnięte przez właściciela produktu, 2026-11-17:
 3. Marka (L4): w Storybooku sam tekst "AITL", bez logo; luka o marce zostaje otwarta.
 5. CI Storybooka: build i testy dostępności w przeglądarce jako osobne joby wymagane do merge, a11y blokuje.
 
-Nadal otwarte:
+4. Odwołanie do `docs/design-system.md` (etap 4) w lokalnym `AGENTS.md` repozytorium AITL (nie w plikach globalnych): tak; krótka sekcja trafi do PR-a etapu 4 i jest zatwierdzana przy review.
 
-4. Czy plik `docs/design-system.md` dla agentów (etap 4) ma być wprost linkowany z `AGENTS.md` (prompt tego wymaga)? Wymaga zmiany `AGENTS.md`, więc potrzebna zgoda; pytanie wraca w etapie 4.
+Nadal otwarte: brak.
 
 ## Komponenty (lista wyprowadzona z ekranów w specyfikacjach)
 
