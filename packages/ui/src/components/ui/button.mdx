@@ -1,0 +1,188 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './button.stories';
+
+<Meta of={Stories} />
+
+# Button
+
+Przycisk uruchamia akcję na bieżącej stronie: zapisuje formularz, anuluje, usuwa, przełącza miesiąc. Źródło reguł: R01.x (referencje), A1-A5 (antyreferencje), tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), WCAG 2.2 i WAI-ARIA. Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Pozwala użytkownikowi wykonać jedną, nazwaną akcję (np. "Zapisz wpis"), a przy tym pokazuje, która akcja na ekranie jest najważniejsza.
+
+## 2. Kiedy używać
+
+- Wysłanie formularza logowania ("Zaloguj") i formularza wpisu ("Dodaj wpis", "Zapisz wpis"). Źródło: E01-S01, E02.
+- Rezygnacja z formularza lub dialogu ("Anuluj").
+- Potwierdzenie usunięcia wpisu lub serii ("Usuń wpis"), wariant `destructive`. Źródło: E02-S03.
+- Przełączanie miesiąca strzałkami (rozmiar `icon`, wariant `secondary`). Źródło: decyzja właściciela, 2026-11-17.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Przejście do innej strony (nawigacja) | link (komponent TextLink, partia 2) albo `<Button asChild>` z `<a>`, gdy link ma wyglądać jak przycisk |
+| Lista akcji dla jednego wiersza (zakończ serię, zmień kwotę) | Menu (partia 2) |
+| Włączenie lub wyłączenie ustawienia ("Zapłacone") | Checkbox (partia 2) |
+| Wybór jednej z opcji (wpływ lub wydatek) | RadioGroup (partia 2) |
+| Informacja zwrotna po zapisie | Toast (partia 2), nie przycisk |
+
+## 4. Anatomia
+
+1. Kontener: element `button` (lub element podany przez `asChild`), wysokość co najmniej `--control-height` (36 px), promień `rounded-control` (6 px), bez cienia i bez ramki.
+2. Etykieta: tekst 14 px (`text-sm`), waga 400. Wymagana, z wyjątkiem rozmiaru `icon`, który wymaga `aria-label`.
+3. Ikona: opcjonalna, tylko w rozmiarze `icon`. Biblioteka ikon (L5) nie jest jeszcze zainstalowana, więc w przykładach strzałki to znaki tekstowe z `aria-hidden`.
+
+## 5. Warianty
+
+| Wariant | Kiedy wybrać | Tokeny |
+|---|---|---|
+| `default` (główny) | Jedna najważniejsza akcja na ekranie lub w formularzu. Najwyżej jeden na widok. Źródło: R01.1 (jeden kolor akcji) | `--primary`, `--primary-foreground`, hover `--primary-hover` |
+| `secondary` | Akcja drugoplanowa obok głównej ("Anuluj"), strzałki miesiąca | `--muted`, `--foreground`, hover `--muted-hover` (propozycja z PR E) |
+| `ghost` | Akcja o najniższym znaczeniu, w gęstym układzie, bez tła w spoczynku | brak tła, hover `--muted` |
+| `destructive` | Akcja nieodwracalna, zwykle w dialogu potwierdzenia ("Usuń wpis"). Nie używać jako wariantu ozdobnego | `--destructive`, `--destructive-foreground` (propozycja z PR E) |
+
+Usunięte z domyślnego shadcn/ui: `outline`, `link` (decyzja właściciela; link to osobny komponent), rozmiary `xs`, `sm`, `lg`, `icon-*`.
+
+<Canvas of={Stories.Variants} />
+
+### Rozmiary
+
+| Rozmiar | Wymiary | Kiedy |
+|---|---|---|
+| `default` | min. 36 px wysokości, `px-4` (16 px) | wszędzie, gdzie jest tekst |
+| `icon` | 36 x 36 px | tylko gdy znak jest zrozumiały bez tekstu (strzałki miesiąca); wymaga `aria-label` |
+
+Źródło wysokości: decyzja właściciela (2026-11-17, 36 px dla kontrolek). Źródło paddingu 16 px: R01.4, skala 4 px.
+
+<Canvas of={Stories.Sizes} />
+
+## 6. Stany
+
+| Stan | Wygląd | Źródło |
+|---|---|---|
+| Domyślny | kolory wariantu | tokeny |
+| Najechanie (hover) | zmiana koloru tła o 150 ms (`--duration-feedback`); tylko dla aktywnego przycisku | R01.6 |
+| Fokus (`:focus-visible`) | globalny obrys 2 px `--ring`, odstęp 2 px, z `styles.css`; komponent nie dodaje własnego | tokeny (fokus widoczny, 2 px), WCAG 2.4.7; offset 2 px: decyzja właściciela |
+| Wciśnięty (active) | brak osobnego wyglądu | R01.6 (ruch tylko przy najechaniu i potwierdzeniu) |
+| Zablokowany (`disabled` lub `aria-disabled`) | jaśniejszy tekst `--muted-foreground`; główny i usuwający dostają tło `--muted`; kursor `not-allowed`; brak hovera | propozycja z PR E (zamiast krycia 50%, A3: nie sam kolor) |
+| Ładowanie (`loading`) | wygląda jak zablokowany, `aria-busy="true"`, `aria-disabled="true"`, kliknięcie ignorowane, fokus zostaje na przycisku; etykieta zmienia się na "Logowanie…" lub "Zapisywanie…", bez spinnera | E01 (stan "wysyłanie"), R01.6; spinner: brak źródła |
+| Błąd | nie dotyczy przycisku; błąd pokazuje Alert lub komunikat przy polu | R01.5 |
+| Wybrany | nie dotyczy; dla przełączników użyj Checkboxa lub `aria-pressed` w komponencie produktu | A3 |
+
+Hover i fokus w macierzy są zamrożonym podglądem: te same deklaracje co w `:hover` i `:focus-visible`, podpięte pod atrybut `data-preview-state` w `.storybook/preview-states.css` (tylko do dokumentacji). Prawdziwy hover działa tylko w przeglądarce z myszą.
+
+<Canvas of={Stories.StatesMatrix} />
+
+### Jak użytkownik dowie się, dlaczego przycisk jest zablokowany
+
+Obok przycisku zawsze stoi tekst z powodem i przyczyną odblokowania, powiązany przez `aria-describedby`. Zablokowanie samym kolorem jest niedopuszczalne (A3).
+
+<Canvas of={Stories.Disabled} />
+
+### Ładowanie
+
+<Canvas of={Stories.Loading} />
+
+## 7. Zachowanie i dostępność
+
+- Klawiatura: `Tab` ustawia fokus, `Enter` i spacja aktywują przycisk (natywny `button`, WAI-ARIA APG, wzorzec Button). Kolejność fokusu wynika z kolejności w DOM.
+- Czytnik ekranu ogłasza rolę i nazwę: "Zapisz wpis, przycisk". Zablokowany przez `disabled` jest pomijany w kolejności fokusu; zablokowany przez `aria-disabled` (i `loading`) zachowuje fokus i jest ogłaszany jako niedostępny.
+- Rozmiar `icon` musi mieć nazwę dostępną: `aria-label="Poprzedni miesiąc"`; znak wewnątrz dostaje `aria-hidden="true"`.
+- Cel kliknięcia: minimum 36 x 36 px, więc spełnia wymóg 24 x 24 px (WCAG 2.5.8).
+- Kontrast: tekst na tle co najmniej 4,5:1 w każdym wariancie: `--primary-foreground` na `--primary` 5,17; na `--primary-hover` 6,70; `--foreground` na `--muted` 11,86; na `--muted-hover` 9,96; `--destructive-foreground` na `--destructive` 6,47. Obrys fokusu `--ring` na `--muted-hover` 3,51 (próg 3:1, WCAG 1.4.11).
+- `loading` ustawia `aria-busy` i ignoruje kliknięcia, więc blokuje podwójne wysłanie, a fokus nie jest tracony. Wynik operacji ogłasza osobny komunikat (Alert z `role="status"` lub `role="alert"`).
+- Ustaw jawnie `type`: natywnie `button` w formularzu jest `submit`. Dla akcji, która nie wysyła formularza, podaj `type="button"`.
+- `prefers-reduced-motion: reduce` zeruje czas przejścia (globalna reguła w `styles.css`).
+
+## 8. Treść
+
+- Czasownik w rozkaźniku plus obiekt: "Dodaj wpis", "Usuń wpis", "Zaloguj". Nie "OK", nie "Dalej" bez kontekstu (R01.7, ton: rozkaźnik, bez ozdobników).
+- Bez wykrzykników i emoji (A1, R01.7).
+- Długość: do ok. 24 znaków. Dłuższa etykieta zawija się do kilku wierszy (przycisk rośnie w dół), nie jest ucinana.
+- Etykieta w trakcie ładowania opisuje trwającą czynność: "Logowanie…", "Zapisywanie…".
+- Dłuższy język (tłumaczenie): przycisk rośnie wraz z tekstem; nie ustawiaj stałej szerokości.
+- Liczby i waluty w etykiecie: format "3 975,50 zł"; unikaj kwot w etykiecie przycisku.
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | przycisk może zająć całą szerokość kontenera (`className="w-full"`); długa etykieta zawija się |
+| 768 px | szerokość wynika z treści; przyciski obok siebie z odstępem `--space-within-group` (8 px, `gap-2`) |
+| 1440 px | bez zmian; szerokość treści ogranicza układ strony (R01.4, kolumna do 960 px) |
+
+<Canvas of={Stories.LongLabelNarrowScreen} />
+
+## 10. API
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `variant` | `'default' \| 'secondary' \| 'ghost' \| 'destructive'` | `'default'` | wygląd i znaczenie akcji |
+| `size` | `'default' \| 'icon'` | `'default'` | rozmiar; `icon` wymaga `aria-label` |
+| `loading` | `boolean` | `false` | ustawia `aria-busy` i `aria-disabled`, ignoruje kliknięcia |
+| `asChild` | `boolean` | `false` | renderuje przekazany element (np. `<a>`) zamiast `button`, z tymi samymi stylami |
+| `disabled` | `boolean` | `false` | natywne zablokowanie (wypada z kolejności fokusu) |
+| `type` | `'button' \| 'submit' \| 'reset'` | natywnie `submit` | ustaw jawnie |
+| `onClick` | `(event) => void` | brak | nie jest wywoływany przy `loading` |
+| `className` | `string` | brak | dodatkowe klasy; konflikty rozwiązuje `cn` (tailwind-merge), unikaj nadpisywania kolorów |
+| inne | atrybuty `button` | | `aria-*`, `data-*`, `form` itd. trafiają na element |
+
+## 11. Kod
+
+Minimalny przykład:
+
+```tsx
+import { Button } from '@aitl/ui';
+
+<Button>Zapisz wpis</Button>;
+```
+
+Typowy przykład z produktu, formularz logowania w trakcie wysyłania i strzałki miesiąca:
+
+```tsx
+<Button type="submit" loading={isSubmitting}>
+  {isSubmitting ? 'Logowanie…' : 'Zaloguj'}
+</Button>
+
+<Button size="icon" variant="secondary" aria-label="Poprzedni miesiąc" onClick={previousMonth}>
+  <span aria-hidden="true">‹</span>
+</Button>
+```
+
+Link wyglądający jak przycisk:
+
+```tsx
+<Button asChild variant="secondary">
+  <a href="/login">Wróć do logowania</a>
+</Button>
+```
+
+<Canvas of={Stories.AsLink} />
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: link (nawigacja, osobny komponent TextLink w partii 2), Menu (lista akcji), Checkbox (przełączenie), Toast (informacja zwrotna).
+- Występuje we wzorcach: formularz (przycisk wysyłania ze stanem `loading`), potwierdzenie usunięcia (przycisk usuwający z czasownikiem i obiektem oraz drugoplanowa rezygnacja), przełącznik miesiąca (strzałki `icon`).
+- Dalsze zasady wyboru komponentu pojawią się na stronie "Jak wybrać komponent" w etapie 4.
+
+## Czego brakuje
+
+- Hover wariantu `destructive`: w zatwierdzonej palecie nie ma ciemniejszej czerwieni, więc wariant nie zmienia koloru przy najechaniu. Do decyzji właściciela (nowy surowy kolor, np. czerwień o kontraście z bielą co najmniej 4,5:1).
+- Wygląd zablokowanego `secondary` i `ghost` różni się od aktywnego tylko kolorem tekstu i kursorem. Propozycja z PR E; do oceny po zobaczeniu w aplikacji.
+- Wskaźnik ładowania (spinner): brak źródła; przycisk w trakcie ładowania zmienia tylko etykietę.
+- Ikony (L5): `lucide-react` dojdzie z Checkboxem w partii 2, wtedy rozmiar ikony 16 px w przycisku z tekstem.
+- Hover na ekranach dotykowych: brak decyzji, czy potrzebne jest osobne potwierdzenie.
+- Zatwierdzone tokeny nie opisują grupy przycisków (kolejność "Anuluj" i "Zapisz", wyrównanie): do ustalenia przy wzorcu formularza.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: kliknięcie, Enter i spacja, zablokowany i ładowanie nie wywołują `onClick`, fokus zostaje na przycisku w trakcie ładowania, wysokość 36 px, promień 6 px, brak cienia, globalny obrys fokusu 2 px.

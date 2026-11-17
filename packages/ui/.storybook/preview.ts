@@ -1,5 +1,6 @@
 import type { Decorator, Preview } from '@storybook/react-vite';
 import '../src/styles.css';
+import './preview-states.css';
 
 const THEME_ATTRIBUTE = 'data-theme';
 const DEFAULT_THEME = 'light';

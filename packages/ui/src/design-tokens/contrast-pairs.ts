@@ -60,6 +60,14 @@ export const APPROVED_PAIRS: readonly ApprovedPair[] = [
   pair('--border', '--card', 'ui', 1.47, 'decorative'),
 ];
 
+export const PROPOSED_PAIRS: readonly ApprovedPair[] = [
+  pair('--foreground', '--muted-hover', 'text', 9.96),
+  pair('--muted-foreground', '--muted-hover', 'text', 5.13),
+  pair('--destructive-foreground', '--destructive', 'text', 6.47),
+  pair('--ring', '--muted-hover', 'ui', 3.51),
+  pair('--ring', '--muted', 'ui', 4.17),
+];
+
 export function evaluatePairs(css: string, pairs: readonly ApprovedPair[] = APPROVED_PAIRS): EvaluatedPair[] {
   const properties = parseCustomProperties(css, ':root');
   return pairs.map((approved) => {

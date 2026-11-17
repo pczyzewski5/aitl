@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { APPROVED_PAIRS, evaluatePairs, TEXT_THRESHOLD, UI_THRESHOLD } from './contrast-pairs.ts';
+import { APPROVED_PAIRS, evaluatePairs, PROPOSED_PAIRS, TEXT_THRESHOLD, UI_THRESHOLD } from './contrast-pairs.ts';
 
 const tokensCss = readFileSync(join(__dirname, '..', 'tokens.css'), 'utf8');
 
@@ -15,6 +15,15 @@ describe('evaluatePairs', () => {
       background,
       ratio: approvedRatio,
     }));
+
+    expect(actual).toEqual(expected);
+  });
+
+  it('reproduces the ratios computed for the pairs proposed in the button PR and all meet the thresholds', () => {
+    const proposed = evaluatePairs(tokensCss, PROPOSED_PAIRS);
+
+    const actual = proposed.map(({ ratio, meetsThreshold }) => ({ ratio, meetsThreshold }));
+    const expected = PROPOSED_PAIRS.map(({ approvedRatio }) => ({ ratio: approvedRatio, meetsThreshold: true }));
 
     expect(actual).toEqual(expected);
   });

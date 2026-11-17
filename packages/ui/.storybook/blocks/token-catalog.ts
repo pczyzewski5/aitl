@@ -39,6 +39,18 @@ export const MEANING_COLORS: readonly TokenEntry[] = [
     avoid: 'ważne treści, kwoty',
   },
   { name: '--muted', origin: 'R01.1', use: 'przycisk drugoplanowy, hover', avoid: 'separacja kart' },
+  {
+    name: '--muted-hover',
+    origin: 'propozycja z PR E, czeka na akceptację właściciela',
+    use: 'hover przycisku drugoplanowego',
+    avoid: 'stan spoczynku',
+  },
+  {
+    name: '--destructive-foreground',
+    origin: 'propozycja z PR E, czeka na akceptację właściciela',
+    use: 'tekst na przycisku usuwającym (na --destructive)',
+    avoid: '—',
+  },
   { name: '--form-surface', origin: 'R01.5', use: 'tło rozwijanego formularza', avoid: 'tło strony' },
   {
     name: '--primary',
@@ -170,6 +182,12 @@ export const SHAPE_TOKENS: readonly TokenEntry[] = [
   { name: '--radius', origin: 'R01.5', use: 'pola, przyciski (Tailwind: rounded-control)', avoid: 'karty' },
   { name: '--radius-surface', origin: 'R01.5', use: 'karty, panel, formularz (Tailwind: rounded-card)', avoid: 'plakietki' },
   { name: '--radius-badge', origin: 'R01.5', use: 'plakietki (Tailwind: rounded-pill)', avoid: 'karty' },
+  {
+    name: '--control-height',
+    origin: 'decyzja właściciela 2026-11-17 (36 px); token to propozycja z PR E',
+    use: 'wysokość przycisków i pól (Tailwind: h-control, size-control)',
+    avoid: 'wysokości spoza skali',
+  },
   { name: '--shadow-card', origin: 'A2', use: 'brak cienia, separacja ramką --border', avoid: 'cień jako jedyny separator' },
 ];
 

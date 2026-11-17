@@ -28,6 +28,7 @@
   --card: var(--raw-white);
   --card-foreground: var(--raw-gray-900);
   --muted: var(--raw-gray-200);
+  --muted-hover: var(--raw-gray-300);
   --muted-foreground: var(--raw-gray-600);
   --form-surface: var(--raw-gray-50);
   --primary: var(--raw-blue-600);
@@ -40,8 +41,12 @@
   --income: var(--raw-green-700);
   --expense: var(--raw-red-700);
   --destructive: var(--raw-red-700);
+  --destructive-foreground: var(--raw-white);
+
+  --control-height: 36px;
 
   --font-sans: -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --line-height-base: 1.5;
   --font-size-sm: 14px;
   --font-size-base: 16px;
   --font-size-lg: 20px;

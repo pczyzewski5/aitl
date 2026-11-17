@@ -10,12 +10,12 @@ Etap 0 (ten plik) niczego nie instaluje i nie zmienia kodu. Zainstalowane zależ
 |---|---|---|
 | 0 | Inwentaryzacja i plan (ten plik) | PR A, do przeglądu |
 | 1 | Fundamenty: Storybook, tokeny, Tailwind, przełącznik motywu, Foundations, skrypt `check:tokens` | zrobiony: PR B, PR C i PR D (Foundations, `check:tokens`, joby CI); PR D do przeglądu |
-| 2 | Komponenty bazowe, partiami po ok. sześć | nie rozpoczęty |
+| 2 | Komponenty bazowe, partiami po ok. sześć | w toku: partia 1 (Button, Input, Label+Field, Alert, Card, Badge); PR E (infrastruktura + Button) gotowy do przeglądu |
 | 3 | Komponenty produktu, wzorce, ekrany epików | nie rozpoczęty |
 | 4 | Strony, które uczą, plik dla agentów | nie rozpoczęty |
 | 5 | Sprawdzenie i raport | nie rozpoczęty |
 
-Następny krok: właściciel przegląda PR D (Foundations, `check:tokens`, CI), decyduje o dodaniu jobów "Storybook tests" i "Check tokens" do wymaganych checków `main` i pisze "dalej" do etapu 2 (komponenty bazowe, pierwsza partia ok. sześciu; plan listy komponentów bez zmian).
+Następny krok: właściciel przegląda PR E (infrastruktura komponentów i Button) i akceptuje propozycje tokenów z `.ai/specs/design/2026-11-17-tokeny.md` (sekcja "Propozycje z PR E"); potem PR F (Input + Label/Field, rozmiar tekstu pól 16/14 px) i PR G (Card, Badge, Alert).
 
 ## Materiały (źródła)
 
@@ -80,7 +80,10 @@ Decyzje z referencji (skrót, 10 linii):
 | A (ten) | Tylko dokumenty: referencje, tokeny, POSTEP.md, wpis w dzienniku | przegląd i odpowiedzi na pytania poniżej |
 | B (zrobiony, do przeglądu) | Narzędzia Storybooka: Storybook 10.6.7 (`react-vite`), Vitest 5.0.5 i Playwright 1.65.1 z Chromium, osobna konfiguracja testów Storybooka, `.gitignore` i `globalIgnores`, pusta strona startowa; bez tokenów | "dalej" do etapu 1; zgoda na pobranie Chromium (już udzielona w zasadzie, potwierdzenie przy PR); decyzja o `npm audit` jeśli padnie |
 | C (zrobiony, do przeglądu) | Tokeny (`packages/ui/src/tokens.css`, trzy warstwy, wartości bez zmian względem `2026-11-17-tokeny.md`) + Tailwind 4.3.5 (`styles.css`, `@theme inline`) + przełącznik motywu w Storybooku (jasny; ciemny tylko pusty blok `[data-theme='dark']`, pozycja w menu opisana jako brak wartości, L3); bez komponentów | zatwierdzenie przeliczonego kontrastu, jeśli jakaś para spadnie poniżej progu; potwierdzenie, że aplikacja nie ma mieć jeszcze motywu ciemnego |
-| D (zrobiony, do przeglądu) | Strony Fundamenty: Kolory (z tabelą kontrastu liczoną na żywo z tokenów), Typografia, Odstępy, Promienie i powierzchnie, Ruch, Motyw (ciemny = luka L3); skrypt `check:tokens` (ui + korzeń) z testami; joby CI "Storybook tests" i "Check tokens"; `test:storybook` bez `passWithNoTests`. Ikony i układ (szerokości 320/768/1440) bez osobnych stron: ikony dojdą z etapem 2 (`lucide-react`), układ czeka na decyzje o tabeli na wąskim ekranie | decyzja, czy joby "Storybook tests" i "Check tokens" wchodzą do wymaganych checków `main` (ustawienie ochrony gałęzi robi właściciel) |
+| D (zrobiony, do przeglądu) | Strony Fundamenty: Kolory (z tabelą kontrastu liczoną na żywo z tokenów), Typografia, Odstępy, Promienie i powierzchnie, Ruch, Motyw (ciemny = luka L3); skrypt `check:tokens` (ui + korzeń) z testami; joby CI "Storybook tests" i "Check tokens"; `test:storybook` bez `passWithNoTests`. Ikony i układ (szerokości 320/768/1440) bez osobnych stron: ikony dojdą z etapem 2 (`lucide-react`), układ czeka na decyzje o tabeli na wąskim ekranie | decyzja, czy joby "Storybook tests" i "Check tokens" wchodzą do wymaganych checków `main` (ustawienie ochrony gałęzi robi właściciel; zrobione, sześć wymaganych checków) |
+| E (zrobiony, do przeglądu) | Infrastruktura komponentów (ręczny `components.json`, `cn` z testami, zależności `class-variance-authority`, `clsx`, `tailwind-merge`, `radix-ui`, peer `react`/`react-dom`) + Button (shadcn dopasowany do tokenów, strona dokumentacji z 13 sekcjami, stories, testy interakcji); nowe tokeny jako propozycje | akceptacja propozycji tokenów (`--muted-hover`, `--destructive-foreground`, `--control-height`, `--line-height-base`); decyzja o kolorze hover dla `destructive` |
+| F (następny) | Input + Label/Field (formularz logowania jako story typowa); tekst pól 16 px poniżej 768 px i 14 px od 768 px | decyzje z tabeli różnic: odstęp etykieta-pole 4 px (brak tokenu), wygląd błędu i "(opcjonalne)" |
+| G | Card, Badge, Alert | tło plakietki neutralnej (brak tokenu), `role=status` dla neutralnego Alertu |
 
 Każdy PR: jeden temat, zielone checki (typecheck, lint, test:coverage, build, audit), wpis w `.ai/runs/`, lekcja przy napotkanej pułapce.
 
@@ -188,3 +191,22 @@ Reguły bez źródła są propozycjami do decyzji. Każda wartość z tokenu. St
 - Luki zapisane na stronach, nie uzupełniane: ciemny motyw (L3), `prefers-reduced-motion`, wysokość i długość linii tekstu, zakres użycia grubości 400 i 600, obramowania i cienie poza zatwierdzonymi.
 - `check:tokens` (`packages/ui/scripts/check-tokens.ts`, logika w `packages/ui/src/check-tokens/`): skanuje `packages/ui/src`, `packages/ui/.storybook` i `packages/app/src` (`.ts`, `.tsx`, `.css`, `.mdx`; bez `*.test.*`, `*.d.ts` i `tokens.css`); wykrywa kolory hex i funkcje kolorów, klasy palety Tailwinda (w tym `text-white`, `bg-black`) i wartości arbitralne (z wyjątkiem `[var(--...)]`); wypisuje `plik:linia`, kończy kodem 1. Aplikacja ma dziś zero trafień.
 - CI: dwa nowe joby z `timeout-minutes`: "Storybook tests" (Chromium przez `npx playwright install --with-deps chromium`, potem `npm run test:storybook`) i "Check tokens". Nie zmieniano ochrony gałęzi.
+
+## Decyzje właściciela z etapu 2 (2026-11-17)
+
+1. Partia 1: Button, Input, Label+Field, Alert, Card, Badge (PR E: infrastruktura i Button; F: Input i Label/Field; G: Card, Badge, Alert); Checkbox, Select i RadioGroup w partii 2.
+2. Wysokość kontrolek 36 px; tekst pól formularza 16 px poniżej 768 px i 14 px od 768 px.
+3. Fokus: globalny obrys 2 px ze `styles.css`, odstęp 2 px, bez pierścienia 3 px.
+4. Wagi 400, 600, 700 (bez 500); bez cieni (A2: ramka); promienie tylko `rounded-control`, `rounded-card`, `rounded-pill`.
+5. Warianty Button: default (główny), secondary, ghost, destructive; rozmiary default i icon; strzałki miesiąca używają `secondary`.
+6. `lucide-react` dopiero z Checkboxem (partia 2); do demonstracji rozmiaru `icon` używamy znaków tekstowych.
+7. `prefers-reduced-motion: reduce` zeruje przejścia; dodać token wysokości linii (propozycja 1,5).
+8. Zatwierdzone zależności `@aitl/ui`: `class-variance-authority`, `clsx`, `tailwind-merge`, `radix-ui`; `@testing-library/user-event` i `jest-dom` nie były potrzebne.
+
+## Notatki z PR E (infrastruktura komponentów i Button)
+
+- `components.json` napisany ręcznie (bez `shadcn init`). `shadcn@4.23.0 add button` zadziałał nieinteraktywnie (`--cwd . --yes`, wersja przypięta w `npx`), ale zapisał plik pod literalnym katalogiem `@/components/ui/` z importem `cn` z placeholdera `"cn"`; plik przeniesiono do `src/components/ui/button.tsx` i przepisano (importy względne, `cn` z `src/lib/utils.ts`). CLI nie zmienił `package.json` poza zależnościami z planu.
+- Z shadcn usunięto: cienie, `ring-[3px]`, `font-medium`, `rounded-md`, `text-white`, `dark:*`, `transition-all`, warianty `outline` i `link`, rozmiary poza `default` i `icon`, selektory `svg` (brak ikon). Dodano prop `loading` (aria-busy, aria-disabled, ignorowanie kliknięć) zgodnie ze stanem "wysyłanie" z E01.
+- `cn` używa `extendTailwindMerge` z nazwami `rounded-control/card/pill` i `h-control`/`size-control`, inaczej tailwind-merge nie zna naszych klas i nie rozwiązuje konfliktów.
+- Najechanie nie da się przetestować w `play` (user-event nie uruchamia `:hover` w CSS); hover jest pokazany jako zamrożony podgląd (`data-preview-state`, `.storybook/preview-states.css`), a istnienie reguły sprawdzone w zbudowanym CSS.
+- Nowe tokeny (propozycje): `--muted-hover`, `--destructive-foreground`, `--control-height`, `--line-height-base`; szczegóły i kontrast w `.ai/specs/design/2026-11-17-tokeny.md`. Brak koloru hover dla `destructive` zapisany jako luka.
