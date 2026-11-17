@@ -1,0 +1,16 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './Theme.stories';
+
+<Meta of={Stories} />
+
+# Motyw
+
+Motyw to atrybut `data-theme` na elemencie `html`, więc dostają go także dialogi, menu i popovery. Przełącznik "Motyw" jest w pasku narzędzi Storybooka.
+
+## Stan: ciemny motyw nie ma wartości (luka L3)
+
+Panel ma docelowo mieć motyw jasny i ciemny, ale ciemne wartości nie zostały jeszcze zaprojektowane. Istnieje tylko struktura: pusty blok `[data-theme='dark']` w pliku tokenów. Wybranie motywu ciemnego wygląda więc dokładnie jak jasny. Wartości nie są wymyślane.
+
+Gdy ciemne wartości powstaną, trzeba policzyć kontrasty od nowa dla obu motywów i dodać strony kontrastu dla motywu ciemnego.
+
+<Canvas of={Stories.Status} />

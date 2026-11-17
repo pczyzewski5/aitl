@@ -9,13 +9,13 @@ Etap 0 (ten plik) niczego nie instaluje i nie zmienia kodu. Zainstalowane zależ
 | Etap | Zakres | Status |
 |---|---|---|
 | 0 | Inwentaryzacja i plan (ten plik) | PR A, do przeglądu |
-| 1 | Fundamenty: Storybook, tokeny, Tailwind, przełącznik motywu, Foundations, skrypt `check:tokens` | w toku: PR B (narzędzia Storybooka) zrobiony; PR C (tokeny, Tailwind, przełącznik motywu) do przeglądu; PR D czeka |
+| 1 | Fundamenty: Storybook, tokeny, Tailwind, przełącznik motywu, Foundations, skrypt `check:tokens` | zrobiony: PR B, PR C i PR D (Foundations, `check:tokens`, joby CI); PR D do przeglądu |
 | 2 | Komponenty bazowe, partiami po ok. sześć | nie rozpoczęty |
 | 3 | Komponenty produktu, wzorce, ekrany epików | nie rozpoczęty |
 | 4 | Strony, które uczą, plik dla agentów | nie rozpoczęty |
 | 5 | Sprawdzenie i raport | nie rozpoczęty |
 
-Następny krok: właściciel przegląda PR C (tokeny, Tailwind, przełącznik motywu) i pisze "dalej" do PR D (Foundations, `check:tokens`, CI).
+Następny krok: właściciel przegląda PR D (Foundations, `check:tokens`, CI), decyduje o dodaniu jobów "Storybook tests" i "Check tokens" do wymaganych checków `main` i pisze "dalej" do etapu 2 (komponenty bazowe, pierwsza partia ok. sześciu; plan listy komponentów bez zmian).
 
 ## Materiały (źródła)
 
@@ -80,7 +80,7 @@ Decyzje z referencji (skrót, 10 linii):
 | A (ten) | Tylko dokumenty: referencje, tokeny, POSTEP.md, wpis w dzienniku | przegląd i odpowiedzi na pytania poniżej |
 | B (zrobiony, do przeglądu) | Narzędzia Storybooka: Storybook 10.6.7 (`react-vite`), Vitest 5.0.5 i Playwright 1.65.1 z Chromium, osobna konfiguracja testów Storybooka, `.gitignore` i `globalIgnores`, pusta strona startowa; bez tokenów | "dalej" do etapu 1; zgoda na pobranie Chromium (już udzielona w zasadzie, potwierdzenie przy PR); decyzja o `npm audit` jeśli padnie |
 | C (zrobiony, do przeglądu) | Tokeny (`packages/ui/src/tokens.css`, trzy warstwy, wartości bez zmian względem `2026-11-17-tokeny.md`) + Tailwind 4.3.5 (`styles.css`, `@theme inline`) + przełącznik motywu w Storybooku (jasny; ciemny tylko pusty blok `[data-theme='dark']`, pozycja w menu opisana jako brak wartości, L3); bez komponentów | zatwierdzenie przeliczonego kontrastu, jeśli jakaś para spadnie poniżej progu; potwierdzenie, że aplikacja nie ma mieć jeszcze motywu ciemnego |
-| D | Strony Foundations (kolor z tabelą kontrastu, typografia, odstępy, kształt i głębia, ruch, ikony, układ, motywy) + skrypt `check:tokens` + zadania CI | decyzja o zestawie ikon (L5); decyzja, czy zadania Storybooka (testy przeglądarkowe, `check:tokens`) wchodzą do wymaganych checków `main` |
+| D (zrobiony, do przeglądu) | Strony Fundamenty: Kolory (z tabelą kontrastu liczoną na żywo z tokenów), Typografia, Odstępy, Promienie i powierzchnie, Ruch, Motyw (ciemny = luka L3); skrypt `check:tokens` (ui + korzeń) z testami; joby CI "Storybook tests" i "Check tokens"; `test:storybook` bez `passWithNoTests`. Ikony i układ (szerokości 320/768/1440) bez osobnych stron: ikony dojdą z etapem 2 (`lucide-react`), układ czeka na decyzje o tabeli na wąskim ekranie | decyzja, czy joby "Storybook tests" i "Check tokens" wchodzą do wymaganych checków `main` (ustawienie ochrony gałęzi robi właściciel) |
 
 Każdy PR: jeden temat, zielone checki (typecheck, lint, test:coverage, build, audit), wpis w `.ai/runs/`, lekcja przy napotkanej pułapce.
 
@@ -179,3 +179,12 @@ Reguły bez źródła są propozycjami do decyzji. Każda wartość z tokenu. St
 - Do warstwy 1 dodano `--raw-white` i `--raw-gray-300` (źródła dla `--card`, `--primary-foreground`, `--border`), żeby znaczenia nie zawierały surowych wartości.
 - Domyślna paleta, cienie, promienie i rozmiary Tailwinda są wyzerowane (`initial`), więc klasy typu `bg-blue-500` nie istnieją; dostępne są tylko znaczenia.
 - Tryb ciemny (L3): `[data-theme='dark']` jest pustym blokiem, bez wymyślonych wartości. Przełącznik w Storybooku ustawia `data-theme` na `html`; pozycja "Ciemny" ma w nazwie informację, że wartości nie istnieją i wygląd jest jak jasny. Po powstaniu wartości trzeba policzyć kontrasty od nowa.
+
+## Notatki z PR D (Foundations, check:tokens, CI)
+
+- Strony Fundamenty to pary: `*.stories.tsx` (testowane przez `test:storybook`, a11y blokuje) i `*.mdx` podpięty przez `<Meta of>`. Bloki podglądu leżą w `packages/ui/.storybook/blocks/` (bez eksportu z pakietu), katalog tokenów z pochodzeniem R/A/K w `token-catalog.ts`.
+- Wartości na stronach są czytane na żywo z `tokens.css` (`?raw`). Kontrast liczy przetestowany kod w `packages/ui/src/design-tokens/` (100% pokrycia); test porównuje wyniki z wartościami zatwierdzonymi w dokumencie tokenów, więc strona i dokument nie mogą się rozjechać.
+- Dwie pary spoza progu 3:1 są pokazane jako znane przypadki z dokumentu tokenów: pole `--input` na tle strony (niedozwolone) i `--border` (dekoracja).
+- Luki zapisane na stronach, nie uzupełniane: ciemny motyw (L3), `prefers-reduced-motion`, wysokość i długość linii tekstu, zakres użycia grubości 400 i 600, obramowania i cienie poza zatwierdzonymi.
+- `check:tokens` (`packages/ui/scripts/check-tokens.ts`, logika w `packages/ui/src/check-tokens/`): skanuje `packages/ui/src`, `packages/ui/.storybook` i `packages/app/src` (`.ts`, `.tsx`, `.css`, `.mdx`; bez `*.test.*`, `*.d.ts` i `tokens.css`); wykrywa kolory hex i funkcje kolorów, klasy palety Tailwinda (w tym `text-white`, `bg-black`) i wartości arbitralne (z wyjątkiem `[var(--...)]`); wypisuje `plik:linia`, kończy kodem 1. Aplikacja ma dziś zero trafień.
+- CI: dwa nowe joby z `timeout-minutes`: "Storybook tests" (Chromium przez `npx playwright install --with-deps chromium`, potem `npm run test:storybook`) i "Check tokens". Nie zmieniano ochrony gałęzi.

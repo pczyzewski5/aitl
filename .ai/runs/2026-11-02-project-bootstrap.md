@@ -107,3 +107,8 @@ Verified typecheck, lint, coverage (100%), build and integration tests; npm audi
 Added tokens.css (three layers, approved values unchanged), styles.css (Tailwind 4.3.5 via @tailwindcss/vite, @theme inline, default palette/radius/shadow/text reset) and a Storybook theme switch that sets data-theme on html; dark is an empty block (L3), the toolbar item says the values are not defined.
 Pitfall: Tailwind theme names equal to token names (--text-*, --radius-surface) produce self-referencing var() cycles, so font sizes became --font-size-* and radii map to rounded-control/card/pill.
 Todo: PR D (Foundations pages, check:tokens, CI jobs).
+
+## 2026-11-17 (design system, PR D: Foundations, check:tokens, CI)
+Added Polish Foundations pages (Kolory, Typografia, Odstepy, Promienie i powierzchnie, Ruch, Motyw) as CSF stories plus attached MDX, with token values and contrast ratios computed live from tokens.css by tested helpers (100% coverage); test:storybook now runs 16 real stories and no longer uses passWithNoTests.
+Added check:tokens (raw colors, Tailwind default palette classes, arbitrary values; file:line, exit 1) over ui src, .storybook and app src with unit tests, plus CI jobs "Storybook tests" and "Check tokens" with timeout-minutes.
+Pitfall: tsc include does not pick up files under .storybook, so the *.css?raw declaration lives in src/raw-imports.d.ts. Todo: owner decides on required checks; stage 2 (base components) after "dalej".

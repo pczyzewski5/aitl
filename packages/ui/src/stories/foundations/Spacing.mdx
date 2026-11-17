@@ -1,0 +1,28 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './Spacing.stories';
+
+<Meta of={Stories} />
+
+# Odstępy
+
+Odstępy pochodzą wyłącznie ze skali na siatce 4 px (R01.4): 4, 8, 12, 16, 24, 32 i 48 px. Wartości spoza skali (2, 6, 14 px z makiety) są zakazane. Kolumny z wartościami są odczytywane na żywo z pliku tokenów.
+
+W kodzie używaj tokenów znaczeniowych (relacji), a nie liczb ze skali.
+
+## Skala
+
+<Canvas of={Stories.Scale} />
+
+## Relacje
+
+<Canvas of={Stories.Meanings} />
+
+## Relacje w praktyce
+
+Podgląd pokazuje te same tokeny użyte w panelu z dwiema kartami i parą przycisków. Dane są przykładowe.
+
+<Canvas of={Stories.Relations} />
+
+## Czego brakuje
+
+Układ strony na różnych szerokościach (320, 768, 1440 px) nie ma osobnej strony. Zatwierdzone decyzje to jedna kolumna do 960 px (R01.4) oraz układ kartowy lub przewijany kontener tabeli poniżej ok. 600 px, a szczegóły tabeli wpisów na wąskim ekranie pozostają otwarte.
