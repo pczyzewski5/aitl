@@ -59,3 +59,8 @@ Pitfall: the pre-commit lint scanned the locally installed skills in .agents (th
 ## 2026-11-17 (discovery layer)
 Added the product layer to the agent pipeline: discovery block in .ai/agentic.config.json (no domain expert, no designer), Product owner role, Definition of Ready and protected product decisions in SDLC.md, .ai/specs/research/. AGENTS.md has no task-routing table, so no routing row was added.
 Todo: run /om-discover to write .ai/specs/product-brief.md; issue #2; phase 4 (Awilix); phase 4b.
+
+## 2026-11-17 (product brief)
+Added the first product brief (om-discover, own mode, quick pass) with the owner's interview note and decision D01: the first version covers recurring and one-off income and expenses, a paid flag, shared and personal accounts, separate logins for the owner and spouse, and the monthly remainder (income minus expenses).
+Pitfall: the evidence is one account from the owner plus their second-hand report of a conversation with the spouse; the brief says so and lists a collection plan (spreadsheet copy, note from the spouse conversation).
+Todo: om-backlog dry run and backlog; issue #2; phase 4 (Awilix); phase 4b.
