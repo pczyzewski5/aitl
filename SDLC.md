@@ -173,11 +173,11 @@ Każdy PR przechodzi pełną bramkę walidacji przed akceptacją review, w tej k
 - `npm run test:coverage`
 - `npm run build`
 - `npm run test:integration`
-- `npm audit --audit-level=high`
+- `npm audit --omit=dev --audit-level=high`
 
 Każdy niezerowy kod wyjścia oblewa bramkę i blokuje PR. Skille implementujące uruchamiają bramkę przed otwarciem PR-a, a `om-check-and-commit` przed pushem ręcznie prowadzonej gałęzi. Testy jednostkowe wymagają 100% pokrycia (statements, branches, functions, lines), próg jest wymuszony w `vitest.config.ts`. Testy integracyjne wymagają Dockera i wcześniejszego `npm run build`.
 
-CI (`.github/workflows/ci.yml`) odtwarza bramkę na każdym PR-ze: job `Build` (typecheck i `next build`), `Lint` (lint oraz `npm audit --audit-level=high`, który oblewa przy podatnościach o poziomie high i wyższym), `Unit tests (100% coverage)` i `Integration tests`. Lista komend żyje w `.ai/agentic.config.json`; przy jej zmianie zaktualizuj ją tam i w tej sekcji razem.
+CI (`.github/workflows/ci.yml`) odtwarza bramkę na każdym PR-ze: job `Build` (typecheck i `next build`), `Lint` (lint oraz `npm audit --omit=dev --audit-level=high`, który oblewa przy podatnościach zależności produkcyjnych o poziomie high i wyższym; podatności w narzędziach deweloperskich nie blokują, bo nie trafiają do działającej aplikacji), `Unit tests (100% coverage)` i `Integration tests`. Lista komend żyje w `.ai/agentic.config.json`; przy jej zmianie zaktualizuj ją tam i w tej sekcji razem.
 
 ## Zmiana tego procesu
 

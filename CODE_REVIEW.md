@@ -51,7 +51,7 @@ Reguły review dla AITL (Next.js, TypeScript, MikroORM, Awilix; monorepo `packag
 - Sekrety tylko z env walidowanego Zodem; żaden sekret, token, hasło ani JWT w logu, błędzie czy odpowiedzi (blocker).
 - Zachowane flagi cookie `httpOnly`, `secure`, `sameSite` w kodzie auth (major); rate limiting na login/register/reset hasła, których dotyka zmiana (major).
 - Komunikaty auth ogólne, bez ujawniania, czy e-mail jest zarejestrowany.
-- Zależności: `npm audit --audit-level=high` zielone; nowa zależność tylko, gdy zastępuje więcej niż ok. 20 linii kodu.
+- Zależności: `npm audit --omit=dev --audit-level=high` zielone; nowa zależność tylko, gdy zastępuje więcej niż ok. 20 linii kodu.
 
 ### Testy
 
