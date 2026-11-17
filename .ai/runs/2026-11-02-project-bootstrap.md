@@ -88,3 +88,8 @@ Todo: implement phase 1 of the auth spec (steps 1.1-1.3).
 ## 2026-11-17 (audit gate)
 CI on main turned red after a new high advisory for picomatch (dev tooling, no patched version) failed the full npm audit step in the Lint job; switched the gate, config and docs to `npm audit --omit=dev --audit-level=high` and recorded a lesson.
 Todo: review dev-tool advisories manually when updating dependencies (Vitest, Vite).
+
+## 2026-11-17 (design system, stage 0)
+Added the approved design decisions (.ai/specs/design/2026-11-17-referencje.md and 2026-11-17-tokeny.md) and the stage 0 plan in packages/ui/POSTEP.md: inventory, decisions, open questions, component list, docs menu tree and the PR sequence A-D. Docs only, nothing installed.
+Decisions: Storybook 10.6.7 with react-vite, Tailwind 4.3.5, Playwright 1.65.1, Vitest pinned at 5.0.5, docs in Polish, dark theme structure only.
+Todo: owner answers the open questions and says "dalej"; then PR B (Storybook tooling).
