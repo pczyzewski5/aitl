@@ -9,13 +9,13 @@ Etap 0 (ten plik) niczego nie instaluje i nie zmienia kodu. Zainstalowane zależ
 | Etap | Zakres | Status |
 |---|---|---|
 | 0 | Inwentaryzacja i plan (ten plik) | PR A, do przeglądu |
-| 1 | Fundamenty: Storybook, tokeny, Tailwind, przełącznik motywu, Foundations, skrypt `check:tokens` | czeka na "dalej" (PR B, C, D) |
+| 1 | Fundamenty: Storybook, tokeny, Tailwind, przełącznik motywu, Foundations, skrypt `check:tokens` | w toku: PR B (narzędzia Storybooka) do przeglądu; PR C i D czekają |
 | 2 | Komponenty bazowe, partiami po ok. sześć | nie rozpoczęty |
 | 3 | Komponenty produktu, wzorce, ekrany epików | nie rozpoczęty |
 | 4 | Strony, które uczą, plik dla agentów | nie rozpoczęty |
 | 5 | Sprawdzenie i raport | nie rozpoczęty |
 
-Następny krok: właściciel czyta plan, odpowiada na pytania i pisze "dalej" (etap 1, zaczynając od PR B).
+Następny krok: właściciel przegląda PR B (narzędzia Storybooka) i pisze "dalej" do PR C (tokeny, Tailwind, przełącznik motywu).
 
 ## Materiały (źródła)
 
@@ -78,7 +78,7 @@ Decyzje z referencji (skrót, 10 linii):
 | PR | Zakres | Czego potrzeba od właściciela |
 |---|---|---|
 | A (ten) | Tylko dokumenty: referencje, tokeny, POSTEP.md, wpis w dzienniku | przegląd i odpowiedzi na pytania poniżej |
-| B | Narzędzia Storybooka: Storybook 10.6.7 (`react-vite`), Vitest 5.0.5 i Playwright 1.65.1 z Chromium, osobna konfiguracja testów Storybooka, `.gitignore` i `globalIgnores`, pusta strona startowa; bez tokenów | "dalej" do etapu 1; zgoda na pobranie Chromium (już udzielona w zasadzie, potwierdzenie przy PR); decyzja o `npm audit` jeśli padnie |
+| B (zrobiony, do przeglądu) | Narzędzia Storybooka: Storybook 10.6.7 (`react-vite`), Vitest 5.0.5 i Playwright 1.65.1 z Chromium, osobna konfiguracja testów Storybooka, `.gitignore` i `globalIgnores`, pusta strona startowa; bez tokenów | "dalej" do etapu 1; zgoda na pobranie Chromium (już udzielona w zasadzie, potwierdzenie przy PR); decyzja o `npm audit` jeśli padnie |
 | C | Tokeny + Tailwind 4.3.5 + przełącznik motywu (wartości jasne, ciemny tylko struktura) | zatwierdzenie przeliczonego kontrastu, jeśli jakaś para spadnie poniżej progu; potwierdzenie, że aplikacja nie ma mieć jeszcze motywu ciemnego |
 | D | Strony Foundations (kolor z tabelą kontrastu, typografia, odstępy, kształt i głębia, ruch, ikony, układ, motywy) + skrypt `check:tokens` + zadania CI | decyzja o zestawie ikon (L5); decyzja, czy zadania Storybooka (testy przeglądarkowe, `check:tokens`) wchodzą do wymaganych checków `main` |
 

@@ -8,11 +8,13 @@
   "scripts": {
     "typecheck": "npm run typecheck --workspaces --if-present && tsc -p tests/tsconfig.json",
     "build": "npm run build --workspace @aitl/app",
+    "build-storybook": "npm run build-storybook --workspace @aitl/ui",
     "lint": "eslint .",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:integration:app": "node tests/integration/support/serve.ts",
+    "test:storybook": "npm run test:storybook --workspace @aitl/ui",
     "prepare": "git config core.hooksPath .githooks"
   },
   "devDependencies": {
