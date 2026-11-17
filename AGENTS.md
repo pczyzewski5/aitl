@@ -50,7 +50,7 @@ Nowy komponent wielokrotnego użytku ma jedno miejsce: prymityw shadcn w `ui/src
 
 ## Workflow git
 
-- Gałąź `main` jest chroniona na GitHubie: zmiany wchodzą wyłącznie przez PR, z zielonymi checkami (Build, Lint, Unit tests, Integration tests) i aktualną gałęzią. Bezpośredni push na `main` jest zablokowany (także dla administratorów), force-push i usuwanie zabronione.
+- Gałąź `main` jest chroniona na GitHubie: zmiany wchodzą wyłącznie przez PR, z zielonymi checkami (Build, Lint, Unit tests, Integration tests, Storybook tests, Check tokens) i aktualną gałęzią. Bezpośredni push na `main` jest zablokowany (także dla administratorów), force-push i usuwanie zabronione.
 - Pracuj na gałęzi `feature/<opis>` i otwieraj PR przez `gh pr create`.
 
 ## Baza danych (lokalnie)

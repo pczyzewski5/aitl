@@ -112,3 +112,7 @@ Todo: PR D (Foundations pages, check:tokens, CI jobs).
 Added Polish Foundations pages (Kolory, Typografia, Odstepy, Promienie i powierzchnie, Ruch, Motyw) as CSF stories plus attached MDX, with token values and contrast ratios computed live from tokens.css by tested helpers (100% coverage); test:storybook now runs 16 real stories and no longer uses passWithNoTests.
 Added check:tokens (raw colors, Tailwind default palette classes, arbitrary values; file:line, exit 1) over ui src, .storybook and app src with unit tests, plus CI jobs "Storybook tests" and "Check tokens" with timeout-minutes.
 Pitfall: tsc include does not pick up files under .storybook, so the *.css?raw declaration lives in src/raw-imports.d.ts. Todo: owner decides on required checks; stage 2 (base components) after "dalej".
+
+## 2026-11-17 (required checks)
+Added "Storybook tests" and "Check tokens" to the required status checks of the protected main branch (verified by reading the protection back: six checks, strict, admins enforced) and updated AGENTS.md and SDLC.md to list all six.
+Todo: stage 2 of the design system (base components) after the owner approves the list of differences from the default shadcn/ui.
