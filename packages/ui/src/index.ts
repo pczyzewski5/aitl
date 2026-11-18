@@ -55,3 +55,16 @@ export {
   type BankAccountType,
 } from './components/bank-accounts/bank-account-list';
 export { DEFAULT_BANK_ACCOUNT_LIST_MESSAGES, type BankAccountListMessages } from './components/bank-accounts/messages';
+export { formatMoneyMinor, type FormatMoneyOptions, type MoneySign } from './lib/format-money-minor';
+export {
+  AccountRemainderCard,
+  type AccountRemainderCardErrorProps,
+  type AccountRemainderCardLoadingProps,
+  type AccountRemainderCardProps,
+  type AccountRemainderCardReadyProps,
+  type AccountType,
+} from './components/bank-accounts/account-remainder-card';
+export { type AccountRemainderCardMessages } from './components/bank-accounts/account-remainder-card.messages';
+export { addMonths, compareMonths, formatMonthLabel, isMonthKey, parseMonthKey, type MonthKey, type MonthParts } from './components/months/month';
+export { MonthSwitcher, type MonthSwitcherProps } from './components/months/month-switcher';
+export { type MonthSwitcherMessages } from './components/months/month-switcher.messages';

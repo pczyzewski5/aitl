@@ -1,0 +1,159 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './month-overview.stories';
+
+<Meta of={Stories} />
+
+# Wzorzec: przegląd miesiąca per konto
+
+Układ sekcji "Ile zostanie w miesiącu": przełącznik miesiąca nad osobną kartą na każde konto bankowe, z możliwością wybrania konta. To wzorzec złożony z istniejących komponentów (`MonthSwitcher`, `AccountRemainderCard`, EmptyState); ekran produktu (`/`) powstanie w późniejszym PR. Źródło reguł: R01.4, R01.8, A3, A4 (referencje), specyfikacja E03 (`.ai/specs/2026-11-17-monthly-remainder.md`: R02, R03, E03-Q5, E03-Q8, E03-Q9, UI/UX, edge cases), E02 (miesiąc kalendarzowy, Europe/Warsaw, `YYYY-MM`), decyzje właściciela z 2026-11-18, WCAG 2.2 i WAI-ARIA. Reguła bez źródła jest oznaczona jako **propozycja**.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Odpowiada na główne pytanie użytkownika: ile zostanie w tym miesiącu, osobno na koncie wspólnym i osobno na osobistym.
+
+## 2. Kiedy używać
+
+- Ekran główny `/` po zalogowaniu (E03-Q9): sekcja pod listą kont.
+- Każdy widok, w którym wynik miesiąca ma być pokazany per konto, a nie łącznie (R03).
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Szczegóły jednego konta: lista wpisów | widok konta z tabelą wpisów (PR R) i `MonthSwitcher` |
+| Wynik łączny kont | nie istnieje (R03, A4) |
+| Prognoza i przenoszenie salda | poza zakresem (E04) |
+
+## 4. Anatomia
+
+1. Nagłówek sekcji `h2` "Ile zostanie w miesiącu".
+2. `MonthSwitcher` z miesiącem z serwera (Europe/Warsaw) i zakresem 2000-01 do 2100-12.
+3. Rząd kart `AccountRemainderCard`: jedna na konto, w kolejności z API, zawijany (`flex flex-wrap`, karta `min-w-64 flex-1`).
+4. Pod kartami: treść dla wybranego konta (w tej stories tylko zastępczy panel; lista wpisów to PR R).
+5. Stan pusty zamiast kart, gdy użytkownik nie ma żadnego konta.
+
+<Canvas of={Stories.TwoAccounts} />
+
+## 5. Warianty
+
+| Postać | Kiedy wybrać |
+|---|---|
+| dwa konta | właściciel: konto wspólne i osobiste |
+| jedno konto | żona widzi tylko konto wspólne (wynika z danych, bez osobnej logiki UI, E03 UI/UX) |
+| brak kont | użytkownik bez dostępu do żadnego konta (`accounts: []`) |
+
+<Canvas of={Stories.OneAccount} />
+
+## 6. Stany
+
+Każdy stan danych to osobna story (mapa stanów):
+
+| Stan | Story | Zachowanie |
+|---|---|---|
+| Dwa konta, wynik dodatni | Dwa konta | wspólne wybrane, wyniki w kolorze wpływu |
+| Jedno konto | Jedno konto | jedna karta, żadna suma |
+| Wynik ujemny | Wynik ujemny | minus U+2212 i kolor wydatku (wrzesień 2026) |
+| Miesiąc bez wpisów | Miesiąc bez wpisów | zera "0,00 zł", **nie** stan pusty (E03 edge cases) |
+| Ładowanie | Ładowanie wyników | obie karty `aria-busy`, Skeleton |
+| Błąd | Błąd wczytania wyników | ErrorState w każdej karcie, ponowienie osobno |
+| Brak kont | Brak kont | EmptyState zamiast kart |
+| Wąski ekran | Wąski ekran, Długie nazwy kont | karty jedna pod drugą, bez przewijania poziomego |
+| Zmiana miesiąca | test | etykieta i kwoty obu kart się zmieniają, wybrane konto zostaje wybrane |
+
+Stany "częściowe dane" i "dużo danych" nie występują: wynik konta to trzy liczby, a wpisy są poza wzorcem.
+
+<Canvas of={Stories.NegativeRemainder} />
+<Canvas of={Stories.MonthWithoutEntries} />
+<Canvas of={Stories.Loading} />
+<Canvas of={Stories.FailedToLoad} />
+<Canvas of={Stories.NoAccounts} />
+
+## 7. Zachowanie i dostępność
+
+- Klawiatura: `Tab` przechodzi: strzałka wstecz, strzałka dalej, karta pierwsza, karta druga. `Enter` i spacja działają na przyciskach.
+- Zmiana miesiąca: etykieta jest regionem `aria-live="polite"` i ogłasza nowy miesiąc; karty przechodzą na moment w `aria-busy`, gdy aplikacja wczytuje nowe dane (stan "Ładowanie").
+- Wybór konta: `aria-pressed` na kartach, co najwyżej jedna wciśnięta; stan niesie ramka, napis "Wybrane" i atrybut (A3).
+- Wynik ujemny: znak minus w tekście, nie tylko kolor (A3).
+- Sekcja ma nagłówek `h2`; karty nie mają własnych nagłówków (to przyciski), więc poziomy nagłówków w sekcji się nie zagnieżdżają.
+- Dostęp: karty tworzą się z konta, do których użytkownik ma dostęp (członkostwo); nic ponad to nie jest pokazywane (R03, izolacja).
+
+## 8. Treść
+
+- Nagłówek: "Ile zostanie w miesiącu" (E03).
+- Brak kont: "Nie masz dostępu do żadnego konta bankowego" i następny krok w opisie.
+- Nazwy miesięcy i kwoty: patrz `MonthSwitcher` (mianownik, małą literą) i `AccountRemainderCard` (minus U+2212, twarda spacja).
+- Waluta tylko PLN, kwoty całkowite w groszach, sumy liczy serwer (R01, E03-Q3).
+- Nigdy "Razem" ani łączna liczba (R03).
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | przełącznik miesiąca, karty jedna pod drugą, panel wybranego konta |
+| 768 px | dwie karty obok siebie (R01.4: auto-fit, min. 256 px) |
+| 1440 px | kolumna do 960 px |
+
+<Canvas of={Stories.NarrowScreen} />
+<Canvas of={Stories.LongAccountNames} />
+
+## 10. API
+
+Wzorzec nie ma własnego komponentu w pakiecie: składa się z `MonthSwitcher`, `AccountRemainderCard`, EmptyState i Card. Story ma komponent pomocniczy `MonthOverview` (tylko w stories, bez eksportu). Podział odpowiedzialności:
+
+| Kto | Odpowiada za |
+|---|---|
+| serwer (`app`) | bieżący miesiąc (Europe/Warsaw), lista kont, kwoty w groszach (`GET /api/monthly-remainder?month=YYYY-MM`), brak sumy |
+| strona kliencka | stan `month` i `selectedId`, ładowanie, błąd, ponowienie |
+| `ui` | wygląd, dostępność, formatowanie kwot i miesięcy (bez importu `@aitl/*`) |
+
+## 11. Kod
+
+Szkic (dane i zapytanie dostarcza `app`):
+
+```tsx
+import { AccountRemainderCard, MonthSwitcher } from '@aitl/ui';
+
+<section aria-labelledby="remainder-heading">
+  <h2 id="remainder-heading">Ile zostanie w miesiącu</h2>
+  <MonthSwitcher month={month} onMonthChange={setMonth} min="2000-01" max="2100-12" />
+  <div className="flex flex-wrap gap-(--space-between-groups)">
+    {accounts.map((account) => (
+      <AccountRemainderCard
+        key={account.id}
+        className="min-w-64 flex-1"
+        name={account.name}
+        accountType={account.type}
+        remainderMinor={account.remainderMinor}
+        incomeMinor={account.incomeMinor}
+        expensesMinor={account.expensesMinor}
+        selected={account.id === selectedId}
+        onSelect={() => setSelectedId(account.id)}
+      />
+    ))}
+  </div>
+</section>;
+```
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Komponenty: `MonthSwitcher`, `AccountRemainderCard`, Card, Badge, Skeleton, ErrorState, EmptyState.
+- Wzorce: lista z filtrami (miesiąc zamiast filtrów, PR T), widok szczegółów konta (PR T).
+- Backlog: E03 (`.ai/specs/backlog.md`), E02 (lista wpisów konta wybranego pod kartami).
+
+## Czego brakuje
+
+- Ładowanie przy zmianie miesiąca: stories pokazują stan ładowania jako osobny scenariusz; przejście ładowanie, gotowe przy zmianie miesiąca nie jest symulowane (brak decyzji o przezroczystości danych w trakcie wczytywania).
+- Wybór konta a adres (`?account=`): nie ustalono, czy wybór konta trafia do URL.
+- Link karty do strony konta: patrz `AccountRemainderCard`, "Czego brakuje".
+- Pełny ekran `/` z listą kont i sekcją "Ile zostanie": PR T.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: wybranie konta oznacza je aktywnym i odznacza drugie, zmiana miesiąca zmienia etykietę i kwoty obu kart (dodatnie, ujemne), wybrane konto przeżywa zmianę miesiąca, brak sumy łącznej, jedno konto to jedna karta, miesiąc bez wpisów pokazuje zera, ładowanie oznacza obie karty jako zajęte, błąd daje ponowienie w każdej karcie, brak kont pokazuje stan pusty, przy 320 px karty są jedna pod drugą bez przewijania poziomego.

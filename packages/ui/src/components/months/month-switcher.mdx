@@ -1,0 +1,158 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './month-switcher.stories';
+
+<Meta of={Stories} />
+
+# MonthSwitcher
+
+Przełącznik miesiąca: strzałka wstecz, nazwa miesiąca, strzałka dalej. Źródło reguł: R01.4 (pasek miesiąca nad kartami), A3 (referencje), specyfikacje E02 (`.ai/specs/2026-11-17-entries-income-expenses.md`, E02-Q2) i E03 (`.ai/specs/2026-11-17-monthly-remainder.md`, E03-Q8, UI/UX), tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-18, WCAG 2.2 (2.5.8, 4.1.3) i WAI-ARIA. Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Pozwala przejść do poprzedniego albo następnego miesiąca kalendarzowego i zawsze mówi, który miesiąc jest teraz oglądany.
+
+## 2. Kiedy używać
+
+- Nad kartami "Ile zostanie w miesiącu" na ekranie głównym `/` (E03): miesiąc dotyczy wszystkich kart naraz.
+- Nad listą wpisów konta (E02), z tym samym miesiącem co na `/` (parametr `?month=YYYY-MM`).
+- Wszędzie tam, gdzie dane są pogrupowane w miesiące kalendarzowe i użytkownik przechodzi między sąsiednimi miesiącami.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Wybór miesiąca w formularzu wpisu (data wpisu) | pole tekstowe `RRRR-MM-DD` w Field (brak komponentu daty, patrz "Czego brakuje") |
+| Skok o wiele miesięcy naraz (np. do stycznia sprzed trzech lat) | brak osobnego komponentu w tym PR: strzałki albo parametr `month` w adresie (propozycja: Select miesiąca i roku po decyzji właściciela) |
+| Zakres dat (od-do) | nie istnieje w produkcie (miesiąc zamiast filtrów, E02) |
+| Przełączanie kont | karty `AccountRemainderCard` z `aria-pressed` |
+
+## 4. Anatomia
+
+1. Grupa (`role="group"` z nazwą "Wybór miesiąca"): spina trzy elementy w jedną całość dla czytnika ekranu.
+2. Strzałka wstecz: Button `secondary`, rozmiar `icon` (36 × 36 px), ikona `ChevronLeft` (16 px, `aria-hidden`), nazwa z `messages.previousLabel`.
+3. Etykieta miesiąca: "listopad 2026", 20 px, waga 600, `--foreground`, region `aria-live="polite"`.
+4. Strzałka dalej: jak wstecz, ikona `ChevronRight`, nazwa z `messages.nextLabel`.
+5. Ukryty powód zablokowania (opcjonalny, tylko na granicy): tekst `sr-only` podpięty przez `aria-describedby`.
+
+Strzałki mają szare tło (`--muted`) zamiast białego z ramką z makiety (decyzja D8 z etapu 2, zatwierdzona): nie ma nowego wariantu przycisku.
+
+## 5. Warianty
+
+Jeden wygląd. Różni się tylko tym, czy podano granice:
+
+| Postać | Kiedy wybrać |
+|---|---|
+| bez `min` i `max` | domyślna: dowolny miesiąc (E03-Q8) |
+| z `min` i `max` | gdy aplikacja zna zakres (E03-Q8: 2000-01 do 2100-12) albo konto istnieje od określonego miesiąca |
+
+<Canvas of={Stories.BoundsReached} />
+
+## 6. Stany
+
+| Stan | Wygląd |
+|---|---|
+| Domyślny | obie strzałki aktywne, etykieta z miesiącem |
+| Najechanie, fokus, wciśnięty | jak w Button `secondary` (najechanie `--muted-hover`, fokus obrys 2 px `--ring`) |
+| Zablokowany (granica) | strzałka zostaje na miejscu, tekst `--muted-foreground`, `aria-disabled="true"`, kursor `not-allowed`; powód jako `title` i tekst dla czytnika (`aria-describedby`); strzałka nadal przyjmuje fokus, więc fokus nie ginie po dojściu do granicy |
+| Ładowanie | nie dotyczy: ładowanie danych pokazują karty i listy, przełącznik jest zawsze gotowy |
+| Wybrany, błąd | nie dotyczy |
+
+Dlaczego `aria-disabled`, a nie `disabled`: po kliknięciu ostatniego dozwolonego miesiąca natywnie zablokowany przycisk gubi fokus, a czytnik nie dowiaduje się, dlaczego dalej nie można. Źródło: reguła z Menu (zablokowane pozycje zostają fokusowalne, powód jako tekst), WAI-ARIA.
+
+<Canvas of={Stories.States} />
+
+## 7. Zachowanie i dostępność
+
+- Klawiatura: strzałki to zwykłe przyciski: `Tab` przechodzi między nimi, `Enter` i spacja zmieniają miesiąc. Nie ma skrótów strzałkami klawiatury (źródło: WAI-ARIA, przycisk nie jest widżetem złożonym).
+- Kolejność fokusu: strzałka wstecz, strzałka dalej. Etykieta nie przyjmuje fokusu.
+- Role: grupa z nazwą; każdy przycisk ma nazwę z propsa (`aria-label`), ikony są `aria-hidden`.
+- **Region `aria-live="polite"` na etykiecie** (spec E03, UI/UX): po zmianie miesiąca czytnik ogłasza nową nazwę ("grudzień 2026") bez przerywania. `aria-atomic="true"` sprawia, że ogłaszana jest cała etykieta, nie sam zmieniony fragment (WCAG 4.1.3).
+- Cele: 36 × 36 px (WCAG 2.5.8 wymaga 24 × 24 px).
+- Kontrast: etykieta `--foreground` na `--background` 13,34:1, ikona strzałki `--foreground` na `--muted` 11,86:1; zablokowana `--muted-foreground` na `--muted` 6,10:1 (wyjątek WCAG dla zablokowanych, ale i tak powyżej progu).
+- Nie dodawaj `role="alert"`: zmiana miesiąca wywołana przez użytkownika nie jest błędem.
+
+<Canvas of={Stories.ChangesLabelAndAnnounces} />
+
+## 8. Treść
+
+- Nazwa miesiąca po polsku, **w mianowniku, małą literą**, po niej rok: "październik 2026". Źródło: makieta (`ekran-bez-ds.html`), decyzja właściciela z 2026-11-18.
+- Nazwy miesięcy są w jednej stałej w `month-switcher.messages.ts`, a nie w `Intl.DateTimeFormat('pl-PL')`. Powód: wynik `Intl` zależy od danych ICU przeglądarki i wersji Node (w testach jednostkowych jsdom i w Chromium mogłyby się różnić), a przy samej nazwie miesiąca w pewnych kontekstach daje dopełniacz ("października"). Stała jest deterministyczna i testowalna. Inny język: przekaż `messages.monthNames` (12 nazw).
+- Nazwy strzałek: "Poprzedni miesiąc" i "Następny miesiąc" (bez nazw samych miesięcy: nazwa przycisku nie może się zmieniać przy każdym kliknięciu).
+- Powód zablokowania: zdanie "Nie ma wcześniejszych miesięcy do wyświetlenia".
+- Długość: etykieta mieści się w jednej linii nawet dla "październik 2026"; przy dłuższych tłumaczeniach zawija się (`wrap-anywhere`), strzałki zostają po bokach.
+- Liczby: rok czterocyfrowy bez separatora.
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | strzałki po bokach, etykieta o minimalnej szerokości 160 px między nimi; razem około 264 px, bez przewijania poziomego |
+| 768 px | bez zmian, wyśrodkowany |
+| 1440 px | bez zmian; kolumna treści do 960 px (R01.4) |
+
+<Canvas of={Stories.LongLabelNarrowScreen} />
+
+## 10. API
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `month` | `string` (`YYYY-MM`) | | wyświetlany miesiąc (wymagany); **komponent jest kontrolowany** |
+| `onMonthChange` | `(month: string) => void` | | wywoływane z nowym miesiącem po kliknięciu strzałki (wymagane) |
+| `min` | `string` (`YYYY-MM`) | | najwcześniejszy dozwolony miesiąc; po jego osiągnięciu strzałka wstecz jest zablokowana |
+| `max` | `string` (`YYYY-MM`) | | najpóźniejszy dozwolony miesiąc; po jego osiągnięciu strzałka dalej jest zablokowana |
+| `messages` | `Partial<MonthSwitcherMessages>` | polskie teksty | `groupLabel`, `previousLabel`, `nextLabel`, `previousDisabledReason`, `nextDisabledReason`, `monthNames` |
+| `className` i atrybuty `div` | `ComponentProps<'div'>` | | `className`, `id`, `data-*` (bez `children` i `onChange`) |
+
+Funkcje pomocnicze (eksportowane z `@aitl/ui`, czyste i przetestowane): `addMonths(month, delta)`, `compareMonths(a, b)`, `formatMonthLabel(month, monthNames)`, `parseMonthKey`, `isMonthKey`. Zakres lat: 0001-9999 (rzuca `RangeError` poza nim); ograniczenie biznesowe 2000-2100 ustawia aplikacja przez `min` i `max`.
+
+**Bieżący miesiąc podaje wołający, nie komponent.** Komponent nie czyta zegara przeglądarki. Domyślny miesiąc liczy serwer w strefie Europe/Warsaw (E02-Q2: `currentMonth(now)` w `core/months`) i przekazuje go jako początkową wartość `month` (np. z `searchParams`). Dzięki temu przełącznik nie pokazuje innego miesiąca niż serwer w nocy z ostatniego dnia miesiąca ani przy ustawionej innej strefie systemu.
+
+<Canvas of={Stories.ServerSuppliedCurrentMonth} />
+
+## 11. Kod
+
+Minimalny przykład:
+
+```tsx
+import { MonthSwitcher } from '@aitl/ui';
+
+<MonthSwitcher month={month} onMonthChange={setMonth} />;
+```
+
+Typowy przykład z produktu, ekran `/` (miesiąc z serwera, zakres z E03-Q8):
+
+```tsx
+import { MonthSwitcher } from '@aitl/ui';
+import { useState } from 'react';
+
+function MonthSection({ currentMonth }: { currentMonth: string }) {
+  const [month, setMonth] = useState(currentMonth);
+
+  return <MonthSwitcher month={month} onMonthChange={setMonth} min="2000-01" max="2100-12" />;
+}
+```
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: Select (lista wartości; przełącznik tylko sąsiednie miesiące), Tabs (osobne widoki, nie ta sama treść w innym miesiącu), pole daty.
+- Występuje we wzorcach: przegląd miesiąca per konto (E03), lista wpisów konta (E02, wzorzec "miesiąc zamiast filtrów").
+- Współpracuje z: `AccountRemainderCard`.
+
+## Czego brakuje
+
+- Skok o wiele miesięcy (Select miesiąca i roku albo pole `RRRR-MM`): nie zbudowany; propozycja do decyzji właściciela, gdy użytkownik zgłosi uciążliwość klikania.
+- Powrót do bieżącego miesiąca jednym kliknięciem ("Dziś"): brak decyzji; wymagałby propsa `currentMonth` z serwera.
+- Pole daty w formularzu wpisu: osobny komponent poza zakresem (patrz wzorzec formularza).
+- Ogłaszanie ładowania nowego miesiąca: ogłasza go karta (`aria-busy`), nie przełącznik.
+- Ciemny motyw: czeka na L3.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: strzałki zmieniają etykietę (także przez granicę roku) i etykieta jest regionem `aria-live="polite"`, `Tab`, `Enter` i spacja, granice blokują strzałki z powodem i fokus zostaje na zablokowanej, nazwy dostępne i cele 36 px, kolory i rozmiary z tokenów, mieści się przy 320 px, pokazuje dokładnie miesiąc z propsa niezależnie od zegara.
