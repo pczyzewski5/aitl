@@ -1,0 +1,149 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './text-link.stories';
+
+<Meta of={Stories} />
+
+# TextLink
+
+Link tekstowy: przejście do innego miejsca (strona, widok), w zdaniu albo samodzielnie. Źródło reguł: R01.1, R01.6 (referencje), A3, tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-18, WCAG 2.2. Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Prowadzi użytkownika do innego miejsca w aplikacji (lub poza nią) i od razu widać, że to link, a nie zwykły tekst.
+
+## 2. Kiedy używać
+
+- Wylogowanie jako nawigacja w nagłówku strony ("Wyloguj"), jeśli zostaje linkiem do adresu wylogowania; akcja zmieniająca dane to przycisk (patrz sekcja 3). Źródło: E01 (R01.4: nagłówek "AITL" + "Wyloguj").
+- Przejście z karty konta do listy wpisów tego konta ("Zobacz wpisy"). Źródło: E03 (link karty do `/bank-accounts/{id}`).
+- Odsyłacz w zdaniu, np. "Wróć do listy kont", gdy brak dostępu do konta.
+- Odsyłacz poza aplikację (dokumentacja): ten sam wygląd, ta sama karta przeglądarki.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Akcja, która zapisuje, usuwa albo zmienia dane ("Zapisz", "Usuń wpis", "Dodaj wpis") | Button (przycisk, nie link) |
+| Akcja wyglądająca skromnie, ale wykonująca się w miejscu ("Wyloguj" wywoływane żądaniem, nie nawigacją) | Button `ghost`, albo `TextLink` z `asChild` na elemencie `button`, jeśli wygląd linku ma zostać (patrz sekcja 7) |
+| Wiele akcji na wpisie | Menu (PR M) |
+| Samotny link bez zdania obok, o nazwie "Kliknij tutaj" | link z nazwą celu ("Zobacz wpisy konta") |
+| Odsyłacz oznaczający stan lub kategorię | Badge (nie jest interaktywny) |
+
+## 4. Anatomia
+
+1. Element `a` z tekstem (jedyna wymagana część): kolor `--primary`, podkreślenie przez cały czas.
+2. Brak ikony (decyzja właściciela: link zewnętrzny bez specjalnej ikony w tej partii).
+3. `asChild`: nakłada ten sam wygląd na wskazany element (np. `Link` z Next.js), zamiast własnego `a`.
+
+<Canvas of={Stories.Variants} />
+
+## 5. Warianty
+
+Jeden wygląd, bez wariantów. Źródło: zasada 6 promptu (nie dodajemy wariantów ponad plan) i decyzja właściciela z 2026-11-18. Zewnętrzny i wewnętrzny link wyglądają tak samo; różnica jest wyłącznie w adresie.
+
+## 6. Stany
+
+| Stan | Wygląd |
+|---|---|
+| Domyślny | tekst `--primary`, podkreślenie 1 px z odstępem 2 px (`underline-offset-2`) |
+| Najechanie | tekst `--primary-hover`; podkreślenie zostaje |
+| Fokus | globalny obrys 2 px `--ring` z odstępem 2 px (`styles.css`) |
+| Wciśnięty | bez osobnego wyglądu (R01.6) |
+| Zablokowany, ładowanie, wybrany, błąd | nie dotyczy: link nieaktywny nie istnieje (zamiast tego nie renderujemy linku albo używamy Button z wyjaśnieniem) |
+| Odwiedzony | bez osobnego wyglądu (propozycja: kolor stanu odwiedzin nie ma tokenu) |
+
+Zamrożony podgląd najechania i fokusu (`data-preview-state`, tylko do dokumentacji):
+
+<Canvas of={Stories.States} />
+
+Kolor jest dodatkiem do podkreślenia, nigdy jedynym nośnikiem znaczenia (A3, WCAG 1.4.1): tekst linku w zdaniu odróżnia podkreślenie, nie sam kolor.
+
+<Canvas of={Stories.OnCardSurface} />
+
+## 7. Zachowanie i dostępność
+
+- Klawiatura: `Tab` wchodzi na link, `Enter` go aktywuje. Spacja nie aktywuje linku (zachowanie przeglądarki).
+- Kolejność fokusu: zgodna z kolejnością w DOM.
+- Czytnik ekranu ogłasza "link" i nazwę z tekstu: nazwa musi mówić, dokąd link prowadzi, także bez zdania obok (WCAG 2.4.4). "Kliknij tutaj" i "Więcej" to błąd.
+- Kontrast: `--primary` na `--card` 5,17:1 (tekst, próg 4,5:1), na `--background` 4,70:1, `--primary-hover` na `--card` 6,70:1.
+- Obrys fokusu: `--ring` na `--card` 5,17:1 i na tle strony 4,70:1 (element UI, próg 3:1) (WCAG 2.4.7).
+- Cel kliknięcia: link w zdaniu jest wyjątkiem WCAG 2.5.8 (cel w tekście ciągłym). **Propozycja:** link samodzielny w osobnym wierszu (np. "Wyloguj" w nagłówku) powinien mieć co najmniej 24 px wysokości: osadź go w kontenerze o wysokości `--control-height` albo użyj Button `ghost`.
+- Link zewnętrzny otwiera się w tej samej karcie, bez atrybutu `target` i bez ikony (decyzja właściciela, 2026-11-18). `rel` nie jest dodawany.
+- Akcja, która nie jest nawigacją, to `button`. Gdy wygląd linku ma zostać, użyj `asChild` na `button`: dostaje wygląd linku, ale zachowuje rolę przycisku (spacja i `Enter`).
+
+## 8. Treść
+
+- Nazwa celu, nie czynność kliknięcia: "Zobacz wpisy konta", "Wróć do listy kont", "Wyloguj".
+- Czasownik w trybie rozkazującym dla akcji nawigacyjnej, rzeczownik dla odsyłacza w zdaniu (R01.7).
+- Długość: do kilku słów; dłuższy link zawija się (nie obcinamy).
+- Link zewnętrzny nazwij tak, by było widać cel: "dokumentacji (strona zewnętrzna)" (propozycja: brak ikony oznacza, że informacja o stronie zewnętrznej jest w tekście).
+- Tłumaczenie na dłuższy język: link zawija się razem ze zdaniem; długie adresy bez spacji też (`break-words` na akapicie).
+- Liczby i daty w nazwie linku: tak jak w treści, np. "Zobacz wpisy za listopad 2026".
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | link zawija się razem z tekstem; podkreślenie biegnie po każdej linii; bez przewijania poziomego |
+| 768 px | bez zmian |
+| 1440 px | bez zmian; kolumna do 960 px (R01.4) |
+
+<Canvas of={Stories.LongTextNarrowScreen} />
+
+## 10. API
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `asChild` | `boolean` | `false` | renderuje wskazany element potomny (np. `Link` z Next.js, `button`) z wyglądem linku zamiast `a` |
+| `href` i pozostałe atrybuty `a` | `ComponentProps<'a'>` | | `href`, `target`, `rel`, `onClick`, `aria-*`, `className`, `data-*` |
+
+## 11. Kod
+
+Minimalny przykład:
+
+```tsx
+import { TextLink } from '@aitl/ui';
+
+<TextLink href="/">Wróć do listy kont</TextLink>;
+```
+
+Typowy przykład z produktu, karta konta z linkiem do wpisów, i wylogowanie jako przycisk w wyglądzie linku:
+
+```tsx
+import { Card, CardContent, TextLink } from '@aitl/ui';
+
+<Card>
+  <CardContent>
+    <TextLink href={`/bank-accounts/${accountId}?month=${month}`}>Zobacz wpisy tego konta</TextLink>
+  </CardContent>
+</Card>;
+
+<TextLink asChild>
+  <button type="button" onClick={logout}>
+    Wyloguj
+  </button>
+</TextLink>;
+```
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: Button (akcja, zmiana danych), Menu (wiele akcji), Badge (etykieta bez akcji).
+- Występuje we wzorcach: nagłówek aplikacji z wylogowaniem (E01), karta konta z odsyłaczem do wpisów (E03), komunikat braku dostępu do konta (E02).
+
+## Czego brakuje
+
+- Ikona linku zewnętrznego i otwieranie w nowej karcie: decyzja właściciela 2026-11-18 mówi: bez ikony i w tej samej karcie w tej partii; do ponownej oceny, gdy pojawi się realny link zewnętrzny w produkcie.
+- Kolor linku odwiedzonego: brak tokenu i decyzji.
+- Wariant linku na ciemnym tle (pasek nagłówka `--primary`): brak ekranu i tokenu; dziś `--primary` na `--primary` jest nieczytelny, więc link w nagłówku potrzebuje decyzji o kolorze (propozycja: `--primary-foreground` z podkreśleniem).
+- Link do konkretnego elementu strony (kotwica) i odsyłacz "Przejdź do treści": poza zakresem, brak ekranu.
+- Cel 24 px dla samodzielnego linku: wymaga potwierdzenia wzorca (patrz sekcja 7, propozycja).
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: link ma rolę i adres, `Tab` ustawia fokus z obrysem 2 px, `Enter` aktywuje, podkreślenie jest obecne, kolor to `--primary`, podgląd najechania ma `--primary-hover` i zachowuje podkreślenie, link zewnętrzny nie ma `target` ani ikony, długi link zawija się przy 320 px.

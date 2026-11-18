@@ -10,12 +10,12 @@ Etap 0 (ten plik) niczego nie instaluje i nie zmienia kodu. Zainstalowane zależ
 |---|---|---|
 | 0 | Inwentaryzacja i plan (ten plik) | PR A, do przeglądu |
 | 1 | Fundamenty: Storybook, tokeny, Tailwind, przełącznik motywu, Foundations, skrypt `check:tokens` | zrobiony: PR B, PR C i PR D (Foundations, `check:tokens`, joby CI); PR D do przeglądu |
-| 2 | Komponenty bazowe, partiami po ok. sześć | w toku: partia 1 zakończona (Button, Input, Label+Field, Card, Badge, Alert; PR E, F i G); partia 2 ZAKOŃCZONA: PR H (Checkbox + `lucide-react`), PR I (Select) i PR J (RadioGroup) zrobione; dalej dalsze komponenty bazowe (patrz sekcja "Dalsze komponenty bazowe") |
+| 2 | Komponenty bazowe, partiami po ok. sześć | w toku: partia 1 zakończona (Button, Input, Label+Field, Card, Badge, Alert; PR E, F i G); partia 2 ZAKOŃCZONA: PR H (Checkbox + `lucide-react`), PR I (Select) i PR J (RadioGroup) zrobione; dalsze komponenty bazowe tylko tam, gdzie ekran ich potrzebuje: PR K (TextLink, Skeleton, EmptyState, ErrorState) zrobiony, dalej PR L (Dialog + ConfirmDialog), PR M (Menu), PR N (Toast); patrz sekcja "Dalsze komponenty bazowe" |
 | 3 | Komponenty produktu, wzorce, ekrany epików | nie rozpoczęty |
 | 4 | Strony, które uczą, plik dla agentów | nie rozpoczęty |
 | 5 | Sprawdzenie i raport | nie rozpoczęty |
 
-Następny krok: właściciel przegląda PR J (RadioGroup); potem kontynuacja etapu 2: pozostałe komponenty bazowe (TextLink, Textarea, Dialog, ConfirmDialog, Menu, decyzja o Tabs, Skeleton, EmptyState, ErrorState, Toast), czego każdy potrzebuje od właściciela: sekcja "Dalsze komponenty bazowe" na dole. Po nich etap 3: komponenty produktu, wzorce i ekrany epików.
+Następny krok: właściciel przegląda PR K (TextLink, Skeleton, EmptyState, ErrorState); potem PR L (Dialog + ConfirmDialog), PR M (Menu), PR N (Toast); Textarea i Tabs nie są budowane, dopóki ekran ich nie zażąda (decyzja 2026-11-18). Czego każdy potrzebuje od właściciela: sekcja "Dalsze komponenty bazowe" na dole. Po nich etap 3: komponenty produktu, wzorce i ekrany epików.
 
 ## Materiały (źródła)
 
@@ -87,6 +87,7 @@ Decyzje z referencji (skrót, 10 linii):
 | H (zrobiony, do przeglądu) | Checkbox (Radix + `Check`/`Minus` z `lucide-react` 1.74.0), token `--checkbox-size` 20 px, strona dokumentacji z 13 sekcjami, stories (stany, 320 px, tabela, Field, grupa "Wszystkie") i testy interakcji; usunięta nieużywana zależność `cn` | przegląd; decyzje zatwierdzone 2026-11-17 (patrz niżej) |
 | I (zrobiony, do przeglądu) | Select (natywny `select`, strzałka `ChevronDown`, opcjonalna pusta opcja), strona dokumentacji z 13 sekcjami, stories i testy interakcji; `Field` bez zmian | przegląd; decyzje zatwierdzone 2026-11-18 (patrz niżej) |
 | J (zrobiony, do przeglądu) | RadioGroup (Radix, `fieldset` z `legend`, opcje z etykietą w celu 36 px, podpowiedź i błąd pod grupą, układ z zapytania kontenerowego), strona dokumentacji z 13 sekcjami, stories (stany, 320 px, formularz wpisu) i testy interakcji (strzałki, `Tab`, spacja); bez nowych zależności i tokenów | przegląd; decyzje zatwierdzone 2026-11-18 (patrz niżej) |
+| K (zrobiony, do przeglądu) | TextLink (podkreślenie zawsze, kolor `--primary`, hover `--primary-hover`), Skeleton (statyczny blok `--muted`, bez animacji), EmptyState (tytuł, opis, jedna akcja przez Button, bez ikony), ErrorState (tytuł, opis, "Spróbuj ponownie", `announce` nadaje `role="alert"`), cztery strony dokumentacji z 13 sekcjami, stories (320 px, długi tekst, podglądy fokusu) i testy interakcji; bez nowych zależności i tokenów | przegląd; decyzje zatwierdzone 2026-11-18 (patrz niżej) |
 
 Każdy PR: jeden temat, zielone checki (typecheck, lint, test:coverage, build, audit), wpis w `.ai/runs/`, lekcja przy napotkanej pułapce.
 
@@ -145,7 +146,7 @@ Bazowe (Primitives), z ekranem, który ich potrzebuje:
 | Button (główny, drugoplanowy, ghost) | logowanie, formularz wpisu, dialog usuwania (E01, E02) |
 | TextLink | logowanie, nawigacja (E01) |
 | Input (tekst, hasło, kwota) | logowanie, formularz wpisu (E01, E02) |
-| Textarea | opis wpisu, jeśli wielowierszowy (E02, do potwierdzenia) |
+| Textarea | opis wpisu, jeśli wielowierszowy (E02); nie budowany, brak, gdy ekran zażąda (decyzja 2026-11-18) |
 | Select | wybór miesiąca/typu wpisu (E02) |
 | Checkbox | "Zapłacone" w wierszu (E02-S04) |
 | RadioGroup | typ wpisu wpływ/wydatek, cykliczność (E02) |
@@ -155,7 +156,7 @@ Bazowe (Primitives), z ekranem, który ich potrzebuje:
 | Alert | błąd logowania, 422 zbyt wiele wpisów (E01, E02) |
 | Dialog, ConfirmDialog | usuwanie wpisu/serii (E02-S03) |
 | Menu | akcje serii "Zakończ od miesiąca", "Zmień kwotę od miesiąca" (E02-S03) |
-| Tabs | opcjonalnie, jeśli przełączanie widoków wejdzie (do decyzji) |
+| Tabs | nie budowany, brak, gdy ekran zażąda (decyzja 2026-11-18) |
 | Skeleton, EmptyState, ErrorState | stany listy i karty konta (E02, E03) |
 | Toast | potwierdzenie po zapisie wpisu (R01.6, P5) |
 | Popover, Tooltip, Avatar | poza zakresem specyfikacji; wpisane do "Czego brakuje", dopóki nie ma ekranu, który ich potrzebuje |
@@ -279,21 +280,36 @@ Reguły bez źródła są propozycjami do decyzji. Każda wartość z tokenu. St
 - W jsdom działają kliknięcie, strzałki (Radix przenosi fokus w `setTimeout`, test czeka `waitFor`) i `FormData`; kolejność `Tab` i fokus klawiaturą sprawdzają testy Storybooka (prawdziwa przeglądarka).
 - Pułapki (lekcje w `.ai/lessons/`): `user-event` wysyła `keyup` zaraz po `keydown`, a Radix wybiera opcję strzałką dopiero w odroczonym fokusie, więc test musi przytrzymać klawisz; `waitFor` ze Storybooka wywołuje callback przy każdej mutacji DOM, więc callback tworzący element pomocniczy (`resolveToken`) zapętla się i zawiesza przeglądarkę.
 
+## Notatki z PR K (TextLink, Skeleton, EmptyState, ErrorState)
+
+- Komponenty napisane ręcznie na wzorcu istniejących, bez nowych zależności i bez nowych tokenów. Wszystkie odstępy z istniejących tokenów semantycznych (`--space-within-group`), promień `rounded-control`, tło `--muted`, kolory `--primary`, `--primary-hover`, `--muted-foreground`.
+- TextLink: `a` z `asChild` (Radix `Slot`, jak Button), potrzebny dla `Link` z Next.js i dla `button` w wyglądzie linku (wylogowanie jako żądanie). Link zewnętrzny bez `target`, `rel` i ikony.
+- Skeleton: jedyny komponent to blok; kontener z `aria-busy` jest wzorcem w dokumentacji, a kompozycje (linie tekstu, karta konta, wiersze wpisów) tylko przykładami w stories z dokumentowanych ekranów (E01-E03), nie eksportem.
+- EmptyState i ErrorState: teksty przekazuje aplikacja (`title`, `description`, `action`, `retryLabel`); poziom nagłówka przez `titleLevel` (h2-h4, domyślnie h3); typ `StateTitleLevel` wspólny. ErrorState ma `retrying` (Button `loading`) i `announce` (`role="alert"`). Przyciski używają wariantu głównego (jedna akcja na widok).
+- Zawijanie: `wrap-anywhere` zamiast `break-words` w tytule i opisie: element `flex-col items-start` ma szerokość `fit-content`, a `break-words` nie zmniejsza szerokości minimalnej, więc długi adres bez spacji rozpychał kontener (410 px przy 320 px).
+- Podgląd najechania i fokusu TextLink w `.storybook/preview-states.css` (`data-preview-state`).
+
+## Decyzje właściciela z 2026-11-18 (PR K i dalsza kolejność)
+
+Zatwierdzone przez właściciela produktu, 2026-11-18:
+
+1. Pozostałe komponenty bazowe budujemy wyłącznie tam, gdzie ekran ich potrzebuje: **Textarea** i **Tabs** nie są budowane (brak, gdy ekran zażąda).
+2. Kolejność: PR K (ten), PR L Dialog + ConfirmDialog, PR M Menu, PR N Toast (Radix Toast z zainstalowanego `radix-ui`, bez nowej zależności; czas wyświetlania jako token).
+3. TextLink: podkreślenie ZAWSZE (nie tylko przy najechaniu), kolor akcji, globalny obrys fokusu 2 px, link zewnętrzny w tej samej karcie bez specjalnej ikony w tej partii, najechanie bez usuwania podkreślenia, kolor nigdy jedynym nośnikiem.
+4. Skeleton: statyczny blok `--muted`, bez pulsowania i animacji (R01.6, `prefers-reduced-motion`); cały kontener ładowania ma `aria-busy` i nie jest ogłaszany blok po bloku; kompozycje tylko jako udokumentowane przykłady z dokumentowanych ekranów; promienie z istniejących tokenów.
+5. EmptyState i ErrorState: bez ikon i ilustracji; tekst mówi, co się stało i co zrobić; EmptyState ma jedną akcję (Button, np. "Dodaj wpis"); ErrorState ma "Spróbuj ponownie" i wyraźne rozgraniczenie od Alertu (Alert: komunikat przy formularzu lub polu; ErrorState: zastępuje treść widoku, której nie da się pokazać); nagłówki z poziomem (h2-h4) jak CardTitle; EmptyState bez roli live; ErrorState z `role="alert"` tylko, gdy pojawia się dynamicznie po nieudanym wczytaniu.
+6. Wagi 400/600/700, bez cieni, promienie tylko z istniejących tokenów, odstępy z istniejących tokenów semantycznych. Kolor hover dla `destructive` nadal otwarty.
+
 ## Dalsze komponenty bazowe (etap 2, ciąg dalszy) i czego potrzeba od właściciela
 
-Partia 2 jest zakończona. Zostają komponenty bazowe z listy powyżej; po nich etap 3 (komponenty produktu, wzorce, ekrany epików).
+PR K zakończony (TextLink, Skeleton, EmptyState, ErrorState). Pozostałe komponenty bazowe powstają tylko tam, gdzie ekran ich potrzebuje; po nich etap 3 (komponenty produktu, wzorce, ekrany epików).
 
-| Komponent | Czego potrzeba od właściciela |
-|---|---|
-| TextLink | wygląd (podkreślenie zawsze czy przy najechaniu; kolor `--primary`), zachowanie linku zewnętrznego |
-| Textarea | potwierdzenie, że opis wpisu bywa wielowierszowy (E02); jeśli nie, pomijamy |
-| Dialog | Radix Dialog; kolor tła przesłony (nowy token, bez surowej wartości w komponencie), szerokość i przewijanie przy 320 px, przycisk zamknięcia (ikona `X`), powrót fokusu |
-| ConfirmDialog | wzorzec treści (co się stanie, nazwy przycisków), fokus domyślny na "Anuluj", kolor hover `destructive` (luka otwarta od PR E) |
-| Menu | Radix DropdownMenu dla akcji serii (E02-S03); wygląd wyzwalacza (przycisk ikony 36 px), kolory pozycji (`--muted`), zachowanie na dotyk |
-| Tabs | decyzja, czy w ogóle potrzebne: żadna specyfikacja nie ma ekranu z zakładkami |
-| Skeleton | decyzja o ruchu: R01.6 (prawie bez ruchu) wskazuje statyczny placeholder (`--muted`), bez pulsowania; potwierdzenie |
-| EmptyState | treść i wezwanie do działania (CTA), czy dopuszczalna ikona (L5), układ w karcie |
-| ErrorState | treść błędu i akcja "Spróbuj ponownie", rozgraniczenie od Alert |
-| Toast | potwierdzenie po zapisie (R01.6, P5): biblioteka (Radix Toast bez nowej zależności albo nowa; wymaga zgody), czas wyświetlania (token), miejsce na ekranie, `aria-live`, ruch |
+| PR | Komponent | Czego potrzeba od właściciela |
+|---|---|---|
+| L | Dialog | Radix Dialog; kolor tła przesłony (nowy token, bez surowej wartości w komponencie), szerokość i przewijanie przy 320 px, przycisk zamknięcia (ikona `X`), powrót fokusu |
+| L | ConfirmDialog | wzorzec treści (co się stanie, nazwy przycisków), fokus domyślny na "Anuluj", kolor hover `destructive` (luka otwarta od PR E) |
+| M | Menu | Radix DropdownMenu dla akcji serii (E02-S03); wygląd wyzwalacza (przycisk ikony 36 px), kolory pozycji (`--muted`), zachowanie na dotyk |
+| N | Toast | Radix Toast z zainstalowanego `radix-ui` (bez nowej zależności); czas wyświetlania jako token (propozycja z `--duration-feedback`: potwierdzenie ok. 3 s), miejsce na ekranie, `aria-live`, ruch |
+| brak | Textarea, Tabs | brak, gdy ekran zażąda (decyzja 2026-11-18) |
 
 Układ poziomy etykiety w Field (etykieta obok pola) dla Checkboxa i RadioGroup oraz wspólny komponent grupy pól wyboru: do rozstrzygnięcia przy wzorcu formularza (etap 3). Kolor hover dla `destructive` nadal otwarty.
