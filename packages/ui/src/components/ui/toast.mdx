@@ -1,0 +1,183 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './toast.stories';
+
+<Meta of={Stories} />
+
+# Toast
+
+Krótkie potwierdzenie, które pojawia się u dołu ekranu po wykonanej czynności (zapis wpisu, R01.6, P5) i znika samo po kilku sekundach. To `ToastProvider` (jeden na aplikację, przy korzeniu drzewa) i hook `useToast()` z funkcją `toast()`, na Radix Toast z zainstalowanego `radix-ui` (bez nowej zależności). Źródło reguł: R01.6 i P5 (referencje), tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-18, WCAG 2.2 (1.4.3, 2.1.1, 2.2.1, 2.5.8, 4.1.3) i WAI-ARIA (role `status`, `alert`). Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+Toast w dokumentacji jest pokazany w ramce (iframe), żeby leżał u dołu tej ramki tak jak u dołu ekranu. W dokumentacji (i tylko tam) czas wyświetlania jest wydłużony do godziny, żeby przykład nie znikał.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Potwierdza użytkownikowi, że czynność się udała, bez przerywania jego pracy: nie zabiera fokusu, nie wymaga kliknięcia, znika sam. Czytnik ekranu ogłasza go uprzejmie (po zakończeniu bieżącej wypowiedzi).
+
+## 2. Kiedy używać
+
+- Potwierdzenie po zapisie wpisu: "Zapisano wpis Czynsz (przykład): 1 850,00 zł." (E02, R01.6). Użytkownik widzi, że zapis się udał, a pole formularza dalej ma fokus.
+- Inne krótkie potwierdzenia, które nie niosą nic więcej niż "zrobione" i nie wymagają reakcji.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| **Błąd, który wymaga działania** (nie udało się zapisać, spróbuj ponownie) | Alert albo ErrorState: zostaje na stronie, dopóki użytkownik nie zareaguje. Toast znika sam i użytkownik mógłby go nie zdążyć przeczytać (WCAG 2.2.1) |
+| Pytanie albo potwierdzenie przed nieodwracalną akcją | ConfirmDialog |
+| Informacja, którą użytkownik ma mieć stale przed oczami (blokada logowania z czasem) | Alert |
+| Komunikat przy konkretnym polu formularza | Field (błąd pod polem) |
+| Wiadomość z akcją do wykonania (np. "Cofnij") | brak w tej partii, patrz "Czego brakuje" |
+| Informacja, bez której użytkownik nie skończy zadania | tekst na stronie; toast może zniknąć niezauważony |
+
+## 4. Anatomia
+
+1. Region powiadomień (`ol` w obszarze `region` nazwanym przez `viewportLabel`): leży przy dolnej krawędzi ekranu, zawiera widoczny toast; do niego przechodzi się klawiszem `F8`.
+2. Powierzchnia toastu (wymagana): `--card`, ramka `--border`, `rounded-card`, bez cienia (A2), odstęp wewnętrzny `--space-panel`, tekst `--foreground`.
+3. Treść (wymagana): jedno krótkie zdanie 14 px przekazane w `message`.
+4. Przycisk zamknięcia (zawsze): Button `secondary` z **tekstem** przekazanym w `closeLabel` (np. "Zamknij"), 36 px wysokości, bez ikony.
+5. Niewidoczny element ogłaszający dla czytnika ekranu (Radix): tekst z `announcementLabel` i `message`.
+
+<Canvas of={Stories.Confirmation} />
+
+## 5. Warianty
+
+Jedna postać wizualna. Różni się tylko sposób ogłaszania (`announce` w `toast()`):
+
+| Wartość | Znaczenie | Kiedy |
+|---|---|---|
+| `polite` (domyślnie) | czytnik ogłasza po zakończeniu bieżącej wypowiedzi (`aria-live="polite"`, Radix `type="background"`) | każde potwierdzenie |
+| `assertive` | czytnik przerywa bieżącą wypowiedź (`aria-live="assertive"`, Radix `type="foreground"`) | tylko błąd, który **nie wymaga działania** i ma być usłyszany od razu |
+
+Mechanizm `assertive` jest opisany i przetestowany, ale **nie jest używany na pierwszych ekranach**: błąd wymagający działania nigdy nie jest toastem (patrz "Kiedy nie używać"). Źródło: decyzja właściciela, 2026-11-18.
+
+## 6. Stany
+
+| Stan | Wygląd i zachowanie |
+|---|---|
+| Brak toastu | region istnieje (dla klawisza `F8`), nic nie jest widoczne; strona pod spodem działa normalnie |
+| Widoczny | u dołu ekranu; odlicza czas z tokenu `--toast-duration` (3 s) |
+| Wstrzymany (najechanie wskaźnikiem) | odliczanie stoi, dopóki wskaźnik jest nad regionem; po zjechaniu odlicza dalej od miejsca, w którym stanęło |
+| Wstrzymany (fokus) | odliczanie stoi, dopóki fokus jest w regionie (`F8`, toast albo przycisk "Zamknij"); wstrzymanie nie zmienia wyglądu |
+| Kolejny w kolejce | niewidoczny; pojawia się, gdy poprzedni zniknie |
+| Fokus na przycisku "Zamknij" | globalny obrys 2 px (`--ring`) |
+| Najechanie na przycisk "Zamknij" | tło `--muted-hover` jak w Button `secondary` |
+| Ładowanie, zablokowany, błąd, wybrany | nie dotyczą |
+
+Wstrzymanie nie ma wyglądu, więc nie ma podglądu stanu (`data-preview-state`); sprawdza je test w przeglądarce. Dwa potwierdzenia naraz pokazują kolejkę:
+
+<Canvas of={Stories.Queued} />
+
+## 7. Zachowanie i dostępność
+
+- **Ogłaszanie:** toast nie ma własnej roli `status` ani `alert`. Radix dokłada niewidoczny element w `body` (`role="status"`, `aria-live="polite"` albo `assertive`) z tekstem `announcementLabel` + `message`; po sekundzie element znika. Dla potwierdzenia jest `polite` (Radix `type="background"`), więc czytnik nie przerywa użytkownikowi pracy. Przycisk "Zamknij" nie jest ogłaszany.
+- **Fokus:** toast nie zabiera fokusu przy pojawieniu się (test: po kliknięciu "Zapisz wpis" fokus zostaje na przycisku). Zamknięcie z fokusem wewnątrz toastu przenosi fokus na region, nie na `body`.
+- **Klawiatura:** `F8` przenosi fokus do regionu powiadomień (Radix, domyślny skrót), potem `Tab` do toastu i do przycisku "Zamknij" (`Enter` albo spacja zamyka); `Escape` zamyka toast, gdy fokus jest w nim. Bez `F8` toast leży poza porządkiem `Tab` strony (region jest na końcu drzewa), więc użytkownik klawiatury o nim nie "potknie się", a nie musi też go zamykać, bo zniknie sam. Skrót w nazwie regionu pochodzi z `viewportLabel` (znacznik `{hotkey}` zamieniany na `F8`).
+- **Czas (WCAG 2.2.1):** czas to token `--toast-duration` (3 s), odczytywany z arkusza stylów w chwili pojawienia się toastu. Odliczanie jest wstrzymane, gdy wskaźnik jest nad regionem albo fokus jest w regionie; po zjechaniu lub utracie fokusu odlicza dalej. Radix wstrzymuje także, gdy okno traci fokus. Użytkownik, który potrzebuje więcej czasu, ma wstrzymanie i przycisk zamknięcia.
+- **Kolejka:** widoczny jest jeden toast; kolejne czekają i pojawiają się po zniknięciu poprzedniego (każdy dostaje pełny czas i własne ogłoszenie). Jeśli wskaźnik albo fokus pozostaje w regionie, kolejny toast też czeka z odliczaniem do zjechania lub wyjścia fokusu.
+- **Gest przesunięcia:** wyłączony (próg przesunięcia nieskończony); toast zamyka się tylko czasem, przyciskiem i `Escape`. Test: przeciągnięcie wskaźnika o 300 px nie zamyka toastu. Źródło: decyzja właściciela, 2026-11-18.
+- **Okna modalne:** otwarte Dialog albo ConfirmDialog wyłącza resztę strony dla czytnika ekranu, więc toast wywołany spod okna zostanie ogłoszony dopiero po jego zamknięciu. Wywołuj toast po zamknięciu okna (np. po zatwierdzeniu w ConfirmDialog).
+- **Ruch:** bez animacji pojawiania i znikania (R01.6); `prefers-reduced-motion` nie wymaga dodatkowej obsługi.
+- **Cele:** przycisk "Zamknij" ma 36 px wysokości (WCAG 2.5.8 wymaga 24 px).
+- **Kontrast:** `--foreground` na `--card` 14,68:1; ramka `--border` 1,47:1 jest dekoracją (jak ramka karty), więc toast od strony odróżnia także tło `--card` i położenie. Przycisk `secondary`: `--foreground` na `--muted` 11,86:1.
+- **Czytnik ekranu:** ogłoszenia konkretnego czytnika nie były sprawdzane; zachowanie `aria-live` sprawdza test przez atrybuty.
+
+## 8. Treść
+
+- **Wiadomość (`message`)**: jedno zdanie w czasie przeszłym, o tym, co się stało, i do którego obiektu się odnosi: "Zapisano wpis Czynsz (przykład): 1 850,00 zł." Nie "Sukces!" ani "Operacja zakończona".
+- **Przycisk zamknięcia (`closeLabel`)**: czasownik: "Zamknij".
+- **Nazwa regionu (`viewportLabel`)**: nazwa z miejscem na skrót: "Powiadomienia ({hotkey})". Znacznik `{hotkey}` jest zamieniany na `F8`.
+- **Przedrostek ogłoszenia (`announcementLabel`)**: jedno słowo, które czytnik ekranu powie przed treścią: "Powiadomienie".
+- Długi tekst zawija się (`wrap-anywhere`), toast nie przekracza szerokości ekranu minus margines.
+- Teksty przekazuje aplikacja (komponent nie ma żadnego własnego tekstu). Dane w przykładach oznaczaj "(przykład)" (A5).
+
+## 9. Responsywność
+
+| Szerokość | Położenie |
+|---|---|
+| 320 px | u dołu ekranu na całą szerokość pomniejszoną o margines `--toast-viewport-offset` (16 px) z każdej strony |
+| od 768 px | w prawym dolnym rogu, 384 px szerokości (`w-96`), margines `--toast-viewport-offset` od prawej i dolnej krawędzi |
+| 1280 px i więcej | bez zmian |
+
+Granica 768 px to breakpoint `md` Tailwinda (po szerokości okna przeglądarki). 384 px to wartość ze skali Tailwinda, nie token (**propozycja**).
+
+<Canvas of={Stories.LongTextNarrowScreen} />
+<Canvas of={Stories.WideScreen} />
+
+## 10. API
+
+`ToastProvider` (jeden na aplikację, otacza stronę):
+
+| Prop | Typ | Opis |
+|---|---|---|
+| `children` | `ReactNode` | strona aplikacji |
+| `closeLabel` | `string` | tekst przycisku zamknięcia (wymagany) |
+| `viewportLabel` | `string` | nazwa regionu powiadomień ze znacznikiem `{hotkey}` (wymagana) |
+| `announcementLabel` | `string` | przedrostek ogłoszenia dla czytnika ekranu (wymagany) |
+
+`useToast()` zwraca `{ toast, dismiss }` i rzuca błąd poza `ToastProvider`:
+
+| Funkcja | Opis |
+|---|---|
+| `toast({ message, announce? })` | dodaje toast do kolejki i zwraca jego identyfikator; `announce`: `'polite'` (domyślnie) albo `'assertive'` |
+| `dismiss(id)` | usuwa toast o danym identyfikatorze, widoczny albo czekający |
+
+Czas wyświetlania nie jest propsem: to token `--toast-duration` (3 s), odczytywany w chwili pokazania toastu (`--toast-duration-with-action`, 6 s, jest zarezerwowany dla toastu z akcją i na razie nieużywany). Komponent nie przyjmuje `className` ani innych atrybutów: wygląd jest jeden.
+
+## 11. Kod
+
+Provider raz, przy korzeniu aplikacji:
+
+```tsx
+import { ToastProvider } from '@aitl/ui';
+
+<ToastProvider closeLabel="Zamknij" viewportLabel="Powiadomienia ({hotkey})" announcementLabel="Powiadomienie">
+  {children}
+</ToastProvider>;
+```
+
+Potwierdzenie po zapisie wpisu (E02), wywołane po udanej odpowiedzi serwera:
+
+```tsx
+import { useToast } from '@aitl/ui';
+
+const { toast } = useToast();
+
+async function save(entry: Entry) {
+  await saveEntry(entry);
+  toast({ message: `Zapisano wpis ${entry.name}: ${entry.amount} zł.` });
+}
+```
+
+Mechanizm pilnego ogłoszenia (nieużywany na pierwszych ekranach; tylko błąd, który nie wymaga działania):
+
+```tsx
+toast({ message: 'Nie udało się odświeżyć podsumowania; pokazujemy poprzednie dane.', announce: 'assertive' });
+```
+
+<Canvas of={Stories.EntrySaved} />
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: Alert (komunikat, który zostaje na stronie, także błąd wymagający działania), ErrorState (błąd wczytania z przyciskiem ponowienia), ConfirmDialog (pytanie przed akcją), Field (błąd przy polu).
+- Występuje we wzorcach: potwierdzenie po zapisie wpisu (E02), przegląd miesiąca po zmianie serii (etap 3).
+
+## Czego brakuje
+
+- **Akcja w toaście** (np. "Cofnij"): nie jest zbudowana, bo żaden ekran jej nie wymaga. API jest rozszerzalne bez zmian dla istniejących wywołań: `toast()` dostanie opcjonalne pole akcji, a dla toastu z akcją czas z zarezerwowanego tokenu `--toast-duration-with-action` (6 s). Akcja wymaga decyzji właściciela (wygląd, etykieta, co dokładnie cofa).
+- **Ikona**: brak (zgodnie z EmptyState i ErrorState).
+- **Wariant błędu o innym wyglądzie**: `announce="assertive"` zmienia tylko ogłaszanie, nie wygląd; błąd wymagający działania to Alert albo ErrorState.
+- **Kilka toastów naraz**: decyzja właściciela to jeden widoczny, reszta w kolejce; brak ograniczenia długości kolejki.
+- **Zachowanie na dotyk i czytniki ekranu**: sprawdzone w Chromium (mysz, klawiatura); rzeczywiste urządzenia dotykowe, Safari i ogłoszenia czytników ekranu nie były sprawdzane.
+- **Ciemny motyw**: czeka na L3.
+- Wymiary: szerokość 384 px i granica 768 px to **propozycje** (wartości ze skali Tailwinda), czekają na akceptację właściciela.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w tym komponencie uruchamiają się w `npm run test:storybook`: toast pojawia się w regionie powiadomień, jest ogłaszany `polite` z przedrostkiem i nie zabiera fokusu; znika sam po czasie z tokenu `--toast-duration` (w teście skróconym); przycisk "Zamknij" jest tekstem, ma co najmniej 36 px i zamyka; widoczny jest jeden toast, drugi pojawia się po zamknięciu pierwszego; odliczanie jest wstrzymane przy najechaniu i przy fokusie (`F8`, `Tab`, `Enter`); gest przesunięcia nie zamyka; przy 320 px toast leży u dołu z marginesem z tokenu, przy 1280 px w prawym dolnym rogu (384 px); kolory, ramka, promień i brak cienia z tokenów; po zapisie wpisu fokus zostaje na przycisku formularza.

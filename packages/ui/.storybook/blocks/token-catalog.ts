@@ -206,6 +206,12 @@ export const SPACE_MEANINGS: readonly TokenEntry[] = [
     avoid: 'padding karty (to --space-panel)',
   },
   { name: '--space-section', origin: 'R01.4', use: 'między sekcjami strony', avoid: 'wartości spoza skali (2, 6, 14 px)' },
+  {
+    name: '--toast-viewport-offset',
+    origin: 'decyzja właściciela produktu, 2026-11-18 (margines toastu od krawędzi ekranu; wartość 16 px = --space-4)',
+    use: 'odstęp regionu powiadomień od dolnej, lewej i prawej krawędzi ekranu',
+    avoid: 'odstępy wewnątrz toastu (to --space-panel)',
+  },
 ];
 
 export const SHAPE_TOKENS: readonly TokenEntry[] = [
@@ -231,7 +237,19 @@ export const MOTION_TOKENS: readonly TokenEntry[] = [
   {
     name: '--duration-feedback',
     origin: 'R01.6 (P5, wartość z propozycji, zatwierdzona)',
-    use: 'hover; potwierdzenie zapisu widoczne ok. 3 s',
+    use: 'hover przycisków',
     avoid: 'animacje dekoracyjne',
+  },
+  {
+    name: '--toast-duration',
+    origin: 'decyzja właściciela produktu, 2026-11-18 (ok. 3 s; zastępuje zapis "potwierdzenie widoczne ok. 3 s" przy --duration-feedback)',
+    use: 'czas wyświetlania potwierdzenia (Toast); odczytywany przy pokazaniu toastu',
+    avoid: 'animacje i przejścia (to --duration-feedback)',
+  },
+  {
+    name: '--toast-duration-with-action',
+    origin: 'decyzja właściciela produktu, 2026-11-18 (ok. 6 s dla toastu z akcją)',
+    use: 'zarezerwowany dla toastu z akcją; do czasu dodania akcji nieużywany',
+    avoid: 'toast bez akcji (to --toast-duration)',
   },
 ];
