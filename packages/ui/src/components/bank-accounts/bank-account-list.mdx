@@ -1,0 +1,142 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './bank-account-list.stories';
+
+<Meta of={Stories} />
+
+# BankAccountList
+
+Lista kont bankowych zalogowanego użytkownika (E01-S01, E01-S02): nazwa konta jako link, plakietka "Wspólne" albo "Osobiste" i cztery stany danych (ładowanie, pusto, błąd, wczytane). Składa się z Badge, TextLink, Skeleton, EmptyState i ErrorState. Źródło reguł: specyfikacja `.ai/specs/2026-11-17-auth-and-app-foundation.md` (`GET /api/bank-accounts`, Q5-Q7, Q13), R01.2 (plakietki), R01.5, A3, tokeny, decyzje właściciela z 2026-11-18, WCAG 2.2. Reguła bez źródła jest oznaczona jako **propozycja**.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Pokazuje użytkownikowi jego konta bankowe i prowadzi do wybranego konta.
+
+## 2. Kiedy używać
+
+- Strona `/` po zalogowaniu: lista kont użytkownika (E01-S01).
+- Żona widzi tylko konto wspólne (E01-S02): ten sam komponent, lista z jednym kontem.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| "Ile zostanie" per konto w miesiącu | AccountRemainderCard (przegląd miesiąca, E03) |
+| Wpisy konta | tabela wpisów (E02) |
+| Wybór konta w formularzu | Select |
+| Aktywne (wybrane) konto | nie należy do tego komponentu: stan aktywny ma karta w przeglądzie miesiąca (E03) |
+
+## 4. Anatomia
+
+1. Sekcja (`section` z `aria-labelledby`) z nagłówkiem "Twoje konta bankowe" (domyślnie `h2`, na stronie `/` przekazujemy `h1`), 20 px / 600.
+2. Lista `ul` z elementami `li` (nie tabela, nie `role` nadpisywane): jedna pozycja na konto.
+3. Pozycja: ramka `--border` na `--card`, nazwa konta jako TextLink (36 px wysokości, 600) po lewej i Badge z typem po prawej; w wąskim kontenerze plakietka zawija się pod nazwę.
+4. Stany: Skeleton (2 wiersze) w kontenerze z `aria-busy`, EmptyState, ErrorState z ponowieniem.
+
+Bez ikon, bez awatarów, bez sumy kwot, bez sortowania.
+
+<Canvas of={Stories.Loaded} />
+
+## 5. Warianty
+
+Jeden wygląd. Typ konta to dane, nie wariant komponentu: `shared` daje plakietkę "Wspólne" (niebieską), `personal` "Osobiste" (fioletową), z tekstem, bo kolor nie jest jedynym nośnikiem znaczenia (A3).
+
+## 6. Stany
+
+| Stan | Co widać | Story |
+|---|---|---|
+| Wczytane, wspólne i osobiste | dwie pozycje w kolejności z API | Wczytane |
+| Członek tylko konta wspólnego (E01-S02) | jedna pozycja; brak konta osobistego i brak śladu jego istnienia | Członek tylko konta wspólnego |
+| Ładowanie | nagłówek i szkielet w kontenerze `aria-busy="true"`, bez listy | Ładowanie |
+| Pusto | EmptyState: "Nie masz jeszcze żadnego konta bankowego" i opis; akcja opcjonalna (`emptyAction`) | Pusto, Pusto z opcjonalną akcją |
+| Błąd wczytania | ErrorState z przyciskiem "Spróbuj ponownie" (ogłaszany `role="alert"`) | Błąd wczytania |
+| Ponowna próba | przycisk ponowienia w stanie `loading` | Ponowna próba |
+| Dużo danych | osiem kont jedno pod drugim, bez stronicowania | Dużo danych |
+| Długie nazwy, 320 px | nazwa zawija się (`wrap-anywhere`), plakietka pod nazwą | Długie nazwy |
+
+Najechanie i fokus ma link (jak TextLink: podkreślenie zawsze, najechanie `--primary-hover`). Zablokowany i wybrany: nie dotyczy.
+
+<Canvas of={Stories.SharedOnlyMember} />
+<Canvas of={Stories.Empty} />
+<Canvas of={Stories.ErrorState} />
+<Canvas of={Stories.ManyAccounts} />
+
+## 7. Zachowanie i dostępność
+
+- Semantyka: `section` (region nazwany nagłówkiem), `ul`/`li`, linki. Czytnik ekranu ogłasza "lista, 2 elementy".
+- Ładowanie ogłasza wyłącznie `aria-busy` na sekcji, bez tekstu "Wczytywanie" i bez `aria-live` (decyzja właściciela z 2026-11-18, Skeleton). Skeleton jest `aria-hidden`.
+- Błąd: ErrorState z `role="alert"` ogłasza się, gdy zastąpi szkielet. Pusto: zwykła treść z nagłówkiem, bez roli live.
+- Nagłówki: stany mają poziom o jeden niższy niż tytuł listy (`h1` daje `h2`, `h2` daje `h3`), więc struktura się nie zapętla.
+- Klawiatura: `Tab` przechodzi po linkach w kolejności listy, `Enter` otwiera konto. Cel kliknięcia linku 36 px (>= 24 px, WCAG 2.5.8).
+- Plakietka nie jest interaktywna i nie ma osobnej roli; jej tekst czytnik ekranu przeczyta po nazwie konta.
+- Członek tylko konta wspólnego nie dostaje żadnej wskazówki o koncie osobistym drugiej osoby (Q13: brak śladu istnienia).
+
+## 8. Treść
+
+Teksty to nazwane stałe w `messages.ts` (`DEFAULT_BANK_ACCOUNT_LIST_MESSAGES`), nadpisywalne propem `messages`. Nazwy kont pochodzą z danych (przykłady oznaczamy "(przykład)", A5).
+
+- Tytuł: "Twoje konta bankowe". Plakietki: "Wspólne", "Osobiste".
+- Pusto: "Nie masz jeszcze żadnego konta bankowego" + "Gdy konto zostanie Ci przypisane, zobaczysz je tutaj." Konta tworzy administrator (seed), więc domyślnie bez przycisku; opcjonalna `emptyAction` (np. "Sprawdź ponownie") jest przeznaczona na odświeżenie listy.
+- Błąd: "Nie udało się wczytać kont bankowych" + "Sprawdź połączenie z internetem i spróbuj ponownie." + przycisk "Spróbuj ponownie".
+- Długość nazwy: bez obcinania, zawija się. Kolejność: dokładnie jak z API, bez sortowania (decyzja właściciela, 2026-11-18).
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | jedna kolumna; nazwa i plakietka zawijają się w pozycji; bez przewijania poziomego |
+| 768 px | pozycja w jednym wierszu: nazwa po lewej, plakietka po prawej |
+| 1440 px | bez zmian; lista w kolumnie do 960 px (R01.4) |
+
+<Canvas of={Stories.LongNamesNarrowScreen} />
+
+## 10. API
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `status` | `'loading' \| 'error' \| 'loaded'` | | wymagany; stan danych |
+| `accounts` | `{ id: string; name: string; type: 'shared' \| 'personal'; href: string }[]` | `[]` | konta w kolejności z API; używane przy `loaded` |
+| `onRetry` | `() => void` | | wymagany; ponowienie wczytania (przycisk w ErrorState) |
+| `retrying` | `boolean` | `false` | przycisk ponowienia w stanie `loading` |
+| `emptyAction` | `{ label: string; onClick: () => void }` | | opcjonalna akcja w stanie pustym |
+| `messages` | `Partial<BankAccountListMessages>` | `DEFAULT_BANK_ACCOUNT_LIST_MESSAGES` | nadpisanie tekstów |
+| `headingLevel` | `'h1' \| 'h2'` | `'h2'` | poziom nagłówka listy |
+| `className` | `string` | | klasy sekcji |
+
+Kontrakt danych odpowiada `GET /api/bank-accounts` (`{ id, type, name }`); `href` dodaje `app` (np. `/konta/{id}`). Kształt `href` zostaje do etapu 5, razem z adapterem nawigacji (zwykły `<a>` robi pełne przeładowanie; `TextLink` ma `asChild`, więc `app` może opakować `Link` z Next).
+
+## 11. Kod
+
+Minimalny przykład:
+
+```tsx
+import { BankAccountList } from '@aitl/ui';
+
+<BankAccountList status="loaded" accounts={accounts} onRetry={reload} />;
+```
+
+Typowy przykład z produktu, strona `/`:
+
+```tsx
+<main>
+  <BankAccountList
+    status={isLoading ? 'loading' : error ? 'error' : 'loaded'}
+    accounts={data?.bankAccounts.map((account) => ({ ...account, href: `/konta/${account.id}` }))}
+    onRetry={refetch}
+    retrying={isFetching}
+    headingLevel="h1"
+  />
+</main>
+```
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: AccountRemainderCard (kwoty "ile zostanie" w miesiącu, E03), Select (wybór konta w formularzu), tabela wpisów (E02).
+- Występuje w: ekran `/` (E01, `Ekrany / E01 Dostęp i logowanie / Strona główna`).
+- Braki: patrz "Czego brakuje" (brak stanu aktywnego, brak stronicowania i wyszukiwania, adapter nawigacji w `app`).

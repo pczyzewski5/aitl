@@ -1,0 +1,97 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './login-screen.stories';
+
+<Meta of={Stories} />
+
+# Ekran: Logowanie (`/login`)
+
+Pełnoekranowa kompozycja strony logowania (E01-S01). Źródło: specyfikacja `.ai/specs/2026-11-17-auth-and-app-foundation.md` (UI/UX, API), R01.1, R01.4, R01.7, decyzje właściciela z 2026-11-18. Strona w `packages/app` powstanie później (etap 5); tu jest wzorzec, do którego ma się sprowadzić.
+
+<Canvas of={Stories.Default} />
+
+## 1. Do czego służy
+
+Jedyna publiczna strona aplikacji: użytkownik loguje się własnym kontem, a po sukcesie trafia na `/` (lista kont).
+
+## 2. Kiedy używać
+
+- Wejście bez sesji na dowolną chronioną stronę przekierowuje tutaj (strony czytają `await cookies()` i przekierowują na `/login`).
+- Wygasła sesja (30 dni nieaktywności albo 90 dni od logowania, spec Q14).
+
+## 3. Kiedy nie używać
+
+Zalogowany użytkownik, który wejdzie na `/login`, powinien zostać przekierowany na `/` (**propozycja** do etapu 5; spec o tym nie mówi).
+
+## 4. Anatomia
+
+1. Nagłówek strony (`header`, landmark "banner") z samym tekstem "AITL" na tle `--primary` (bez logo, bez nawigacji, bez linków).
+2. Treść (`main`) w kolumnie do 960 px (R01.4), wyrównana do lewej, z kartą LoginForm do 28 rem.
+3. Brak stopki (`contentinfo`).
+
+Struktura nagłówków: `h1` "Logowanie" jest nagłówkiem karty LoginForm.
+
+## 5. Mapa stanów (która story pokazuje który stan)
+
+| Stan ekranu | Story |
+|---|---|
+| Pusty formularz | Stan: pusty formularz |
+| Błąd pola po opuszczeniu | Stan: błąd pola po jego opuszczeniu |
+| Kilka błędów z podsumowaniem | Stan: kilka błędów z podsumowaniem |
+| Wysyłanie | Stan: wysyłanie |
+| Błędny e-mail lub hasło (401, komunikat ogólny) | Stan: błędny e-mail lub hasło |
+| Blokada (429, z sekundami) | Stan: blokada po zbyt wielu próbach |
+| Brak sieci | Stan: brak sieci |
+| 768 px | Szerokość: 768 px |
+| 320 px, długi komunikat blokady | Szerokość: 320 px |
+| Testy: kolejność fokusu, brak stopki, brak logo | Test: kolejność fokusu |
+
+Stany "ładowanie strony", "pusto" i "błąd wczytania" nie dotyczą tego ekranu (brak danych do wczytania); sukces to przekierowanie.
+
+<Canvas of={Stories.Loading} />
+<Canvas of={Stories.InvalidCredentials} />
+<Canvas of={Stories.Lockout} />
+
+## 6. Zachowanie i dostępność
+
+- Landmarki: `banner`, `main`; formularz jest nazwany "Logowanie". Brak stopki, brak powtórzonych landmarków.
+- Fokus: po wejściu na stronę fokus zostaje na dokumencie (nie przenosimy go na pole, żeby czytnik ekranu przeczytał stronę od góry); `Tab` trafia na e-mail, hasło, przycisk. W nagłówku nie ma elementów interaktywnych.
+- Błędy: wg wzorca formularza (fokus na pierwszym błędzie, podsumowanie tylko przy kilku błędach, błąd serwera jako Alert u góry formularza).
+- Tytuł dokumentu (`<title>`), dla strony w `app`: "Logowanie – AITL" (**propozycja**).
+
+## 7. Treść
+
+Teksty komponentu: patrz strona LoginForm (komunikaty zatwierdzone 2026-11-18). Nagłówek strony to wyłącznie nazwa produktu "AITL", bez hasła reklamowego.
+
+## 8. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | karta na całą szerokość kolumny, jedna kolumna, bez przewijania poziomego |
+| 768 px | karta do 28 rem, wyrównana do lewej |
+| 1440 px | kolumna treści do 960 px, wyrównana do środka okna jak nagłówek |
+
+<Canvas of={Stories.Tablet} />
+<Canvas of={Stories.NarrowScreen} />
+
+## 9. Kompozycja
+
+```tsx
+<div className="flex min-h-screen flex-col bg-background text-foreground">
+  <header className="bg-primary text-primary-foreground">
+    <div className="mx-auto flex w-full max-w-240 items-center p-(--space-panel)">
+      <p className="text-xl font-semibold leading-base">AITL</p>
+    </div>
+  </header>
+  <main className="mx-auto w-full max-w-240 flex-1 px-(--space-panel) py-(--space-section)">
+    <LoginForm onSubmit={signIn} />
+  </main>
+</div>
+```
+
+Nagłówek jest dziś zapisany w samej story; po drugim ekranie z tym samym paskiem (strona konta, E02) wyodrębniamy komponent `AppShell` (patrz POSTEP.md).
+
+## 10. Braki
+
+- Strona w `packages/app` (route `(auth)/login`, adapter `apiCall`) powstaje w etapie 5.
+- Brak "pokaż hasło" i resetu hasła (poza zakresem, Q9).
+- Brak ciemnego motywu (L3).

@@ -1,0 +1,174 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './login-form.stories';
+
+<Meta of={Stories} />
+
+# LoginForm
+
+Formularz logowania (E01-S01): e-mail, hasło i przycisk "Zaloguj się" na karcie. Składa się z Card, Field, Input, Button, Alert i wzorca formularza (`useFormValidation`, `ErrorSummary`). Źródło reguł: specyfikacja `.ai/specs/2026-11-17-auth-and-app-foundation.md` (E01-S01, kontrakt `POST /api/auth/login`), R01.7, A3 (referencje), tokeny, decyzje właściciela z 2026-11-18 (komunikaty logowania, blokada bez odliczania na żywo), WCAG 2.2 i WAI-ARIA. Reguła bez źródła jest oznaczona jako **propozycja**.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Pozwala zalogować się własnym kontem i mówi wprost, co się stało i co zrobić, gdy się nie udało, nie zdradzając, czy dany e-mail istnieje.
+
+## 2. Kiedy używać
+
+- Strona `/login`, jedyna publiczna strona aplikacji (E01-S01).
+- Ponowne logowanie po wygaśnięciu sesji (ten sam formularz, ta sama strona).
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Formularz wpisu, filtrowania, ustawień | wzorzec formularza (`useFormValidation`) z własnymi polami |
+| Rejestracja, reset i zmiana hasła | nie istnieją w produkcie (Q1, Q9 specyfikacji); gdy się pojawią, osobny formularz |
+| Wylogowanie | link "Wyloguj" w nagłówku (TextLink), nie formularz |
+
+## 4. Anatomia
+
+1. Karta (Card), szerokość do 28 rem (`max-w-md`), jedna kolumna, wyrównana do lewej.
+2. Nagłówek "Logowanie": domyślnie `h1` (prop `headingLevel`: `h1` albo `h2`), 20 px / 600; nazywa też formularz (`aria-labelledby`), więc czytnik ekranu zna go jako landmark "formularz Logowanie".
+3. Alert błędu serwera (opcjonalny): pierwszy element formularza, tylko po nieudanym wysłaniu.
+4. Podsumowanie błędów (opcjonalne): tylko przy więcej niż jednym błędzie po wysłaniu.
+5. Pole "Adres e-mail" (Field + Input `email`, `autoComplete="username"`).
+6. Pole "Hasło" (Field + Input `password`, `autoComplete="current-password"`).
+7. Przycisk "Zaloguj się" (Button główny; w trakcie wysyłania "Logowanie…" ze wskaźnikiem ładowania).
+
+Bez logo, bez linku "Zapomniałem hasła" (reset poza zakresem, Q9), bez pola "Zapamiętaj mnie" (sesja jest przesuwna 30 dni, Q14), bez ikon i ozdobników (A1).
+
+## 5. Warianty
+
+Jeden wygląd, bez wariantów. Prop `headingLevel` zmienia tylko poziom nagłówka (`h1` na stronie logowania, `h2` gdy formularz leży w większej stronie).
+
+## 6. Stany
+
+| Stan | Co widać | Story |
+|---|---|---|
+| Czysty | pola puste, bez błędów | Czysty formularz |
+| Błąd pola | komunikat pod polem po jego opuszczeniu | Błąd pola po jego opuszczeniu |
+| Jeden błąd po wysłaniu | komunikat pod polem, fokus na polu, bez podsumowania | Wysłanie z jednym błędem |
+| Kilka błędów | podsumowanie z linkami, fokus na pierwszym polu | Kilka błędów |
+| Wysyłanie | przycisk `loading` ("Logowanie…"), dane zostają, drugie wysłanie zablokowane | Wysyłanie |
+| Błędne dane (401) | Alert u góry, ten sam tekst dla nieznanego e-maila i złego hasła | Błędne dane |
+| Blokada (429) | Alert u góry z liczbą sekund, statyczny | Blokada po zbyt wielu próbach |
+| Brak sieci | Alert u góry, dane zostają | Brak sieci, Żądanie rzuca wyjątek |
+| Sukces | formularz nie pokazuje nic własnego; przekierowanie robi aplikacja | Sukces |
+| Zablokowany | nie dotyczy: przycisk jest zawsze dostępny, a błędy mówią, co poprawić | |
+
+<Canvas of={Stories.FieldError} />
+<Canvas of={Stories.SeveralErrorsWithSummary} />
+<Canvas of={Stories.Loading} />
+<Canvas of={Stories.InvalidCredentials} />
+<Canvas of={Stories.Lockout} />
+<Canvas of={Stories.NetworkError} />
+
+## 7. Zachowanie i dostępność
+
+- Walidacja po opuszczeniu dotkniętego pola i przy wysłaniu; `noValidate` na formularzu, `aria-required="true"` na polach; komunikat jest powiązany z polem (`aria-describedby`) i ogłaszany (`role="alert"` w Field). Źródło: reguły wzorca formularza, zatwierdzone 2026-11-18.
+- Po nieudanym wysłaniu fokus trafia na pierwsze nieprawidłowe pole; podsumowanie (tylko gdy błędów jest więcej niż jeden) ma linki przenoszące fokus do pól.
+- Alert błędu serwera ma `role="alert"`: czytnik ekranu ogłasza go od razu. Komunikat jest **statyczny**, bez odliczania na żywo, żeby czytnik nie był zalewany co sekundę (decyzja właściciela, 2026-11-18). Po upływie czasu użytkownik po prostu wysyła formularz ponownie.
+- Blokada podwójnego wysłania: przycisk `loading` ma `aria-busy` i `aria-disabled` (zostaje w kolejności fokusu), a ponowne wysłanie przez Enter w polu jest ignorowane do zakończenia żądania. Po udanym logowaniu kolejne wysłania są ignorowane, dopóki aplikacja nie przekieruje.
+- Kolejność fokusu: e-mail, hasło, przycisk. Cel kliknięcia: pola i przycisk 36 px (`--control-height`).
+- Menedżery haseł: `autoComplete="username"` na polu e-mail i `current-password` na haśle (WCAG 1.3.5), pole e-mail z `autoCapitalize="none"` i bez sprawdzania pisowni.
+- Kolory: błąd w `--destructive` na `--card` (kontrast w tabeli tokenów); znaczenie niesie tekst i ramka pola, nie sam kolor (A3).
+
+## 8. Treść
+
+Wszystkie teksty to nazwane stałe w `messages.ts` (`DEFAULT_LOGIN_MESSAGES`), nadpisywalne propem `messages` (częściowo). Zatwierdzone przez właściciela produktu, 2026-11-18:
+
+| Sytuacja | Tekst |
+|---|---|
+| 401, nieznany e-mail i złe hasło | "Nie udało się zalogować. Sprawdź adres e-mail i hasło, a potem spróbuj ponownie." |
+| 429 | "Zbyt wiele prób logowania. Spróbuj ponownie za 87 sekund." |
+| 429 bez czasu (brak `retryAfterSeconds`) | "Zbyt wiele prób logowania. Spróbuj ponownie za chwilę." (**propozycja**: kontrakt API zawsze podaje sekundy, to zabezpieczenie) |
+| Brak sieci | "Nie udało się połączyć z serwerem. Sprawdź połączenie z internetem i spróbuj ponownie; wpisane dane zostały w formularzu." |
+| Pusty e-mail, niepełny e-mail | "Wpisz adres e-mail, np. jan@example.com.", "Adres e-mail wygląda na niepełny. Sprawdź, czy ma znak @ i domenę, np. jan@example.com." |
+| Puste hasło | "Wpisz hasło." |
+
+Odmiana "sekundę / sekundy / sekund" pochodzi z `formatSeconds` (reguły `Intl.PluralRules('pl')`, testowane dla 1, 2-4, 5-21, 22-24, 25, 87, 101, 102 i liczb niecałkowitych). Czas z API jest zaokrąglany w górę do pełnych sekund. Komunikat 401 nie zdradza, który z dwóch danych jest zły (specyfikacja: ten sam komunikat dla nieznanego e-maila i złego hasła). Zabronione: "Błąd 401", "Nieprawidłowy użytkownik", wykrzykniki.
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | karta na całą szerokość, jedna kolumna; długi komunikat zawija się (`wrap-anywhere`), bez przewijania poziomego |
+| 768 px | karta do 28 rem, wyrównana do lewej |
+| 1440 px | bez zmian; kolumna treści strony do 960 px (R01.4) |
+
+<Canvas of={Stories.NarrowScreen} />
+<Canvas of={Stories.LongErrorNarrowScreen} />
+
+## 10. API
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `onSubmit` | `(values: { email: string; password: string }) => Promise<LoginResult>` | | wymagany; wywoływany po przejściu walidacji z przyciętym e-mailem i niezmienionym hasłem |
+| `messages` | `Partial<LoginFormMessages>` | `DEFAULT_LOGIN_MESSAGES` | nadpisanie tekstów (także funkcja `tooManyAttempts(secondsText)`) |
+| `headingLevel` | `'h1' \| 'h2'` | `'h1'` | poziom nagłówka |
+| `className` | `string` | | klasy karty |
+
+Kontrakt `LoginResult` (`ui` nie importuje `@aitl/*`, więc `app` tłumaczy kopertę API na ten kształt):
+
+```ts
+type LoginResult =
+  | { ok: true }
+  | { ok: false; kind: 'invalid-credentials' | 'too-many-attempts' | 'network'; retryAfterSeconds?: number };
+```
+
+| Odpowiedź API (`app`) | Wynik dla `onSubmit` |
+|---|---|
+| 200 `{ ok: true }` | `{ ok: true }`, potem przekierowanie na `/` |
+| 401 `invalid_credentials` | `{ ok: false, kind: 'invalid-credentials' }` |
+| 429 `too_many_attempts` z `error.retryAfterSeconds` (i `Retry-After`) | `{ ok: false, kind: 'too-many-attempts', retryAfterSeconds }` |
+| `fetch` rzuca, 5xx, niepoprawny JSON | `{ ok: false, kind: 'network' }` albo wyjątek (formularz traktuje wyjątek jak brak sieci) |
+| 400 `validation_error` | nie powinno się zdarzyć po walidacji w formularzu; `app` mapuje na `network` albo `invalid-credentials` (**do decyzji w etapie 5**) |
+
+## 11. Kod
+
+Minimalny przykład:
+
+```tsx
+import { LoginForm } from '@aitl/ui';
+
+<LoginForm onSubmit={signIn} />;
+```
+
+Typowy przykład z produktu (adapter w `app`):
+
+```tsx
+'use client';
+
+import { LoginForm, type LoginResult } from '@aitl/ui';
+
+async function signIn(values: { email: string; password: string }): Promise<LoginResult> {
+  const response = await apiCall('/api/auth/login', { method: 'POST', body: values });
+  if (response.ok) {
+    return { ok: true };
+  }
+  if (response.error.code === 'too_many_attempts') {
+    return { ok: false, kind: 'too-many-attempts', retryAfterSeconds: response.error.retryAfterSeconds };
+  }
+  return { ok: false, kind: 'invalid-credentials' };
+}
+
+<LoginForm onSubmit={async (values) => {
+  const result = await signIn(values);
+  if (result.ok) {
+    router.replace('/');
+  }
+  return result;
+}} />;
+```
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: wzorzec formularza (to on daje walidację i fokus, LoginForm jest jego gotowym zastosowaniem), Alert (sam komunikat), ErrorSummary (podsumowanie kilku błędów).
+- Występuje w: ekran `/login` (E01, `Ekrany / E01 Dostęp i logowanie / Logowanie`).
+- Braki: patrz "Czego brakuje" (brak "pokaż hasło", brak resetu hasła, adapter API w `app` do etapu 5).

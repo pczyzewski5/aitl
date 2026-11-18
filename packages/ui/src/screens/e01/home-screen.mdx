@@ -1,0 +1,96 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './home-screen.stories';
+
+<Meta of={Stories} />
+
+# Ekran: Strona główna (`/`)
+
+Pełnoekranowa kompozycja strony po zalogowaniu: pasek z nazwą produktu i linkiem "Wyloguj" oraz lista kont bankowych użytkownika (E01-S01, E01-S02). Źródło: specyfikacja `.ai/specs/2026-11-17-auth-and-app-foundation.md` (UI/UX, `GET /api/bank-accounts`), R01.1, R01.4, A3, decyzje właściciela z 2026-11-18 (link na pasku `--primary`). Strona w `packages/app` powstanie później (etap 5).
+
+<Canvas of={Stories.Loaded} />
+
+## 1. Do czego służy
+
+Punkt wejścia po zalogowaniu: użytkownik widzi swoje konta i wybiera, które otworzyć, albo się wylogowuje.
+
+## 2. Kiedy używać
+
+- Po udanym logowaniu (przekierowanie z `/login`).
+- Wejście na `/` z aktywną sesją.
+
+## 3. Kiedy nie używać
+
+Przegląd miesiąca ("ile zostanie") i wpisy konta to osobne ekrany (E03, E02); ten ekran tylko wskazuje konto.
+
+## 4. Anatomia
+
+1. Pasek nagłówka (`header`, landmark "banner") na tle `--primary`: tekst "AITL" po lewej, link "Wyloguj" (TextLink) po prawej.
+2. Treść (`main`) w kolumnie do 960 px (R01.4): BankAccountList z nagłówkiem `h1` "Twoje konta bankowe".
+3. Brak stopki, brak logo, brak nawigacji (jedyna akcja to wylogowanie).
+
+Link na tle `--primary` ma kolor `--primary-foreground` z podkreśleniem także przy najechaniu, a cel 36 px (zatwierdzone 2026-11-18, TextLink).
+
+## 5. Mapa stanów (która story pokazuje który stan)
+
+| Stan ekranu | Story |
+|---|---|
+| Wczytane konta (wspólne i osobiste) | Stan: wczytane konta |
+| Członek tylko konta wspólnego (E01-S02) | Stan: członek tylko konta wspólnego |
+| Ładowanie | Stan: ładowanie |
+| Brak kont | Stan: brak kont |
+| Błąd wczytania z ponowieniem | Stan: błąd wczytania |
+| 768 px | Szerokość: 768 px |
+| 320 px, długa nazwa konta | Szerokość: 320 px, długa nazwa konta |
+| Testy: link na pasku `--primary`, kolejność fokusu | Test: link "Wyloguj"..., Test: kolejność fokusu |
+
+Stan "częściowe dane" i "dużo danych" pokazuje strona komponentu BankAccountList (osiem kont); sesja wygasła to przekierowanie na `/login`, nie stan tego ekranu.
+
+<Canvas of={Stories.SharedOnlyMember} />
+<Canvas of={Stories.Loading} />
+<Canvas of={Stories.Empty} />
+<Canvas of={Stories.ErrorState} />
+
+## 6. Zachowanie i dostępność
+
+- Landmarki: `banner`, `main`; jeden `h1`. Kolejność fokusu: "Wyloguj", potem konta w kolejności z API.
+- Wylogowanie: `POST /api/auth/logout` (tylko CSRF) i przekierowanie na `/login`; to link wyglądający jak link, ale w `app` może być przyciskiem w formularzu (**do decyzji w etapie 5**: link `<a>` do `GET` nie nadaje się, bo wylogowanie zmienia stan; story używa `TextLink` jako wzorca wyglądu).
+- Stany ładowania i błędu: wg komponentu BankAccountList (`aria-busy`, `role="alert"` w błędzie).
+
+## 7. Treść
+
+Teksty listy: patrz strona BankAccountList. Nagłówek: tylko "AITL"; link: "Wyloguj" (czasownik, bez "Do zobaczenia!").
+
+## 8. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | pasek w jednym wierszu (nazwa i link), lista w jednej kolumnie, długie nazwy zawijają się |
+| 768 px | pozycja listy w jednym wierszu: nazwa i plakietka |
+| 1440 px | kolumna do 960 px |
+
+<Canvas of={Stories.Tablet} />
+<Canvas of={Stories.NarrowScreenLongName} />
+
+## 9. Kompozycja
+
+```tsx
+<div className="flex min-h-screen flex-col bg-background text-foreground">
+  <header className="bg-primary text-primary-foreground">
+    <div className="mx-auto flex w-full max-w-240 items-center justify-between gap-(--space-within-group) p-(--space-panel)">
+      <p className="text-xl font-semibold leading-base">AITL</p>
+      <TextLink href="/logout" className="inline-flex min-h-control items-center text-primary-foreground hover:text-primary-foreground">
+        Wyloguj
+      </TextLink>
+    </div>
+  </header>
+  <main className="mx-auto w-full max-w-240 flex-1 px-(--space-panel) py-(--space-section)">
+    <BankAccountList status="loaded" accounts={accounts} onRetry={reload} headingLevel="h1" />
+  </main>
+</div>
+```
+
+## 10. Braki
+
+- Strona w `packages/app` (widok na `/`, przekierowania, wylogowanie) powstaje w etapie 5.
+- Wspólny `AppShell` (pasek z nazwą i "Wyloguj") zostaje wyodrębniony, gdy powstanie drugi ekran z tym paskiem (ekran konta, E02).
+- Brak stanu aktywnego konta (należy do przeglądu miesiąca, E03).
