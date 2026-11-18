@@ -10,12 +10,12 @@ Etap 0 (ten plik) niczego nie instaluje i nie zmienia kodu. Zainstalowane zależ
 |---|---|---|
 | 0 | Inwentaryzacja i plan (ten plik) | PR A, do przeglądu |
 | 1 | Fundamenty: Storybook, tokeny, Tailwind, przełącznik motywu, Foundations, skrypt `check:tokens` | zrobiony: PR B, PR C i PR D (Foundations, `check:tokens`, joby CI); PR D do przeglądu |
-| 2 | Komponenty bazowe, partiami po ok. sześć | w toku: partia 1 zakończona (Button, Input, Label+Field, Card, Badge, Alert; PR E, F i G zrobione); partia 2 rozpoczęta: PR H (Checkbox + `lucide-react`) zrobiony; dalej PR I (Select) i PR J (RadioGroup) |
+| 2 | Komponenty bazowe, partiami po ok. sześć | w toku: partia 1 zakończona (Button, Input, Label+Field, Card, Badge, Alert; PR E, F i G zrobione); partia 2 rozpoczęta: PR H (Checkbox + `lucide-react`) i PR I (Select) zrobione; dalej PR J (RadioGroup) |
 | 3 | Komponenty produktu, wzorce, ekrany epików | nie rozpoczęty |
 | 4 | Strony, które uczą, plik dla agentów | nie rozpoczęty |
 | 5 | Sprawdzenie i raport | nie rozpoczęty |
 
-Następny krok: właściciel przegląda PR H (Checkbox); potem PR I (Select, natywny `<select>`) i PR J (RadioGroup); czego potrzeba od właściciela: sekcja "Partia 2" niżej.
+Następny krok: właściciel przegląda PR I (Select); potem PR J (RadioGroup) z już zatwierdzonymi decyzjami (układ poziomy dla dwóch opcji, pionowy dla więcej i zawsze pionowy przy 320 px, `fieldset` z `legend`); czego jeszcze potrzeba: sekcja "Partia 2" niżej.
 
 ## Materiały (źródła)
 
@@ -118,6 +118,14 @@ Decyzje właściciela produktu, 2026-11-17 (PR H), zatwierdzone przez właścici
 14. `lucide-react` zatwierdzony wyłącznie tam, gdzie komponent wymaga ikony (Checkbox: `Check`, `Minus`; później strzałka w Select); Alert i Badge zostają bez ikon.
 15. Checkbox: pole 20 px (token `--checkbox-size`) z celem kliknięcia 36 px (etykieta jest częścią celu), zaznaczony = wypełnienie `--primary` i biała ikona `Check`, pośredni = kreska, fokus globalny 2 px, ramka `--input`, bez cienia, `rounded-control`, stany disabled i invalid, etykieta zawsze widoczna (w tabeli nazwa dostępna z opisu wpisu), kolor nigdy jedynym nośnikiem.
 16. Natywny `<select>` dla Select i układ RadioGroup rozstrzygane w PR I i J. Kolor hover dla `destructive` nadal otwarty.
+
+Decyzje właściciela produktu, 2026-11-18 (PR I), zatwierdzone przez właściciela produktu, 2026-11-18:
+
+17. Select to natywny `<select>` (nie Radix), stylowany tylko na polu: tło `--card`, ramka `--input`, wysokość 36 px (`--control-height`), `rounded-control`, tekst 16 px poniżej 768 px i 14 px od 768 px (jak Input), bez cienia, wagi 400/600, bez zmiany wyglądu przy najechaniu, fokus globalny 2 px.
+18. Strzałka: `ChevronDown` z `lucide-react` 16 px, import z podścieżki `lucide-react/icons/chevron-down` (jak `check` i `minus`), dekoracyjna (`aria-hidden`), z prawej margines 32 px (`pr-8`), więc nie nachodzi na tekst; bez nowego tokenu.
+19. Listę opcji rysuje system operacyjny; nie stylujemy jej (ograniczenie opisane na stronie "Czego brakuje"). Stany: domyślny, fokus, zablokowany, błąd (czerwona ramka `--destructive`, komunikat pod polem przez Field z `aria-describedby` i `aria-invalid`), długa opcja przy 320 px (obcięta wielokropkiem).
+20. Opcjonalna postać z pustą opcją "Wybierz…" (prop `placeholder`) istnieje, ale nie jest używana na pierwszych ekranach (miesiąc i typ wpisu mają wartości domyślne). Kolor nigdy nie jest jedynym nośnikiem.
+21. Select działa w `Field` tak jak Input (etykieta, podpowiedź, błąd, znacznik "(opcjonalne)", identyfikatory): `Field` bez zmian, bo przekazuje właściwości przez `cloneElement`. RadioGroup to PR J. Kolor hover `destructive` nadal otwarty.
 
 Nadal otwarte: kolor hover dla `destructive`.
 
@@ -247,9 +255,15 @@ Reguły bez źródła są propozycjami do decyzji. Każda wartość z tokenu. St
 - Prop `label` jest opcjonalny (typ nie wymusza nazwy dostępnej, bo unia typów psuje typowanie stories); brak `label` i `aria-label` łapie test a11y w Storybooku.
 - Obrys fokusu przechodzi przez `transition-colors` (kolor obrysu też jest animowany 150 ms), więc test mierzy szerokość, odstęp i styl obrysu, nie jego kolor tuż po fokusie.
 
-## Partia 2: czego potrzeba od właściciela (Select, RadioGroup)
+## Notatki z PR I (Select)
 
-- Select: natywny `select` czy Radix Select (stack zatwierdzony: shadcn/Radix); wybór miesiąca i typu wpisu (E02); wygląd listy rozwijanej (tło `--card`, ramka, bez cienia, A2), strzałka z `lucide-react` (zatwierdzona), wybór opcji klawiaturą.
-- RadioGroup: układ poziomy czy pionowy dla typu wpisu (wpływ/wydatek) i cykliczności; `fieldset` z `legend` jako etykieta grupy.
+- Komponent: `Select` w `src/components/ui/select.tsx`, natywny `select` w kontenerze z absolutnie ustawioną strzałką `ChevronDown` (`aria-hidden`, `pointer-events-none`). Opcje to dane (`options`), nazwy miesięcy i typów są w stories, nie w komponencie. `Field` bez zmian (działa przez `cloneElement`), test integracji z Field jest w `select.test.tsx`.
+- Bez nowych zależności ani tokenów: 32 px prawego marginesu to `pr-8` ze skali odstępów (8 + 16 + 8 px).
+- Testy w Storybooku nie sprawdzają strzałek ani wpisywania nazwy: `user-event` nie uruchamia natywnej obsługi klawiszy w zamkniętym `select`; test sprawdza fokus przez `Tab`, `selectOptions` i `change`.
+- Luki (strona "Czego brakuje"): lista opcji rysowana przez system, kolor pustej opcji, `optgroup`, hover pola.
+
+## Partia 2: czego potrzeba od właściciela (RadioGroup)
+
+- RadioGroup (PR J): układ zatwierdzony (poziomy dla dwóch opcji, pionowy dla więcej i zawsze pionowy przy 320 px, `fieldset` z `legend`); do wyjaśnienia przy PR J tylko ewentualne szczegóły (np. wygląd zaznaczonej opcji, odstępy).
 - Układ poziomy etykiety w Field (etykieta obok pola): potrzebny dla Checkboxa i RadioGroup przy wzorcu formularza (etap 3).
 - Zamrożone podglądy hover/fokus dla nowych kontrolek; kolor hover dla `destructive` nadal otwarty (luka z PR E).
