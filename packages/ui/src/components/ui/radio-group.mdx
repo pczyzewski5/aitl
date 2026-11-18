@@ -1,0 +1,207 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './radio-group.stories';
+
+<Meta of={Stories} />
+
+# RadioGroup
+
+Grupa opcji "jedna z kilku": typ wpisu (wpływ albo wydatek) i cykliczność (jednorazowy albo co miesiąc) w formularzu wpisu (E02). Źródło reguł: R01.x (referencje), A1-A5 (antyreferencje), tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-18, WCAG 2.2 i WAI-ARIA (wzorzec Radio Group). Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+Komponent to jedna całość: `fieldset` z widoczną `legend`, opcje (każda z etykietą będącą częścią celu kliknięcia 36 px), opcjonalna podpowiedź i komunikat błędu pod grupą. Zbudowany na `RadioGroup` z `radix-ui` (przyciski z rolą `radio`, strzałki i spacja jak w wzorcu APG), z `fieldset` jako elementem głównym (`asChild`).
+
+Dlaczego `fieldset` z rolą `radiogroup` i `aria-labelledby` wskazującym na `legend`, a nie sam `div`: `fieldset` z `legend` to natywny, powszechnie wspierany sposób nazwania grupy pól formularza i daje wizualną etykietę grupy bez dodatkowego znacznika; rola `radiogroup` (dozwolona na `fieldset`) jest potrzebna, bo opcje Radix to przyciski, a nie natywne `input type="radio"`, więc bez niej czytnik ekranu nie ogłosiłby grupy ani pozycji "1 z 2"; jawne `aria-labelledby` gwarantuje nazwę grupy niezależnie od tego, jak czytnik traktuje `legend` przy zmienionej roli. Wybrano wariant z Radix zamiast natywnych pól `radio`, bo daje te same zachowania klawiatury w każdej przeglądarce, ten sam wygląd znacznika (kropka jest kształtem) i spójność z Checkbox.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Pozwala wybrać dokładnie jedną opcję z krótkiej listy, gdy wszystkie opcje mają być widoczne od razu, i pokazuje, która jest wybrana.
+
+## 2. Kiedy używać
+
+- Typ wpisu w formularzu: "Wpływ" albo "Wydatek" (E02).
+- Cykliczność wpisu: "Jednorazowy" albo "Co miesiąc" (E02).
+- Zakres zmiany serii: "Tylko ten miesiąc", "Od tego miesiąca", "Cała seria" (przykład, E02-S03).
+- Wybór jednej z 2-5 opcji, które użytkownik chce porównać wzrokiem.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Opcje niezależne, można włączyć kilka naraz | [Checkbox](?path=/docs/elementy-bazowe-checkbox--docs) |
+| Jedna opcja z długiej listy (miesiąc, więcej niż około 5 pozycji) | [Select](?path=/docs/elementy-bazowe-select--docs) |
+| Opcja "tak / nie" | Checkbox |
+| Akcja, która ma coś wykonać od razu | Button |
+| Grupa bez widocznej nazwy | zawsze podaj `legend` (jest wymagana) |
+| Tylko kolor jako sygnał wyboru | wybór zawsze ma kropkę (A3) |
+
+## 4. Anatomia
+
+1. Grupa: `fieldset` (`role="radiogroup"`) z `legend` (14 px, waga 600) jako nazwą; po prawej stronie legendy opcjonalnie "(opcjonalne)".
+2. Cel kliknięcia opcji: element `label` o wysokości co najmniej 36 px (`--control-height`).
+3. Koło: przycisk `role="radio"` 20 x 20 px (`--checkbox-size`), ramka 1 px `--input`, tło `--card`, kształt koła (`rounded-pill`), bez cienia.
+4. Kropka: 8 px, biała (`--primary-foreground`), tylko w wybranej opcji, na wypełnieniu `--primary`.
+5. Etykieta: tekst 14 px, waga 400, 8 px (`--space-within-group`) od koła; opcjonalny opis pod etykietą (`--muted-foreground`).
+6. Podpowiedź i błąd: pod grupą, 14 px, w odstępie 4 px (`--space-label-field`).
+
+## 5. Warianty
+
+Komponent ma jeden wygląd; układ zależy od liczby opcji i szerokości kontenera (decyzja właściciela produktu, 2026-11-18):
+
+| Liczba opcji | Układ |
+|---|---|
+| 2 | obok siebie, gdy kontener ma co najmniej 384 px (`@sm`); poniżej zawsze jedna pod drugą |
+| więcej niż 2 | zawsze jedna pod drugą |
+| przy 320 px | zawsze jedna pod drugą |
+
+Układ zależy od szerokości kontenera (zapytanie kontenerowe), nie okna przeglądarki: grupa w wąskiej kolumnie jest pionowa także na szerokim ekranie.
+
+<Canvas of={Stories.EntryTypeHorizontal} />
+
+Opcja może mieć krótki opis (`hint`), np. cykliczność:
+
+<Canvas of={Stories.Recurrence} />
+
+<Canvas of={Stories.ThreeOptionsVertical} />
+
+## 6. Stany
+
+| Stan | Wygląd | Źródło |
+|---|---|---|
+| Domyślny (niewybrana) | tło `--card`, ramka `--input` (3,18:1 na `--card`) | A2, tokeny |
+| Najechanie (hover) | brak zmiany: hover tylko przy przyciskach | R01.6 |
+| Fokus (`:focus-visible`) | globalny obrys 2 px `--ring`, odstęp 2 px, ze `styles.css`; komponent nie dodaje własnego | tokeny (fokus widoczny, 2 px), WCAG 2.4.7 |
+| Wybrana | wypełnienie i ramka `--primary`, biała kropka 8 px; biały na `--primary` 5,17:1 | decyzja właściciela, 2026-11-18; K1 |
+| Zablokowana (grupa lub jedna opcja) | tło `--muted`, kursor `not-allowed`, tekst `--muted-foreground`; wybrana zablokowana ma wypełnienie `--muted-foreground` i kropkę; wypada z kolejności fokusu i jest pomijana przez strzałki | propozycja spójna z Checkbox |
+| Błąd (`aria-invalid` na grupie) | ramka `--destructive` na niewybranych opcjach; komunikat tekstowy pod grupą (kolor nie jest jedynym nośnikiem) | R01.5, A3 |
+| Ładowanie, wciśnięty | nie dotyczy | |
+
+Błąd dotyczy grupy bez wyboru (np. wymagany typ wpisu): po wybraniu opcji ramka wybranej opcji wraca do `--primary`, a komunikat znika dopiero po stronie formularza (jak w Field).
+
+Fokus w macierzy jest zamrożonym podglądem: te same deklaracje co `:focus-visible`, podpięte pod atrybut `data-preview-state` grupy w `.storybook/preview-states.css` (obrys dostaje wybrana opcja; tylko do dokumentacji).
+
+<Canvas of={Stories.StatesMatrix} />
+
+## 7. Zachowanie i dostępność
+
+- Klawiatura (wzorzec APG Radio Group): `Tab` wchodzi do grupy jeden raz i ustawia fokus na wybranej opcji (gdy nic nie wybrano: na pierwszej); drugi `Tab` opuszcza grupę. Strzałki (dół i prawo: następna, góra i lewo: poprzednia, z przejściem z ostatniej na pierwszą) przenoszą fokus i od razu wybierają opcję. `Spacja` wybiera opcję z fokusem. `Enter` nie wybiera (jak natywne pole radio).
+- Zablokowane opcje są pomijane przez `Tab` i strzałki.
+- Rola i stan: `fieldset` z `role="radiogroup"`, opcje `role="radio"` z `aria-checked` `true` albo `false`. Czytnik ekranu ogłasza nazwę grupy, nazwę opcji, stan i pozycję.
+- Nazwa grupy: z `legend` przez `aria-labelledby` (WCAG 1.3.1, 4.1.2); legenda jest zawsze widoczna. Nazwa opcji: z tekstu etykiety bez opisu; opis opcji i podpowiedź grupy trafiają do `aria-describedby`.
+- Błąd: `aria-invalid="true"` na grupie oraz `aria-describedby` na komunikat (jak Field); komunikat ma `role="alert"`. Grupa wymagana dostaje `aria-required="true"`; `optional` zdejmuje je i dodaje "(opcjonalne)" do legendy (jak Field).
+- Cel kliknięcia: koło 20 px jest mniejsze niż 24 px, ale cel (cały `label`) ma co najmniej 36 px wysokości, więc spełnia WCAG 2.5.8 (min. 24 x 24 px) z zapasem; opcje leżą jedna pod drugą bez odstępu między celami.
+- Znaczenie nie zależy od koloru: wybór ma kropkę (kształt), błąd ma tekst (A3).
+- Kontrast: ramka `--input` na `--card` 3,18:1 (WCAG 1.4.11), kropka `--primary-foreground` na `--primary` 5,17:1, tekst etykiety `--foreground` na `--card` 14,68:1, błąd `--destructive` na `--card` 6,47:1, obrys fokusu `--ring` na `--card` 5,17:1.
+- Grupa musi leżeć na `--card` albo `--form-surface`, nie na tle strony `--background` (ramka ma tam 2,89:1), tak samo jak Input i Checkbox.
+- W formularzu natywnym (`name`) komponent dodaje ukryte pole, więc wybrana wartość trafia do `FormData`.
+
+## 8. Treść
+
+- Legenda to pytanie o jedną rzecz w formie rzeczownika: "Typ wpisu", "Cykliczność", bez dwukropka i bez kropki.
+- Etykiety opcji krótkie, równoległe i bez negacji: "Wpływ" i "Wydatek", "Jednorazowy" i "Co miesiąc".
+- Opis opcji (`hint`) tylko, gdy etykieta nie wystarcza; jedno zdanie, bez ozdobników.
+- Błąd mówi, co zrobić: "Wybierz typ wpisu: wpływ albo wydatek."
+- Dane przykładowe oznaczaj "(przykład)" (A5).
+- Tłumaczenie: komponent nie ma stałych szerokości; dłuższe etykiety zawijają się w wielu wierszach.
+
+## 9. Responsywność
+
+| Szerokość kontenera | Zachowanie |
+|---|---|
+| 320 px | zawsze jedna opcja pod drugą, długie etykiety zawijają się, cel kliknięcia nie wychodzi poza kontener (`max-w-full`), brak poziomego przewijania |
+| od 384 px (dwie opcje) | opcje obok siebie, zawijają się do następnego wiersza, gdy się nie mieszczą |
+| więcej niż dwie opcje | zawsze jedna pod drugą, na każdej szerokości |
+
+Zapytanie kontenerowe wymaga, by element nadrzędny miał własną szerokość: kontener grupy ma `w-full`, więc w układzie `flex` w rzędzie grupa potrzebuje szerokości podanej z zewnątrz.
+
+<Canvas of={Stories.LongLabelsNarrowScreen} />
+
+## 10. API
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `legend` | `ReactNode` | wymagany | widoczna nazwa grupy (`legend`) |
+| `options` | `{ value: string; label: ReactNode; hint?: ReactNode; disabled?: boolean }[]` | wymagany | opcje; `hint` to opis pod etykietą, `disabled` blokuje jedną opcję |
+| `value` | `string` | brak | wybrana wartość (kontrolowany) |
+| `defaultValue` | `string` | brak | wartość początkowa (niekontrolowany) |
+| `onValueChange` | `(value: string) => void` | brak | wywoływane przy zmianie |
+| `hint` | `ReactNode` | brak | podpowiedź pod grupą (`aria-describedby`) |
+| `error` | `ReactNode` | brak | komunikat błędu pod grupą; ustawia `aria-invalid` i `aria-describedby` |
+| `optional` | `boolean` | `false` | dodaje "(opcjonalne)" do legendy i zdejmuje `aria-required` |
+| `optionalText` | `string` | `(opcjonalne)` | tekst znacznika (tłumaczenie) |
+| `disabled` | `boolean` | `false` | blokada całej grupy |
+| `name`, `form` | atrybuty formularza | | trafiają do ukrytego pola w formularzu |
+| `id` | `string` | generowany | podstawa identyfikatorów legendy, podpowiedzi i błędu |
+| `aria-invalid`, `aria-describedby` | | | ustawiane z `error` i `hint`; własne wartości są łączone |
+| `className` | `string` | brak | dodatkowe klasy na `fieldset`; konflikty rozwiązuje `cn` |
+
+## 11. Kod
+
+Minimalny przykład:
+
+```tsx
+import { RadioGroup } from '@aitl/ui';
+
+<RadioGroup
+  legend="Typ wpisu"
+  options={[
+    { value: 'income', label: 'Wpływ' },
+    { value: 'expense', label: 'Wydatek' },
+  ]}
+  defaultValue="expense"
+/>;
+```
+
+Kontrolowana, z błędem walidacji:
+
+```tsx
+<RadioGroup
+  legend="Cykliczność"
+  name="recurrence"
+  options={recurrenceOptions}
+  value={recurrence}
+  onValueChange={setRecurrence}
+  error={errors.recurrence}
+/>
+```
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+W formularzu wpisu (legenda działa jak etykieta pola, grupy dostają odstęp `--space-between-fields`):
+
+<Canvas of={Stories.InForm} />
+
+Z komunikatem błędu pod grupą:
+
+<Canvas of={Stories.Invalid} />
+
+Zablokowana grupa i zablokowana jedna opcja:
+
+<Canvas of={Stories.Disabled} />
+
+<Canvas of={Stories.DisabledOption} />
+
+## 13. Powiązane
+
+- Z czym się go myli: [Checkbox](?path=/docs/elementy-bazowe-checkbox--docs) (wiele niezależnych opcji), [Select](?path=/docs/elementy-bazowe-select--docs) (jedna z długiej listy), przełącznik Switch (efekt natychmiastowy; dziś brak w systemie).
+- Występuje we wzorcach: formularz wpisu (typ i cykliczność, E02), dialog wyboru zakresu zmiany serii (E02-S03).
+- RadioGroup ma własną legendę, podpowiedź i błąd, więc **nie** wchodzi w [Field](?path=/docs/elementy-bazowe-label-i-field--docs) (Field łączy `label` z jednym polem przez `htmlFor`); wygląd podpowiedzi i błędu jest ten sam.
+- Dalsze zasady wyboru komponentu pojawią się na stronie "Jak wybrać komponent" w etapie 4.
+
+## Czego brakuje
+
+- Układ poziomy etykiety obok pola (Field i RadioGroup w jednym wierszu) dla wzorca formularza: etap 3.
+- Grupa pól wyboru z `fieldset` i `legend` jako wspólny komponent dla Checkbox i RadioGroup: dziś Checkbox składa się ręcznie, RadioGroup ma wbudowany `fieldset`; do rozstrzygnięcia w etapie 3.
+- Hover koła: brak (R01.6), do decyzji, jeśli użytkownicy nie rozpoznają koła po samej ramce.
+- Wygląd zablokowanego (tło `--muted`, wybrany `--muted-foreground`) to propozycja do oceny w aplikacji.
+- Szczegóły wybranej opcji (kropka 8 px z `--primary-foreground`, rozmiar koła z `--checkbox-size`, odstępy z istniejących tokenów) to rekomendacja agenta zatwierdzona domyślnie przez właściciela, 2026-11-18.
+- Układ poziomy przy więcej niż dwóch opcjach i próg 384 px (`@sm`): wartość progu to propozycja agenta (zapytanie kontenerowe, bez surowej wartości w kodzie); do oceny na ekranach.
+- Opcja z polem tekstowym ("Inne: ...") i grupy opcji w kartach: brak źródła.
+- Kolor hover wariantu `destructive` przycisku bez zmian (luka z PR E, nie dotyczy grupy).
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: kliknięcie koła i etykiety wybiera opcję, `Tab` wchodzi do grupy raz, strzałki zmieniają wybór z przejściem z ostatniej na pierwszą, spacja wybiera, `Tab` opuszcza grupę, a `Enter` nie wybiera, obrys fokusu 2 px, nazwa grupy z legendy i opisy opcji, `aria-invalid` z `aria-describedby` i kolorem ramki, zablokowana grupa i opcja nie przyjmują fokusu ani kliknięcia, wymiary koła 20 px i celu 36 px (min. 24 px), kolory, ramka, okrągły kształt i kropka z tokenów, układ obok siebie i jedna pod drugą przy 320 px, wartość w `FormData`.
