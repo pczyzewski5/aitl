@@ -66,12 +66,12 @@ function Field({
         'aria-required': optional ? undefined : true,
       })}
       {hint && (
-        <p id={hintId} data-slot="field-hint" className="text-sm leading-base text-muted-foreground">
+        <p id={hintId} data-slot="field-hint" className="text-sm leading-base text-muted-foreground wrap-anywhere">
           {hint}
         </p>
       )}
       {error && (
-        <p id={errorId} role="alert" data-slot="field-error" className="text-sm leading-base text-destructive">
+        <p id={errorId} role="alert" data-slot="field-error" className="text-sm leading-base text-destructive wrap-anywhere">
           {error}
         </p>
       )}

@@ -11,11 +11,11 @@ Etap 0 (ten plik) niczego nie instaluje i nie zmienia kodu. Zainstalowane zależ
 | 0 | Inwentaryzacja i plan (ten plik) | PR A, do przeglądu |
 | 1 | Fundamenty: Storybook, tokeny, Tailwind, przełącznik motywu, Foundations, skrypt `check:tokens` | zrobiony: PR B, PR C i PR D (Foundations, `check:tokens`, joby CI); PR D do przeglądu |
 | 2 | Komponenty bazowe, partiami po ok. sześć | ZAKOŃCZONY (PR N, Toast, ostatni komponent bazowy): partia 1 (Button, Input, Label+Field, Card, Badge, Alert; PR E, F i G), partia 2 (Checkbox + `lucide-react`, Select, RadioGroup; PR H, I i J), PR K (TextLink, Skeleton, EmptyState, ErrorState), PR L (Dialog + ConfirmDialog), PR M (Menu), PR N (Toast); Textarea i Tabs celowo nie zbudowane (brak, gdy ekran zażąda); patrz sekcja "Etap 2 zakończony i plan etapu 3" |
-| 3 | Komponenty produktu, wzorce, ekrany epików | nie rozpoczęty |
+| 3 | Komponenty produktu, wzorce, ekrany epików | w toku: plan zatwierdzony 2026-11-18; PR O (wzorzec formularza) zrobiony; dalej P i Q równolegle, potem R, S, T |
 | 4 | Strony, które uczą, plik dla agentów | nie rozpoczęty |
 | 5 | Sprawdzenie i raport | nie rozpoczęty |
 
-Następny krok: właściciel przegląda PR N (Toast); potem ETAP 3 (komponenty produktu, wzorce, ekrany epików E01-E03): propozycja podziału na PR-y i potrzebne decyzje w sekcji "Etap 2 zakończony i plan etapu 3" na dole.
+Następny krok: właściciel przegląda PR O (wzorzec formularza); potem równolegle PR P (E01: LoginForm, BankAccountList, ekrany `/login` i `/`) i PR Q (przegląd miesiąca: MonthSwitcher, AccountRemainderCard), każdy z potrzebnymi decyzjami w tabeli "Proponowany podział etapu 3 na PR-y" na dole.
 
 ## Materiały (źródła)
 
@@ -348,7 +348,8 @@ Wszystkie cztery pozycje poniżej oraz rola `dialog` zamiast `alertdialog` dla C
 - Wstrzymanie (WCAG 2.2.1) zweryfikowane w przeglądarce: Radix wstrzymuje przy `pointermove` nad regionem i `focusin` w regionie, wznawia po `pointerleave`/wyjściu fokusu; `F8` (zdarzenie `keydown` z `code: 'F8'`) fokusuje region, `Tab` prowadzi do toastu i przycisku "Zamknij". Gest przesunięcia wyłączony przez `swipeThreshold` równy nieskończoności (test przeciągnięcia o 300 px). Brak animacji, więc reduced-motion nie wymaga obsługi.
 - Położenie: region `fixed`, `left`/`right`/`bottom` = `--toast-viewport-offset`; od `md` (768 px) `left-auto` i `w-96`. W Storybooku wąski widok to `mobile1` (320 px), a `desktop` ma 1280 px (nie 1024), więc test szerokiego ekranu sprawdza 1280 px.
 - Znane ograniczenie: gdy wskaźnik albo fokus pozostaje w regionie po zamknięciu toastu, kolejny z kolejki czeka z odliczaniem do zjechania lub wyjścia fokusu (wspólna flaga wstrzymania w Radixie). Otwarty Dialog wygasza resztę strony dla czytnika ekranu, więc toast wywołuj po zamknięciu okna.
-- Propozycje PR N do zatwierdzenia (plik tokenów, sekcja "Toast (PR N)"): szerokość 384 px, granica `md`, przycisk zamknięcia jako Button `secondary`, prop `announcementLabel`, odczyt tokenu z CSS, wyłączenie przesunięcia przez próg.
+- Propozycje PR N (plik tokenów, sekcja "Toast (PR N)"): szerokość 384 px, granica `md`, przycisk zamknięcia jako Button `secondary`, prop `announcementLabel`, odczyt tokenu z CSS, wyłączenie przesunięcia przez próg: zatwierdzone przez właściciela produktu, 2026-11-18.
+- Token `--toast-duration-with-action` (6 s) usunięty w PR O jako martwy kod (zatwierdzone przez właściciela produktu, 2026-11-18); wraca razem z akcją w toaście.
 
 ## Etap 2 zakończony i plan etapu 3
 
@@ -358,7 +359,21 @@ Zbudowane (18 plików komponentów w `packages/ui/src/components/ui/`, każdy z 
 
 Celowo niezbudowane (brak, gdy ekran zażąda): Textarea, Tabs, Tooltip, Popover, Avatar; Toast bez akcji ("Cofnij") i bez ikony; ciemny motyw (L3).
 
-Dług do rozstrzygnięcia w etapie 3: układ poziomy etykiety w Field dla Checkboxa i RadioGroup oraz wspólny komponent grupy pól wyboru (przy wzorcu formularza); odświeżenie zdania w `Shape.mdx` o "oczekiwaniu na akceptację" 60% `--overlay` (zatwierdzone).
+Dług z etapu 2: układ poziomy etykiety w Field dla Checkboxa i RadioGroup oraz wspólny komponent grupy pól wyboru: rozstrzygnięty propozycją w PR O (bez układu poziomego i bez wspólnego komponentu, patrz niżej, do decyzji właściciela); zdanie w `Shape.mdx` o 60% `--overlay` odświeżone w PR O (zatwierdzone 2026-11-18).
+
+### Decyzje właściciela z 2026-11-18 (plan etapu 3)
+
+Zatwierdzone przez właściciela produktu, 2026-11-18: plan etapu 3 w poniższym podziale (O formularz, P E01, Q przegląd miesiąca równolegle z P po O, R tabela wpisów E02, S EntryForm + SeriesActions + potwierdzenie usunięcia + Toast po zapisie, T ekrany pełnoekranowe i pozostałe wzorce); propozycje z PR N (szerokość toastu 384 px, granica `md`, przycisk zamknięcia Button `secondary`, prop `announcementLabel`, odczyt tokenu z CSS, wyłączony gest przesunięcia); usunięcie nieużywanego tokenu `--toast-duration-with-action` do czasu akcji w toaście; reguły wzorca formularza (patrz "Notatki z PR O").
+
+### Notatki z PR O (wzorzec formularza)
+
+- Kod w `packages/ui/src/backend/forms/` (zgodnie z `AGENTS.md`: generyczne wzorce panelu w `ui/src/backend/<kategoria>/`): `useFormValidation` (stan wartości, "dotknięte", wysłanie, fokus na pierwszym błędzie, błędy serwera, blokada podwójnego wysłania, `reset`), `ErrorSummary` (Alert `error` z linkami przenoszącymi fokus), `focusControl` (wewnętrzny: fokus na polu albo pierwszym elemencie grupy), `parseAmountToMinor` ("12,50" daje 1250; powody odrzucenia jako dane, komunikaty po polsku dają aplikacja i story). Wszystko eksportowane z `index.ts`, relatywne importy, bez zależności od `@aitl/*`, bez nowych zależności i tokenów; testy jednostkowe 100% w jsdom.
+- Zod: pomocnik przyjmuje `validate(values) => mapa pole -> komunikat`, więc `app` podepnie wspólne schematy z `core` bez importu w `ui`.
+- Reguły (zatwierdzone przez właściciela produktu, 2026-11-18): sprawdzanie po opuszczeniu dotkniętego pola i przy wysłaniu; fokus na pierwszym nieprawidłowym polu; podsumowanie tylko przy więcej niż jednym błędzie; komunikaty "co się stało i co zrobić"; `noValidate` + `aria-required`; `loading` blokuje podwójne wysłanie; błąd serwera niezwiązany z polem jako Alert u góry (logowanie: komunikat ogólny, blokada 429 z sekundami); Toast po zapisie jako udokumentowana kompozycja, nie część formularza; kwota jako tekst z `inputMode="decimal"` parsowany w formularzu do groszy.
+- Pułapki: `Field` nadpisuje `id` kontrolki własnym, więc `id` do fokusu trzeba przekazać do `Field` (stąd `getFieldProps` zwraca `{ id, error }` dla `Field` i `RadioGroup`, a `getInputProps` samo `name`, `value`, `onChange`, `onBlur`); typ wartości formularza musi być aliasem `type`, nie `interface` (indeksowa sygnatura); długi nieprzerwany tekst w błędzie i podpowiedzi `Field` wypychał stronę przy 320 px, więc dostały `wrap-anywhere` (jak w lekcji o `break-words`).
+- Stories w `Wzorce/Formularz`: logowanie (czysty, pole po opuszczeniu, jeden błąd, kilka błędów, wysyłanie, błąd ogólny, blokada 429 z sekundami, brak sieci, sukces; kontrolka `scenario` w polu do zabawy), wpis (czysty, jeden błąd, kilka błędów z podsumowaniem, zapisany z Toastem, błąd pola z serwera, błąd serwera), długie etykiety przy 320 px, testy (`noValidate`, powiązanie błędu z polem, znikanie błędu po poprawie, blokada podwójnego wysłania, linki podsumowania), "Dobrze i źle". Strona dokumentacji `form-pattern.mdx` z sekcjami wzorca i "Czego brakuje".
+- Propozycje do decyzji właściciela (plik tokenów, "Wzorzec formularza (PR O)"): format kwoty (przecinek i kropka; odrzucane ujemna, zero, ponad dwa miejsca, separator tysięcy, ponad 8 cyfr), układ pól wyboru (bez układu poziomego etykiety i bez wspólnego komponentu grupy), data jako tekst RRRR-MM-DD, podsumowanie znikające przy jednym błędzie, komunikat ogólny jako jeden tekst, `wrap-anywhere` w `Field`.
+- PR N: statusy propozycji uzupełnione (zatwierdzone), strony Kształt (60% `--overlay` zatwierdzone) i Ruch oraz `toast.mdx` zaktualizowane.
 
 ### Proponowany podział etapu 3 na PR-y
 
@@ -366,8 +381,8 @@ Wejście: backlog E01-E03 (`.ai/specs/backlog.md`) i specyfikacje w `.ai/specs/`
 
 | PR | Zakres | Czego potrzeba od właściciela |
 |---|---|---|
-| O | Wzorzec formularza (bez ekranu): etykiety zawsze widoczne, walidacja po opuszczeniu pola i przy wysłaniu, fokus na pierwszym błędzie po nieudanym wysłaniu, dane zostają, blokada podwójnego wysłania, sukces po potwierdzeniu z serwera; odpowiedzi API symulowane (sukces, oczekiwanie, błąd pola, błąd serwera, brak sieci); rozstrzygnięcie układu poziomego etykiety dla pól wyboru | decyzje: kiedy walidować (po opuszczeniu pola czy przy wysłaniu), treść komunikatów błędów po polsku, czy fokus po błędzie ma też czytelny komunikat zbiorczy |
-| P | E01: LoginForm (stany: wysyłanie, błąd ogólny, blokada z czasem 429), BankAccountList (plakietki "Wspólne"/"Osobiste", stan pusty, błąd wczytania) + stories ekranów `/login` i `/` z mapą stanów | akceptacja treści komunikatów logowania (R01.7) i zachowania blokady z czasem; czy lista kont ma kolejność inną niż z API |
+| O (zrobiony, do przeglądu) | Wzorzec formularza (bez ekranu): etykiety zawsze widoczne, walidacja po opuszczeniu pola i przy wysłaniu, fokus na pierwszym błędzie po nieudanym wysłaniu, dane zostają, blokada podwójnego wysłania, sukces po potwierdzeniu z serwera; odpowiedzi API symulowane (sukces, oczekiwanie, błąd pola, błąd serwera, brak sieci); rozstrzygnięcie układu poziomego etykiety dla pól wyboru | decyzje: kiedy walidować (po opuszczeniu pola czy przy wysłaniu), treść komunikatów błędów po polsku, czy fokus po błędzie ma też czytelny komunikat zbiorczy |
+| P | E01: LoginForm (stany: wysyłanie, błąd ogólny, blokada z czasem 429), BankAccountList (plakietki "Wspólne"/"Osobiste", stan pusty, błąd wczytania) + stories ekranów `/login` i `/` z mapą stanów | akceptacja treści komunikatów logowania (R01.7; w PR O są robocze: "Nie udało się zalogować. Sprawdź adres e-mail i hasło, a potem spróbuj ponownie.", "Zbyt wiele prób logowania. Spróbuj ponownie za 87 sekund.") i zachowania blokady z czasem (czy odliczać na żywo, czy tylko podać sekundy); czy lista kont ma kolejność inną niż z API; przegląd propozycji z PR O |
 | Q | MonthSwitcher (strzałki miesiąca, nazwa miesiąca, granice) i AccountRemainderCard ("ile zostanie" per konto, aktywne konto `aria-pressed`, stany: ładowanie, brak wpisów, wynik ujemny; R01.8) | decyzja o wyglądzie stanu aktywnego karty (ramka 2 px grozi przeskokiem układu), formacie kwot ujemnych i sposobie oznaczenia znaku (kolor + znak, A3) |
 | R | E02 wpisy: EntryTable / EntryRow (przełącznik "zapłacone", znak +/-, oznaczenie cykliczności, długie nazwy, dużo wierszy, wąski ekran: układ kartowy albo przewijany kontener) | decyzja o układzie tabeli poniżej ok. 600 px (jest otwarta w specyfikacji), liczbie wierszy w "dużo danych", wyglądzie wiersza zapłaconego |
 | S | EntryForm (rozwijany nad listą, pola: nazwa, kwota, typ, cykliczność, miesiąc), SeriesActions (Menu + okna: zakończ, zmień kwotę, usuń całkowicie), potwierdzenie usunięcia, Toast po zapisie | akceptacja treści pytań potwierdzających i etykiet, potwierdzenie czy po zapisie wpisu formularz zostaje otwarty, czy toast ma akcję "Cofnij" (dziś brak) |
