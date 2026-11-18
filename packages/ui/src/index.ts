@@ -8,5 +8,6 @@ export { Checkbox, type CheckboxProps } from './components/ui/checkbox';
 export { Field,type FieldProps } from './components/ui/field';
 export { Input, type InputProps, type InputType } from './components/ui/input';
 export { Label } from './components/ui/label';
+export { RadioGroup, type RadioGroupOption, type RadioGroupProps } from './components/ui/radio-group';
 export { Select, type SelectOption, type SelectProps } from './components/ui/select';
 export { cn } from './lib/utils';

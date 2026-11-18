@@ -21,14 +21,14 @@ Pozwala użytkownikowi wybrać jedną wartość z listy znanych opcji (miesiąc,
 ## 2. Kiedy używać
 
 - Wybór miesiąca w formularzu wpisu i w przeglądzie miesiąca: 12 opcji z domyślnym bieżącym miesiącem. Źródło: E02, E03.
-- Wybór typu wpisu (wpływ albo wydatek), gdy formularz ma mało miejsca. Źródło: E02. Układ typu wpisu jako RadioGroup rozstrzyga PR J.
+- Wybór typu wpisu (wpływ albo wydatek), gdy formularz ma mało miejsca. Źródło: E02. Typ wpisu w formularzu to [RadioGroup](?path=/docs/elementy-bazowe-radiogroup--docs) (dwie opcje obok siebie).
 - Lista, której długość lub zawartość się zmienia i nie mieści się sensownie jako grupa przycisków radio.
 
 ## 3. Kiedy nie używać
 
 | Sytuacja | Użyj zamiast |
 |---|---|
-| Dwie lub trzy opcje, które użytkownik ma widzieć naraz | RadioGroup (PR J) |
+| Dwie lub trzy opcje, które użytkownik ma widzieć naraz | [RadioGroup](?path=/docs/elementy-bazowe-radiogroup--docs) |
 | Włączenie lub wyłączenie ustawienia | Checkbox |
 | Wybór wielu wartości naraz | grupa Checkbox |
 | Wartość wpisywana swobodnie (nazwa, kwota) | Input |
@@ -164,7 +164,7 @@ Typowy przykład z produktu, wybór miesiąca z błędem:
 
 ## 13. Powiązane
 
-- Z czym się go myli: RadioGroup (kilka opcji widocznych naraz, PR J), Input (swobodny tekst), pole z wyszukiwaniem (długa lista).
+- Z czym się go myli: [RadioGroup](?path=/docs/elementy-bazowe-radiogroup--docs) (kilka opcji widocznych naraz), Input (swobodny tekst), pole z wyszukiwaniem (długa lista).
 - Występuje we wzorcach: formularz wpisu (typ wpisu, miesiąc), przegląd miesiąca (wybór miesiąca).
 - Z komponentami: zawsze w [Field](?path=/docs/elementy-bazowe-label-i-field--docs); wygląd pola i błędu jak [Input](?path=/docs/elementy-bazowe-input--docs).
 - Dalsze zasady wyboru komponentu pojawią się na stronie "Jak wybrać komponent" w etapie 4.

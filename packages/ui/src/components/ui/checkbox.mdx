@@ -27,7 +27,7 @@ Pozwala użytkownikowi włączyć lub wyłączyć jedną niezależną opcję i p
 
 | Sytuacja | Użyj zamiast |
 |---|---|
-| Wybór dokładnie jednej opcji z kilku (wpływ czy wydatek, cykliczność) | RadioGroup (partia 2) |
+| Wybór dokładnie jednej opcji z kilku (wpływ czy wydatek, cykliczność) | [RadioGroup](?path=/docs/elementy-bazowe-radiogroup--docs) |
 | Wybór jednej wartości z długiej listy (miesiąc) | [Select](?path=/docs/elementy-bazowe-select--docs) |
 | Akcja, która ma coś wykonać od razu | Button |
 | Włączenie ustawienia ze skutkiem natychmiastowym i stanem "włączone/wyłączone" jak przełącznik | przełącznik (Switch), jeśli pojawi się potrzeba; dziś brak źródła |
@@ -168,7 +168,7 @@ Grupa z polem "Wszystkie" i stanem pośrednim:
 
 ## 13. Powiązane
 
-- Z czym się go myli: RadioGroup (jedna z kilku opcji), przełącznik Switch (efekt natychmiastowy; dziś brak w systemie), Button z `aria-pressed` (akcja z trwałym stanem).
+- Z czym się go myli: [RadioGroup](?path=/docs/elementy-bazowe-radiogroup--docs) (jedna z kilku opcji), przełącznik Switch (efekt natychmiastowy; dziś brak w systemie), Button z `aria-pressed` (akcja z trwałym stanem).
 - Występuje we wzorcach: tabela wpisów ("Zapłacone", E02-S04), formularz ze zgodą.
 - Etykietę, podpowiedź i błąd pod polem dodaje [Field](?path=/docs/elementy-bazowe-label-i-field--docs), jeśli grupa pól potrzebuje wspólnej etykiety.
 - Dalsze zasady wyboru komponentu pojawią się na stronie "Jak wybrać komponent" w etapie 4.
@@ -176,7 +176,7 @@ Grupa z polem "Wszystkie" i stanem pośrednim:
 ## Czego brakuje
 
 - Układ poziomy etykiety i pola w Field: Field ma etykietę nad polem, więc przy Checkboxie nazwa dostępna składa się z etykiety Field i etykiety pola; do rozstrzygnięcia przy wzorcu formularza (etap 3).
-- Grupa pól wyboru z `fieldset` i `legend` jako gotowy komponent: dziś składana ręcznie (patrz grupa z "Wszystkie"); decyzja razem z RadioGroup (PR J).
+- Grupa pól wyboru z `fieldset` i `legend` jako gotowy komponent: dziś składana ręcznie (patrz grupa z "Wszystkie"); RadioGroup (PR J) ma `fieldset` z `legend` wbudowany; wspólny komponent dla obu do rozstrzygnięcia w etapie 3.
 - Hover pola: brak (R01.6), do decyzji, jeśli użytkownicy nie rozpoznają pola po samej ramce.
 - Wygląd zablokowanego (tło `--muted`, zaznaczony `--muted-foreground`) to propozycja do oceny w aplikacji.
 - Wymiar pola 20 px nie leży na skali odstępów 4/8/12/16/24/32/48: osobny token `--checkbox-size` zatwierdzony przez właściciela produktu, 2026-11-17.

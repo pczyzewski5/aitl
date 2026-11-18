@@ -10,12 +10,12 @@ Etap 0 (ten plik) niczego nie instaluje i nie zmienia kodu. Zainstalowane zależ
 |---|---|---|
 | 0 | Inwentaryzacja i plan (ten plik) | PR A, do przeglądu |
 | 1 | Fundamenty: Storybook, tokeny, Tailwind, przełącznik motywu, Foundations, skrypt `check:tokens` | zrobiony: PR B, PR C i PR D (Foundations, `check:tokens`, joby CI); PR D do przeglądu |
-| 2 | Komponenty bazowe, partiami po ok. sześć | w toku: partia 1 zakończona (Button, Input, Label+Field, Card, Badge, Alert; PR E, F i G zrobione); partia 2 rozpoczęta: PR H (Checkbox + `lucide-react`) i PR I (Select) zrobione; dalej PR J (RadioGroup) |
+| 2 | Komponenty bazowe, partiami po ok. sześć | w toku: partia 1 zakończona (Button, Input, Label+Field, Card, Badge, Alert; PR E, F i G); partia 2 ZAKOŃCZONA: PR H (Checkbox + `lucide-react`), PR I (Select) i PR J (RadioGroup) zrobione; dalej dalsze komponenty bazowe (patrz sekcja "Dalsze komponenty bazowe") |
 | 3 | Komponenty produktu, wzorce, ekrany epików | nie rozpoczęty |
 | 4 | Strony, które uczą, plik dla agentów | nie rozpoczęty |
 | 5 | Sprawdzenie i raport | nie rozpoczęty |
 
-Następny krok: właściciel przegląda PR I (Select); potem PR J (RadioGroup) z już zatwierdzonymi decyzjami (układ poziomy dla dwóch opcji, pionowy dla więcej i zawsze pionowy przy 320 px, `fieldset` z `legend`); czego jeszcze potrzeba: sekcja "Partia 2" niżej.
+Następny krok: właściciel przegląda PR J (RadioGroup); potem kontynuacja etapu 2: pozostałe komponenty bazowe (TextLink, Textarea, Dialog, ConfirmDialog, Menu, decyzja o Tabs, Skeleton, EmptyState, ErrorState, Toast), czego każdy potrzebuje od właściciela: sekcja "Dalsze komponenty bazowe" na dole. Po nich etap 3: komponenty produktu, wzorce i ekrany epików.
 
 ## Materiały (źródła)
 
@@ -85,6 +85,8 @@ Decyzje z referencji (skrót, 10 linii):
 | F (zrobiony) | Input (text, email, password, amount) + Label + Field (etykieta, podpowiedź, błąd pod polem, "(opcjonalne)"), token `--space-label-field` 4 px, tekst pól 16 px poniżej 768 px i 14 px od 768 px, dwie strony dokumentacji z 13 sekcjami, stories i testy interakcji | propozycje zatwierdzone 2026-11-17: `readOnly` (tło `--form-surface`), odstęp podpowiedź-błąd 4 px, brak hovera pól, `aria-required` zamiast natywnego `required` |
 | G (zrobiony, do przeglądu) | Card (Card, CardHeader, CardTitle, CardContent), Badge (shared, personal, neutral), Alert (neutral `status`, error `alert`; Title, Description), token `--space-card-gap` 12 px, trzy strony dokumentacji z 13 sekcjami, stories (320 px, długi tekst, logowanie: błąd i blokada 429), testy interakcji | przegląd; decyzje zatwierdzone 2026-11-17 (patrz niżej) |
 | H (zrobiony, do przeglądu) | Checkbox (Radix + `Check`/`Minus` z `lucide-react` 1.74.0), token `--checkbox-size` 20 px, strona dokumentacji z 13 sekcjami, stories (stany, 320 px, tabela, Field, grupa "Wszystkie") i testy interakcji; usunięta nieużywana zależność `cn` | przegląd; decyzje zatwierdzone 2026-11-17 (patrz niżej) |
+| I (zrobiony, do przeglądu) | Select (natywny `select`, strzałka `ChevronDown`, opcjonalna pusta opcja), strona dokumentacji z 13 sekcjami, stories i testy interakcji; `Field` bez zmian | przegląd; decyzje zatwierdzone 2026-11-18 (patrz niżej) |
+| J (zrobiony, do przeglądu) | RadioGroup (Radix, `fieldset` z `legend`, opcje z etykietą w celu 36 px, podpowiedź i błąd pod grupą, układ z zapytania kontenerowego), strona dokumentacji z 13 sekcjami, stories (stany, 320 px, formularz wpisu) i testy interakcji (strzałki, `Tab`, spacja); bez nowych zależności i tokenów | przegląd; decyzje zatwierdzone 2026-11-18 (patrz niżej) |
 
 Każdy PR: jeden temat, zielone checki (typecheck, lint, test:coverage, build, audit), wpis w `.ai/runs/`, lekcja przy napotkanej pułapce.
 
@@ -126,6 +128,11 @@ Decyzje właściciela produktu, 2026-11-18 (PR I), zatwierdzone przez właścici
 19. Listę opcji rysuje system operacyjny; nie stylujemy jej (ograniczenie opisane na stronie "Czego brakuje"). Stany: domyślny, fokus, zablokowany, błąd (czerwona ramka `--destructive`, komunikat pod polem przez Field z `aria-describedby` i `aria-invalid`), długa opcja przy 320 px (obcięta wielokropkiem).
 20. Opcjonalna postać z pustą opcją "Wybierz…" (prop `placeholder`) istnieje, ale nie jest używana na pierwszych ekranach (miesiąc i typ wpisu mają wartości domyślne). Kolor nigdy nie jest jedynym nośnikiem.
 21. Select działa w `Field` tak jak Input (etykieta, podpowiedź, błąd, znacznik "(opcjonalne)", identyfikatory): `Field` bez zmian, bo przekazuje właściwości przez `cloneElement`. RadioGroup to PR J. Kolor hover `destructive` nadal otwarty.
+
+Decyzje właściciela produktu, 2026-11-18 (PR J), zatwierdzone przez właściciela produktu, 2026-11-18:
+
+22. RadioGroup: układ poziomy dla dwóch opcji, pionowy dla więcej niż dwóch i zawsze pionowy przy 320 px; grupa to `fieldset` z widoczną `legend` (uzasadnienie wyboru Radix z `fieldset` jako elementem głównym: strona dokumentacji i opis PR).
+23. Wygląd jak Checkbox: koło 20 px (`--checkbox-size`) w celu 36 px (etykieta w celu), ramka `--input`, wybrana = wypełnienie `--primary` z białą kropką (kształt, nie sam kolor), disabled, invalid (ramka `--destructive`, komunikat pod grupą, `aria-describedby` i `aria-invalid` na `fieldset`), fokus globalny 2 px, bez cienia i bez hovera koła, wagi 400/600; szczegóły wybranej opcji i odstępy to rekomendacja agenta zatwierdzona domyślnie (kropka 8 px = `size-2`, koło `rounded-pill`, odstępy z istniejących tokenów, brak nowych tokenów). Klawiatura: strzałki przenoszą i wybierają, `Tab` raz, spacja wybiera. Kolor hover `destructive` nadal otwarty.
 
 Nadal otwarte: kolor hover dla `destructive`.
 
@@ -262,8 +269,31 @@ Reguły bez źródła są propozycjami do decyzji. Każda wartość z tokenu. St
 - Testy w Storybooku nie sprawdzają strzałek ani wpisywania nazwy: `user-event` nie uruchamia natywnej obsługi klawiszy w zamkniętym `select`; test sprawdza fokus przez `Tab`, `selectOptions` i `change`.
 - Luki (strona "Czego brakuje"): lista opcji rysowana przez system, kolor pustej opcji, `optgroup`, hover pola.
 
-## Partia 2: czego potrzeba od właściciela (RadioGroup)
+## Notatki z PR J (RadioGroup)
 
-- RadioGroup (PR J): układ zatwierdzony (poziomy dla dwóch opcji, pionowy dla więcej i zawsze pionowy przy 320 px, `fieldset` z `legend`); do wyjaśnienia przy PR J tylko ewentualne szczegóły (np. wygląd zaznaczonej opcji, odstępy).
-- Układ poziomy etykiety w Field (etykieta obok pola): potrzebny dla Checkboxa i RadioGroup przy wzorcu formularza (etap 3).
-- Zamrożone podglądy hover/fokus dla nowych kontrolek; kolor hover dla `destructive` nadal otwarty (luka z PR E).
+- Komponent: `RadioGroup` w `src/components/ui/radio-group.tsx`, API z danymi `options` (jak Select): `legend`, `options` (`value`, `label`, `hint`, `disabled`), `hint`, `error`, `optional`, `optionalText`, `disabled`. Własna legenda, podpowiedź i błąd (jak Field), więc nie wchodzi w `Field` (Field łączy `label` z jednym polem przez `htmlFor`).
+- Radix `RadioGroup.Root` z `asChild` na `fieldset` (rola `radiogroup` jawnie, nazwa przez `aria-labelledby` na `legend`): daje strzałki z zawijaniem, `Tab` raz, spację, pomijanie zablokowanych i ukryte pole formularza. Natywne `input type="radio"` odrzucone: ten sam wygląd i zachowanie we wszystkich przeglądarkach, spójność z Checkbox, kropka jako kształt.
+- Układ z zapytania kontenerowego Tailwinda (`@container`, `@sm:flex-row`), nie z okna: wąska kolumna na szerokim ekranie też jest pionowa. Wymaga szerokości kontenera (`w-full`).
+- Błąd: ramka `--destructive` tylko na niewybranych opcjach (`group-aria-invalid/radio-group:data-[state=unchecked]:`); po wyborze ramka wraca do `--primary`.
+- Bez nowych zależności ani tokenów; `npm audit --omit=dev` bez zmian.
+- W jsdom działają kliknięcie, strzałki (Radix przenosi fokus w `setTimeout`, test czeka `waitFor`) i `FormData`; kolejność `Tab` i fokus klawiaturą sprawdzają testy Storybooka (prawdziwa przeglądarka).
+- Pułapki (lekcje w `.ai/lessons/`): `user-event` wysyła `keyup` zaraz po `keydown`, a Radix wybiera opcję strzałką dopiero w odroczonym fokusie, więc test musi przytrzymać klawisz; `waitFor` ze Storybooka wywołuje callback przy każdej mutacji DOM, więc callback tworzący element pomocniczy (`resolveToken`) zapętla się i zawiesza przeglądarkę.
+
+## Dalsze komponenty bazowe (etap 2, ciąg dalszy) i czego potrzeba od właściciela
+
+Partia 2 jest zakończona. Zostają komponenty bazowe z listy powyżej; po nich etap 3 (komponenty produktu, wzorce, ekrany epików).
+
+| Komponent | Czego potrzeba od właściciela |
+|---|---|
+| TextLink | wygląd (podkreślenie zawsze czy przy najechaniu; kolor `--primary`), zachowanie linku zewnętrznego |
+| Textarea | potwierdzenie, że opis wpisu bywa wielowierszowy (E02); jeśli nie, pomijamy |
+| Dialog | Radix Dialog; kolor tła przesłony (nowy token, bez surowej wartości w komponencie), szerokość i przewijanie przy 320 px, przycisk zamknięcia (ikona `X`), powrót fokusu |
+| ConfirmDialog | wzorzec treści (co się stanie, nazwy przycisków), fokus domyślny na "Anuluj", kolor hover `destructive` (luka otwarta od PR E) |
+| Menu | Radix DropdownMenu dla akcji serii (E02-S03); wygląd wyzwalacza (przycisk ikony 36 px), kolory pozycji (`--muted`), zachowanie na dotyk |
+| Tabs | decyzja, czy w ogóle potrzebne: żadna specyfikacja nie ma ekranu z zakładkami |
+| Skeleton | decyzja o ruchu: R01.6 (prawie bez ruchu) wskazuje statyczny placeholder (`--muted`), bez pulsowania; potwierdzenie |
+| EmptyState | treść i wezwanie do działania (CTA), czy dopuszczalna ikona (L5), układ w karcie |
+| ErrorState | treść błędu i akcja "Spróbuj ponownie", rozgraniczenie od Alert |
+| Toast | potwierdzenie po zapisie (R01.6, P5): biblioteka (Radix Toast bez nowej zależności albo nowa; wymaga zgody), czas wyświetlania (token), miejsce na ekranie, `aria-live`, ruch |
+
+Układ poziomy etykiety w Field (etykieta obok pola) dla Checkboxa i RadioGroup oraz wspólny komponent grupy pól wyboru: do rozstrzygnięcia przy wzorcu formularza (etap 3). Kolor hover dla `destructive` nadal otwarty.
