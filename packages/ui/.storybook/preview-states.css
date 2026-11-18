@@ -37,3 +37,12 @@
   outline: var(--ring-width) solid var(--ring);
   outline-offset: -2px;
 }
+
+[data-slot='account-remainder-card'][data-preview-state='hover'] {
+  background-color: var(--background);
+}
+
+[data-slot='account-remainder-card'][data-preview-state='focus-visible'] {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}

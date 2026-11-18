@@ -1,0 +1,228 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './account-remainder-card.stories';
+
+<Meta of={Stories} />
+
+# AccountRemainderCard
+
+Karta konta bankowego z wynikiem "ile zostanie w miesiącu": osobny wynik dla jednego konta, jednocześnie przycisk wyboru konta. Źródło reguł: R01.2, R01.4, R01.8 (referencje), A3 i A4 (antyreferencje), specyfikacja E03 (`.ai/specs/2026-11-17-monthly-remainder.md`: R02, R03, E03-Q3, E03-Q7), tokeny (`.ai/specs/design/2026-11-17-tokeny.md`, kontrast `--income` 5,02:1 i `--expense` 6,47:1 na bieli), decyzje właściciela z 2026-11-18 (poniżej), WCAG 2.2 (1.4.1, 1.4.11, 2.5.8) i WAI-ARIA (przycisk przełączany).
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## Decyzje właściciela (zatwierdzone przez właściciela produktu, 2026-11-18)
+
+- Karta jest elementem przełączanym do wyboru konta (`aria-pressed`).
+- Stan aktywny: **stała ramka 2 px** w kolorze akcji (`--primary`); karta nieaktywna ma też ramkę 2 px (`--border`), więc układ nigdy nie skacze.
+- Aktywna karta ma **dodatkowo napis "Wybrane"** (z ikoną), żeby stan nie zależał od koloru (A3).
+- Kwoty ujemne: "−1 234,50 zł" z prawdziwym znakiem minus U+2212, twardą spacją jako separatorem tysięcy, przecinkiem dziesiętnym i kolorem `--expense`.
+- Kwoty wpływów z jawnym plusem i kolorem `--income`.
+- **Znak niesie znaczenie, kolor tylko je wzmacnia.**
+- Wartość "ile zostanie": rozmiar xl (28 px), waga 700 **tylko** dla niej; pod nią wiersze "Wpływy: …" i "Wydatki: …".
+- **Nigdy suma łączna** (R03, A4). Kolejność kont: taka, jak dostarczyła aplikacja.
+
+## 1. Do czego służy
+
+Pokazuje, ile zostanie w wybranym miesiącu na jednym koncie bankowym, i pozwala wybrać to konto do dalszego oglądania.
+
+## 2. Kiedy używać
+
+- Sekcja "Ile zostanie w miesiącu" na ekranie głównym `/` (E03): jedna karta na każde konto, do którego użytkownik ma dostęp (wspólne i osobiste).
+- Wybór konta, którego wpisy pokazuje lista pod kartami (E02, E03).
+- Ekran konta, gdy ma pokazywać wynik miesiąca tego konta obok listy wpisów.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Wynik dwóch kont naraz, "razem" | nie istnieje: zakazane przez R03 (A4); pokaż dwie karty |
+| Zwykła informacja bez wyboru | Card (bez `aria-pressed`) |
+| Wiersz na liście kont (bez wyniku) | BankAccountList (PR P) |
+| Wybór jednej z kilku opcji w formularzu | RadioGroup |
+| Karta ma otwierać osobną stronę konta | link (TextLink) lub karta z `asChild`: dziś niezbudowane, patrz "Czego brakuje" |
+
+## 4. Anatomia
+
+1. Nazwa konta (wymagana): 16 px, waga 600, zawija się (`wrap-anywhere`).
+2. Plakietka typu konta (wymagana): Badge `shared` ("Wspólne") albo `personal` ("Osobiste"); typ niesie tekst, nie sam kolor.
+3. Etykieta "Ile zostanie" (14 px, `--muted-foreground`) i, po prawej, napis "Wybrane" z ikoną `Check`: napis zajmuje miejsce także na karcie nieaktywnej (jest wtedy niewidoczny, `visibility: hidden`), więc wysokość karty jest stała.
+4. Wynik: 28 px, waga 700, kolor zależny od znaku.
+5. Wiersz "Wpływy:" z kwotą z plusem i wiersz "Wydatki:" z kwotą z minusem (14 px, waga 400).
+
+Cała karta jest jednym `<button type="button">`: wszystkie części to elementy liniowe (`span`), zgodnie z modelem treści przycisku. Nie ma w niej nagłówka ani linku.
+
+<Canvas of={Stories.Active} />
+<Canvas of={Stories.TwoAccountsSideBySide} />
+
+## 5. Warianty
+
+Jeden wygląd, dwa typy konta (plakietka) i trzy statusy:
+
+| Postać | Kiedy wybrać |
+|---|---|
+| `status` pominięty lub `ready` | dane wczytane |
+| `status="loading"` | wynik nowego miesiąca jeszcze się wczytuje |
+| `status="error"` | wczytanie się nie udało |
+| `accountType` `shared` / `personal` | zgodnie z typem konta z API |
+
+## 6. Stany
+
+| Stan | Wygląd |
+|---|---|
+| Domyślny (nieaktywny) | ramka 2 px `--border`, tło `--card`, `aria-pressed="false"` |
+| Wybrany | ramka 2 px `--primary`, widoczny napis "Wybrane", `aria-pressed="true"` |
+| Najechanie | tło `--background` (jak w pozostałych elementach klikalnych: zmiana tła, nie ramki) |
+| Fokus | globalny obrys 2 px `--ring` z odstępem 2 px (poza ramką karty) |
+| Wciśnięty | jak najechanie; przełącza stan |
+| Ładowanie | te same nazwa i plakietka, wartości zastąpione Skeletonami, `aria-busy="true"`, tekst "Wczytywanie wyniku konta" dla czytnika; wybór nadal działa i wybrane konto zostaje wybrane |
+| Błąd | zwykła karta (nie przycisk) z nazwą, plakietką i ErrorState z "Spróbuj ponownie" (`role="alert"`); nie da się jej wybrać, bo przycisk w przycisku jest niedozwolony |
+| Wynik dodatni | wartość w kolorze `--income` |
+| Wynik ujemny | wartość z minusem, kolor `--expense` |
+| Zero | "0,00 zł": neutralny kolor tekstu, bez znaku i koloru |
+| Zablokowany | nie dotyczy: żadna karta nie jest zablokowana; jeśli konto nie jest dostępne, nie ma jego karty |
+
+<Canvas of={Stories.States} />
+<Canvas of={Stories.Negative} />
+<Canvas of={Stories.Zero} />
+<Canvas of={Stories.Loading} />
+<Canvas of={Stories.FailedToLoad} />
+
+### Ramka 2 px zamiast 1 px: dlaczego układ nie skacze
+
+Zwykła Card ma ramkę 1 px. Karta konta ma **zawsze 2 px**, a zmienia się tylko jej kolor (`--border` na `--primary`). Gdyby aktywna miała 2 px, a nieaktywna 1 px, zaznaczenie przesuwałoby treść o 1 px i sąsiednie karty. Test w przeglądarce mierzy rozmiar karty przed i po wybraniu.
+
+Ramka `--primary` na `--card` ma kontrast 5,17:1 (próg elementów interfejsu 3:1, WCAG 1.4.11), ale sam kolor nie wystarcza (A3), więc stan niesie też napis "Wybrane" i `aria-pressed`.
+
+## 7. Zachowanie i dostępność
+
+- Klawiatura: `Tab` wchodzi na kartę, `Enter` i spacja przełączają wybór (natywny przycisk).
+- Role i atrybuty: natywny `button` z `aria-pressed` (wzorzec "toggle button" z WAI-ARIA APG). Czytnik ogłasza "przycisk przełączany, wciśnięty/niewciśnięty". Napis "Wybrane" jest `aria-hidden`, żeby czytnik nie powtarzał stanu dwa razy.
+- Nazwa przycisku składa się z całej zawartości: "Konto wspólne Wspólne Ile zostanie 3 975,50 zł Wpływy: +6 500,00 zł Wydatki: −2 524,50 zł". Czytnik odczytuje U+2212 jako "minus".
+- **Wybór jednego konta**: aplikacja pilnuje, żeby `selected` miała co najwyżej jedna karta (kontrolowany stan w rodzicu); karta nie zna sąsiadów.
+- Ładowanie: `aria-busy="true"`; Skeleton jest `aria-hidden`, a tekst "Wczytywanie wyniku konta" czyta czytnik.
+- Błąd: ErrorState z `announce` ogłasza się raz, gdy karta zmienia się w błąd po nieudanym wczytaniu.
+- Kolor nie jest jedynym nośnikiem (A3): wybór = ramka + napis + `aria-pressed`; znak kwoty = plus lub minus w tekście; typ konta = tekst plakietki.
+- Kontrast: `--income` na `--card` 5,02:1, `--expense` 6,47:1 (zatwierdzone tokeny); na tle najechania (`--background`) odpowiednio 4,56:1 i 5,88:1; `--muted-foreground` 7,56:1.
+- Cel kliknięcia: cała karta, co najmniej 36 px wysokości (WCAG 2.5.8).
+
+<Canvas of={Stories.TogglesAriaPressed} />
+
+## 8. Treść
+
+- Domyślne teksty są po polsku w jednej stałej: `account-remainder-card.messages.ts`. Zmień je propem `messages` (np. dla innego języka); w JSX nie ma polskich literałów.
+- **Kwoty**: wyłącznie przez `formatMoneyMinor` (PLN, liczby całkowite w groszach): spacja twarda (U+00A0) jako separator tysięcy i przed "zł", przecinek dziesiętny, prawdziwy minus U+2212, plus tylko we wpływach. Twarda spacja nie pozwala zawinąć kwoty w środku liczby.
+- `formatMoneyMinor(amountMinor, { sign })` (eksport z `@aitl/ui`, czysta funkcja, bez importów `@aitl/*`): tylko PLN, kwota w groszach jako `number` (liczba całkowita bezpieczna, do 90 071 992 547 409,91 zł) albo `bigint` (bez limitu); liczba niecałkowita lub poza zakresem to `RangeError`; bez zaokrąglania. `sign: 'negative'` (domyślnie) pisze minus tylko dla ujemnych, `sign: 'always'` dopisuje też plus dla dodatnich; zero nigdy nie ma znaku. Limit domeny to 99 999 999,99 zł (9 999 999 999 groszy, E02).
+
+| Wejście (grosze) | `sign` | Wynik |
+|---|---|---|
+| `0` | dowolny | `0,00 zł` |
+| `1` | domyślny | `0,01 zł` |
+| `-123450` | domyślny | `−1 234,50 zł` |
+| `650000` | `always` | `+6 500,00 zł` |
+| `9999999999` | domyślny | `99 999 999,99 zł` |
+
+- Wynik może być ujemny, zerowy albo dodatni; zero pisze się "0,00 zł", bez znaku.
+- Wiersz "Wydatki" pokazuje wydatki z minusem ("−2 524,50 zł"), choć API zwraca je jako liczbę dodatnią.
+- Nazwa konta: do 2 linii zalecane; dłuższa zawija się (`wrap-anywhere`), plakietka przechodzi do nowej linii.
+- Największa kwota z domeny: "99 999 999,99 zł"; mieści się w karcie 320 px (test w przeglądarce).
+- Nie pisz "Razem", "Łącznie" ani "Suma" w żadnej postaci (R03).
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | karta zajmuje całą szerokość, karty jedna pod drugą; długa nazwa zawija się, plakietka pod nazwą |
+| 768 px | dwie karty obok siebie (rodzic: `flex flex-wrap`, `min-w-64 flex-1`) |
+| 1440 px | bez zmian; kolumna treści do 960 px (R01.4) |
+
+<Canvas of={Stories.LongNameNarrowScreen} />
+<Canvas of={Stories.LargestAmountNarrowScreen} />
+
+## 10. API
+
+Typ `AccountRemainderCardProps` to suma trzech postaci (rozróżnia je `status`):
+
+| Prop | Typ | Postać | Opis |
+|---|---|---|---|
+| `name` | `string` | wszystkie | nazwa konta |
+| `accountType` | `'shared' \| 'personal'` | wszystkie | typ konta (plakietka) |
+| `status` | `'ready' \| 'loading' \| 'error'` | | domyślnie `ready` |
+| `remainderMinor` | `number \| bigint` | `ready` | wynik w groszach, ze znakiem (liczy serwer, R02) |
+| `incomeMinor` | `number \| bigint` | `ready` | wpływy w groszach |
+| `expensesMinor` | `number \| bigint` | `ready` | wydatki w groszach, liczba dodatnia |
+| `selected` | `boolean` | `ready`, `loading` | czy konto jest wybrane (`aria-pressed`) |
+| `onSelect` | `() => void` | `ready`, `loading` | kliknięcie karty; rodzic ustawia `selected` |
+| `onRetry` | `() => void` | `error` | ponowienie wczytania |
+| `retrying` | `boolean` | `error` | przycisk ponowienia zajęty |
+| `messages` | `Partial<AccountRemainderCardMessages>` | wszystkie | teksty: `remainderLabel`, `incomeLabel`, `expensesLabel`, `selectedMarker`, `loadingLabel`, `errorTitle`, `errorDescription`, `retryLabel`, `sharedAccountLabel`, `personalAccountLabel` |
+| `className` | `string` | wszystkie | np. `min-w-64 flex-1` w układzie rodzica |
+
+Komponent nie sumuje i nie oblicza wyniku: dostaje gotowe kwoty z serwera. Nie importuje pakietów `@aitl/*`.
+
+## 11. Kod
+
+Minimalny przykład:
+
+```tsx
+import { AccountRemainderCard } from '@aitl/ui';
+
+<AccountRemainderCard
+  name="Konto wspólne"
+  accountType="shared"
+  remainderMinor={397550}
+  incomeMinor={650000}
+  expensesMinor={252450}
+  selected={selectedId === account.id}
+  onSelect={() => setSelectedId(account.id)}
+/>;
+```
+
+Typowy przykład z produktu, sekcja "Ile zostanie" (dwa konta, miesiąc z przełącznika, stany z zapytania):
+
+```tsx
+import { AccountRemainderCard, MonthSwitcher } from '@aitl/ui';
+
+<div className="flex flex-wrap gap-(--space-between-groups)">
+  {accounts.map((account) =>
+    account.status === 'error' ? (
+      <AccountRemainderCard key={account.id} status="error" name={account.name} accountType={account.type} onRetry={reload} />
+    ) : (
+      <AccountRemainderCard
+        key={account.id}
+        className="min-w-64 flex-1"
+        status={account.status}
+        name={account.name}
+        accountType={account.type}
+        remainderMinor={account.remainderMinor}
+        incomeMinor={account.incomeMinor}
+        expensesMinor={account.expensesMinor}
+        selected={account.id === selectedId}
+        onSelect={() => setSelectedId(account.id)}
+      />
+    ),
+  )}
+</div>;
+```
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: Card (nieinteraktywna), BankAccountList (lista kont bez wyniku), Button (akcja, nie stan wyboru), RadioGroup (wybór w formularzu).
+- Występuje we wzorcach: przegląd miesiąca per konto (E03), ekran główny `/` (E01, E03).
+- Współpracuje z: `MonthSwitcher` (miesiąc), Badge (typ), Skeleton i ErrorState (stany), `formatMoneyMinor` (kwoty).
+
+## Czego brakuje
+
+- Karta jako link do strony konta (`/bank-accounts/{id}?month=...`, E03 UI/UX): dziś karta tylko wybiera konto; link wymaga decyzji, czy wybór i nawigacja to jedna, czy dwie akcje.
+- Wybrane konto w stanie błędu: karta błędu nie jest przyciskiem, więc traci oznaczenie wyboru; propozycja do decyzji właściciela (alternatywa: ErrorState obok przycisku, nie w nim).
+- Stan "częściowe dane" (np. wpływy znane, wydatki nie): nie istnieje w specyfikacji E03, wynik jest liczony w całości.
+- Kolor dla "dodatni wynik w kolorze wpływu" wynika z R01.2 (zielona dodatnia reszta), ale nie z decyzji E03: do potwierdzenia.
+- Skeleton ma 28 px wysokości zamiast 42 px wiersza wartości: wysokość karty w ładowaniu jest nieco mniejsza niż w stanie gotowym.
+- Ciemny motyw: czeka na L3.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: `aria-pressed` przełącza się kliknięciem, `Enter` i spacją (z obrysem fokusu 2 px), ramka stale 2 px i rozmiar karty identyczny przed i po wybraniu (pomiar), kolor ramki z `--border` na `--primary`, widoczny napis "Wybrane" tylko na wybranej karcie, kwoty z minusem U+2212, twardą spacją, plusem i kolorami z tokenów, waga 700 tylko przy wyniku, kolor wyniku dodatniego i zerowego, ładowanie z `aria-busy` i szkieletami, błąd z ponowieniem, cel co najmniej 36 px i nazwa przycisku, brak sumy łącznej przy dwóch kontach, długa nazwa i największa kwota przy 320 px.
