@@ -44,7 +44,7 @@ Pozwala użytkownikowi wykonać jedną, nazwaną akcję (np. "Zapisz wpis"), a p
 | `default` (główny) | Jedna najważniejsza akcja na ekranie lub w formularzu. Najwyżej jeden na widok. Źródło: R01.1 (jeden kolor akcji) | `--primary`, `--primary-foreground`, hover `--primary-hover` |
 | `secondary` | Akcja drugoplanowa obok głównej ("Anuluj"), strzałki miesiąca | `--muted`, `--foreground`, hover `--muted-hover` (zatwierdzony przez właściciela, 2026-11-17) |
 | `ghost` | Akcja o najniższym znaczeniu, w gęstym układzie, bez tła w spoczynku | brak tła, hover `--muted` |
-| `destructive` | Akcja nieodwracalna, zwykle w dialogu potwierdzenia ("Usuń wpis"). Nie używać jako wariantu ozdobnego | `--destructive`, `--destructive-foreground` (zatwierdzony przez właściciela, 2026-11-17) |
+| `destructive` | Akcja nieodwracalna, zwykle w dialogu potwierdzenia ("Usuń wpis"). Nie używać jako wariantu ozdobnego | `--destructive`, `--destructive-foreground` (zatwierdzony przez właściciela, 2026-11-17), hover `--destructive-hover` (propozycja z PR L, czeka na akceptację właściciela) |
 
 Usunięte z domyślnego shadcn/ui: `outline`, `link` (decyzja właściciela; link to osobny komponent), rozmiary `xs`, `sm`, `lg`, `icon-*`.
 
@@ -94,7 +94,7 @@ Obok przycisku zawsze stoi tekst z powodem i przyczyną odblokowania, powiązany
 - Czytnik ekranu ogłasza rolę i nazwę: "Zapisz wpis, przycisk". Zablokowany przez `disabled` jest pomijany w kolejności fokusu; zablokowany przez `aria-disabled` (i `loading`) zachowuje fokus i jest ogłaszany jako niedostępny.
 - Rozmiar `icon` musi mieć nazwę dostępną: `aria-label="Poprzedni miesiąc"`; znak wewnątrz dostaje `aria-hidden="true"`.
 - Cel kliknięcia: minimum 36 x 36 px, więc spełnia wymóg 24 x 24 px (WCAG 2.5.8).
-- Kontrast: tekst na tle co najmniej 4,5:1 w każdym wariancie: `--primary-foreground` na `--primary` 5,17; na `--primary-hover` 6,70; `--foreground` na `--muted` 11,86; na `--muted-hover` 9,96; `--destructive-foreground` na `--destructive` 6,47. Obrys fokusu `--ring` na `--muted-hover` 3,51 (próg 3:1, WCAG 1.4.11).
+- Kontrast: tekst na tle co najmniej 4,5:1 w każdym wariancie: `--primary-foreground` na `--primary` 5,17; na `--primary-hover` 6,70; `--foreground` na `--muted` 11,86; na `--muted-hover` 9,96; `--destructive-foreground` na `--destructive` 6,47; na `--destructive-hover` 8,31 (propozycja z PR L). Obrys fokusu `--ring` na `--muted-hover` 3,51 (próg 3:1, WCAG 1.4.11).
 - `loading` ustawia `aria-busy` i ignoruje kliknięcia, więc blokuje podwójne wysłanie, a fokus nie jest tracony. Wynik operacji ogłasza osobny komunikat (Alert z `role="status"` lub `role="alert"`).
 - Ustaw jawnie `type`: natywnie `button` w formularzu jest `submit`. Dla akcji, która nie wysyła formularza, podaj `type="button"`.
 - `prefers-reduced-motion: reduce` zeruje czas przejścia (globalna reguła w `styles.css`).
@@ -176,7 +176,6 @@ Link wyglądający jak przycisk:
 
 ## Czego brakuje
 
-- Hover wariantu `destructive`: w zatwierdzonej palecie nie ma ciemniejszej czerwieni, więc wariant nie zmienia koloru przy najechaniu. Do decyzji właściciela (nowy surowy kolor, np. czerwień o kontraście z bielą co najmniej 4,5:1).
 - Wygląd zablokowanego `secondary` i `ghost` różni się od aktywnego tylko kolorem tekstu i kursorem. Propozycja z PR E; do oceny po zobaczeniu w aplikacji.
 - Wskaźnik ładowania (spinner): brak źródła; przycisk w trakcie ładowania zmienia tylko etykietę.
 - Ikony (L5): `lucide-react` dojdzie z Checkboxem w partii 2, wtedy rozmiar ikony 16 px w przycisku z tekstem.

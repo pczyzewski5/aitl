@@ -12,6 +12,7 @@
   --raw-blue-700: #1d4ed8;
   --raw-green-700: #15803d;
   --raw-red-700: #b91c1c;
+  --raw-red-800: #991b1b;
   --raw-violet-100: #ede9fe;
   --raw-violet-700: #6d28d9;
 
@@ -42,6 +43,8 @@
   --expense: var(--raw-red-700);
   --destructive: var(--raw-red-700);
   --destructive-foreground: var(--raw-white);
+  --destructive-hover: var(--raw-red-800);
+  --overlay: color-mix(in srgb, var(--raw-gray-900) 60%, transparent);
 
   --control-height: 36px;
   --checkbox-size: 20px;

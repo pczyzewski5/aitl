@@ -300,16 +300,38 @@ Zatwierdzone przez właściciela produktu, 2026-11-18:
 5. EmptyState i ErrorState: bez ikon i ilustracji; tekst mówi, co się stało i co zrobić; EmptyState ma jedną akcję (Button, np. "Dodaj wpis"); ErrorState ma "Spróbuj ponownie" i wyraźne rozgraniczenie od Alertu (Alert: komunikat przy formularzu lub polu; ErrorState: zastępuje treść widoku, której nie da się pokazać); nagłówki z poziomem (h2-h4) jak CardTitle; EmptyState bez roli live; ErrorState z `role="alert"` tylko, gdy pojawia się dynamicznie po nieudanym wczytaniu.
 6. Wagi 400/600/700, bez cieni, promienie tylko z istniejących tokenów, odstępy z istniejących tokenów semantycznych. Kolor hover dla `destructive` nadal otwarty.
 
+## Decyzje właściciela z 2026-11-18 po PR K (akceptacja propozycji)
+
+Zatwierdzone przez właściciela produktu, 2026-11-18:
+
+1. Link samodzielny w osobnym wierszu (np. "Wyloguj") ma cel co najmniej 24 px wysokości; link na tle `--primary` (pasek nagłówka) ma kolor `--primary-foreground` z podkreśleniem; ładowanie ogłaszane wyłącznie przez `aria-busy` na kontenerze. Dokumentacja TextLink i Skeleton zaktualizowana w PR L (stories z testami: pasek nagłówka, cel 24 px).
+2. Dialog na Radix Dialog z zainstalowanego `radix-ui` (bez nowej zależności), przesłona jako nowy token znaczeniowy z istniejącej palety, ConfirmDialog z fokusem domyślnym na "Anuluj" i bez zamykania przesłoną (pełna lista w pliku tokenów).
+
+## Propozycje z PR L (czekają na akceptację właściciela)
+
+- `--destructive-hover` = nowy surowy `--raw-red-800` #991b1b (tylko w `tokens.css`): biały tekst 8,31:1, na `--card` 8,31:1, na `--background` 7,55:1. Zamyka lukę "hover destructive" z PR E.
+- `--overlay` = `--raw-gray-900` z krytością 60% (`color-mix`): okno `--card` względem przyciemnionej strony 4,33:1 nad `--background`, 4,04:1 nad `--card`, 9,98:1 nad paskiem `--primary`. Nazwa i rola tokenu zatwierdzone, krycie 60% to propozycja.
+- Maksymalna szerokość okna 448 px (`max-w-md`).
+
+## Notatki z PR L (Dialog, ConfirmDialog)
+
+- Komponenty: `Dialog` (z `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogDescription`, `DialogFooter`, `DialogClose`) i `ConfirmDialog` w `src/components/ui/`, na Radix Dialog z `radix-ui`; ikona `X` z `lucide-react/icons/x`. Bez nowych zależności; `npm audit --omit=dev` bez zmian.
+- Budowa: przesłona (`DialogPrimitive.Overlay`) jest elementem flex, który centruje okno i daje margines 16 px (`p-(--space-4)`); okno ma `max-h-full`, a przewija się wewnątrz obszar treści (`dialog-body`), więc przycisk zamknięcia zostaje w rogu, a strona za oknem stoi (blokada przewijania Radix). Bez wartości arbitralnych Tailwinda.
+- Przycisk zamknięcia: Button `ghost` `icon` (36 px) z `aria-label` z propsa `closeLabel`; leży w DOM za treścią, więc fokus początkowy trafia na pierwsze pole, a nie na "X". `dismissOnOverlayClick` (domyślnie `true`) wyłącza zamykanie przesłoną; ConfirmDialog ustawia `false`.
+- ConfirmDialog: sterowany (`open`, `onOpenChange`), `onConfirm` nie zamyka okna, fokus domyślny na "Anuluj" przez `onOpenAutoFocus`, a powrót fokusu na element otwierający zapamiętany przy otwarciu (Radix wraca fokusem tylko na `DialogTrigger`, a ConfirmDialog nie ma wyzwalacza). Potwierdzenie to Button `destructive` z `loading`. Stan "zablokowany" dotyczy wyzwalacza z powodem obok (E02-Q15), nie samego okna.
+- Pułapka (nie lekcja): Radix Dialog zamyka przesłoną dopiero po zdarzeniu `click` po `pointerdown` (odroczone `pointerdown` poza oknem), więc test jednostkowy musi wysłać oba zdarzenia, a test Storybooka używa `userEvent.click` na przesłonie.
+- 320 px w Storybooku: `globals: { viewport: { value: 'mobile1' } }` w story (dodatek Vitest ustawia wtedy `page.viewport(320, 568)`); test sprawdza `window.innerWidth`, margines 16 px, przewijanie wewnątrz okna i brak przewijania strony.
+- Button `destructive`: hover `--destructive-hover` (klasa, podgląd `data-preview-state` w `preview-states.css`, test klasy, dokumentacja, katalog tokenów).
+- Foundations: katalog tokenów ma `--raw-red-800`, `--destructive-hover`, `--overlay`; strona Kształt ma sekcję "Przesłona za oknem"; nowe pary kontrastu `--destructive-hover` są w teście `contrast-pairs.test.ts`.
+
 ## Dalsze komponenty bazowe (etap 2, ciąg dalszy) i czego potrzeba od właściciela
 
-PR K zakończony (TextLink, Skeleton, EmptyState, ErrorState). Pozostałe komponenty bazowe powstają tylko tam, gdzie ekran ich potrzebuje; po nich etap 3 (komponenty produktu, wzorce, ekrany epików).
+PR K (TextLink, Skeleton, EmptyState, ErrorState) i PR L (Dialog, ConfirmDialog) zakończone. Pozostałe komponenty bazowe powstają tylko tam, gdzie ekran ich potrzebuje; po nich etap 3 (komponenty produktu, wzorce, ekrany epików).
 
 | PR | Komponent | Czego potrzeba od właściciela |
 |---|---|---|
-| L | Dialog | Radix Dialog; kolor tła przesłony (nowy token, bez surowej wartości w komponencie), szerokość i przewijanie przy 320 px, przycisk zamknięcia (ikona `X`), powrót fokusu |
-| L | ConfirmDialog | wzorzec treści (co się stanie, nazwy przycisków), fokus domyślny na "Anuluj", kolor hover `destructive` (luka otwarta od PR E) |
-| M | Menu | Radix DropdownMenu dla akcji serii (E02-S03); wygląd wyzwalacza (przycisk ikony 36 px), kolory pozycji (`--muted`), zachowanie na dotyk |
+| M | Menu | Radix DropdownMenu dla akcji serii (E02-S03: "Zakończ od miesiąca", "Zmień kwotę od miesiąca", "Usuń całkowicie" tylko dla serii bez miesięcy z przeszłości, E02-Q15; pozycje otwierają Dialog i ConfirmDialog). Potrzebne: wygląd wyzwalacza (przycisk ikony 36 px; która ikona z `lucide-react`, np. trzy kropki, i nazwa dostępna), kolory pozycji (propozycja `--muted` przy najechaniu i fokusie), wygląd pozycji destrukcyjnej ("Usuń całkowicie": `--destructive` na `--card` 6,47:1?), zachowanie na dotyk (cel pozycji 36 px, otwieranie dotknięciem) i czy pozycje zablokowane mają być widoczne z powodem czy ukryte; powrót fokusu na wyzwalacz po wyborze pozycji, która otwiera okno |
 | N | Toast | Radix Toast z zainstalowanego `radix-ui` (bez nowej zależności); czas wyświetlania jako token (propozycja z `--duration-feedback`: potwierdzenie ok. 3 s), miejsce na ekranie, `aria-live`, ruch |
 | brak | Textarea, Tabs | brak, gdy ekran zażąda (decyzja 2026-11-18) |
 
-Układ poziomy etykiety w Field (etykieta obok pola) dla Checkboxa i RadioGroup oraz wspólny komponent grupy pól wyboru: do rozstrzygnięcia przy wzorcu formularza (etap 3). Kolor hover dla `destructive` nadal otwarty.
+Układ poziomy etykiety w Field (etykieta obok pola) dla Checkboxa i RadioGroup oraz wspólny komponent grupy pól wyboru: do rozstrzygnięcia przy wzorcu formularza (etap 3). Kolor hover dla `destructive`: propozycja z PR L czeka na akceptację właściciela.

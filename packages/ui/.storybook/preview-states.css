@@ -10,6 +10,10 @@
   background-color: var(--muted);
 }
 
+[data-slot='button'][data-variant='destructive'][data-preview-state='hover'] {
+  background-color: var(--destructive-hover);
+}
+
 [data-slot='text-link'][data-preview-state='hover'] {
   color: var(--primary-hover);
 }

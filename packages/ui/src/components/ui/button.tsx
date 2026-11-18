@@ -17,7 +17,7 @@ const buttonVariants = cva(
         ghost:
           'bg-transparent text-foreground enabled:not-aria-disabled:hover:bg-muted disabled:text-muted-foreground aria-disabled:text-muted-foreground',
         destructive:
-          'bg-destructive text-destructive-foreground disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground',
+          'bg-destructive text-destructive-foreground enabled:not-aria-disabled:hover:bg-destructive-hover disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground',
       },
       size: {
         default: 'min-h-control px-4 py-1',

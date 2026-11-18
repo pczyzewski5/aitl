@@ -1,0 +1,233 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './dialog.stories';
+
+<Meta of={Stories} />
+
+# Dialog
+
+Okno modalne: zatrzymuje użytkownika w jednym, krótkim zadaniu albo decyzji, zanim wróci do strony. Zbudowane na `Dialog` z zainstalowanego pakietu `radix-ui` (bez nowej zależności). Źródło reguł: R01.4-R01.7, A1-A3 (referencje), tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-18, WCAG 2.2 (1.4.11, 2.1.2, 2.4.3, 2.5.8, 4.1.2) i WAI-ARIA APG (wzorzec Dialog (Modal)). Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+Okna w dokumentacji są pokazane w ramce (iframe), bo okno modalne zasłania całą stronę, na której leży. Otwórz je przyciskiem w ramce.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Pozwala dokończyć jedno, krótkie zadanie (np. zmienić kwotę serii) bez opuszczania strony, ze wszystkim innym wyłączonym, dopóki użytkownik nie zdecyduje.
+
+## 2. Kiedy używać
+
+- Krótki formularz, który ma jeden cel i wraca do tej samej strony: "Zmień kwotę od miesiąca" dla serii cyklicznej (E02-S03).
+- Informacja, którą trzeba potwierdzić, zanim użytkownik pójdzie dalej, a która nie jest nieodwracalna.
+- Zawsze wtedy, gdy reszta strony nie może reagować na kliknięcia, dopóki zadanie nie zostanie zamknięte.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Potwierdzenie nieodwracalnej akcji (usunięcie wpisu, zakończenie serii) | ConfirmDialog (fokus domyślny na "Anuluj", przesłona nie zamyka okna) |
+| Potwierdzenie zapisu, które samo znika | Toast (PR N) |
+| Błąd przy polu lub formularzu | błąd w Field albo Alert |
+| Lista akcji przy wierszu | Menu (PR M) |
+| Duży, wieloetapowy formularz albo osobny ekran | osobna strona (formularz wpisu E02 rozwija się nad listą, nie jest oknem) |
+| Podpowiedź, objaśnienie | tekst w Field (Popover i Tooltip: brak, gdy ekran zażąda) |
+
+### Dialog czy ConfirmDialog
+
+| | Dialog | ConfirmDialog |
+|---|---|---|
+| Zadanie | krótki formularz lub informacja | decyzja o nieodwracalnej akcji |
+| Fokus po otwarciu | pierwsze pole okna | "Anuluj" |
+| Kliknięcie przesłony | zamyka okno | nie zamyka okna |
+| Przycisk w rogu | opcjonalny (`closeLabel`) | brak (jest "Anuluj") |
+| Treść | dowolna | tytuł z nazwą obiektu, skutek, "nie można cofnąć", dwa przyciski |
+
+Źródło: decyzje właściciela, 2026-11-18.
+
+## 4. Anatomia
+
+1. Przesłona (`--overlay`): wypełnia ekran, przyciemnia stronę; kliknięcie zamyka Dialog.
+2. Okno: karta (`--card`, ramka `--border`, `rounded-card`, padding `--space-panel`), wyśrodkowane, szerokość do 448 px.
+3. Nagłówek (`DialogHeader`, opcjonalny wrapper): `DialogTitle` (wymagany) i `DialogDescription` (opcjonalny).
+4. Treść: dowolne komponenty (np. Field, Input).
+5. Stopka (`DialogFooter`, opcjonalna): przyciski, wyrównane do prawej, zawijają się.
+6. Przycisk zamknięcia w rogu (opcjonalny, prop `closeLabel`): Button `ghost` o rozmiarze `icon`, ikona `X` z `lucide-react`.
+7. Wyzwalacz (`DialogTrigger`, opcjonalny): element, który otwiera okno i do którego wraca fokus.
+
+Bez cienia (A2: separacja ramką), bez ilustracji. Okno ma kontrolowaną strukturę: wszystko, co przekażesz jako dzieci, trafia do przewijanego obszaru; przycisk zamknięcia zostaje w rogu.
+
+<Canvas of={Stories.Open} />
+<Canvas of={Stories.WithoutDescription} />
+<Canvas of={Stories.WithoutCloseButton} />
+
+## 5. Warianty
+
+Jeden wygląd; różnią się zawartością i dwoma propsami:
+
+| Postać | Kiedy wybrać |
+|---|---|
+| z opisem i przyciskiem w rogu | domyślna dla formularza: opis mówi, co się stanie, przycisk w rogu to dodatkowe wyjście |
+| bez opisu | tytuł wystarcza (jedno pole); wtedy podaj `aria-describedby={undefined}` na `DialogContent` |
+| bez przycisku w rogu (brak `closeLabel`) | gdy w stopce jest "Anuluj" i nie chcesz dwóch wyjść |
+| `dismissOnOverlayClick={false}` | gdy zamknięcie przypadkiem kosztowałoby wpisane dane; dla nieodwracalnych akcji użyj ConfirmDialog |
+
+Źródło: decyzje właściciela z 2026-11-18.
+
+## 6. Stany
+
+| Stan | Wygląd |
+|---|---|
+| Zamknięty | nic nie jest renderowane; wyzwalacz wygląda jak zwykły przycisk |
+| Otwarty | przesłona, okno, fokus w oknie, strona za oknem nie przewija się i jest ukryta przed czytnikiem (`aria-hidden`) |
+| Długa treść | okno ma maksymalną wysokość ekranu minus 2 x 16 px i przewija się wewnątrz (obszar `dialog-body`); strona za oknem stoi |
+| Fokus | globalny obrys 2 px; przycisk zamknięcia i przyciski jak w Button |
+| Najechanie | tylko przyciski (hover jak w Button; przycisk w rogu dostaje tło `--muted`) |
+| Zablokowany | okno nie ma stanu zablokowanego; zablokowany bywa wyzwalacz |
+| Ładowanie, błąd, wybrany | nie dotyczą okna; ładowanie i błąd to sprawa treści i przycisków (Button `loading`, Alert) |
+
+Hover i fokus przycisku zamknięcia są pokazane jako zamrożony podgląd (`data-preview-state`); okno nie ma własnego hovera ani wciśnięcia.
+
+### Jak użytkownik dowie się, dlaczego wyzwalacz jest zablokowany
+
+Obok wyzwalacza stoi tekst z powodem i przyczyną odblokowania, powiązany przez `aria-describedby`; zablokowanie samym kolorem jest niedopuszczalne (A3). Zablokowany wyzwalacz używa `aria-disabled`, żeby zachować fokus.
+
+<Canvas of={Stories.States} />
+
+### Długa treść na wąskim ekranie
+
+<Canvas of={Stories.LongContentNarrowScreen} />
+
+## 7. Zachowanie i dostępność
+
+- Rola `dialog`, nazwa z `DialogTitle` (`aria-labelledby`), opis z `DialogDescription` (`aria-describedby`). Tytuł jest wymagany; opis wymagany, jeśli okno wyjaśnia skutek. Bez opisu ustaw `aria-describedby={undefined}`, inaczej Radix zgłosi ostrzeżenie w konsoli.
+- Klawiatura: `Enter` lub spacja na wyzwalaczu otwiera okno; `Tab` i `Shift+Tab` krążą po elementach okna i nie wychodzą poza nie (pułapka fokusu jest zamierzona w oknie modalnym, WAI-ARIA APG; wyjście zapewnia `Escape`, WCAG 2.1.2); `Escape` zamyka okno.
+- Fokus po otwarciu trafia na pierwszy element interaktywny (zwykle pierwsze pole). Przycisk zamknięcia jest ostatni w kolejności, bo leży w DOM za treścią.
+- Po zamknięciu fokus wraca na wyzwalacz (WCAG 2.4.3). Gdy okno otwierasz bez `DialogTrigger`, wróć fokusem na element otwierający sam (w ConfirmDialog robi to komponent).
+- Reszta strony dostaje `aria-hidden` i nie przyjmuje kliknięć; czytnik ekranu czyta tylko okno. Rola `dialog` w czytnikach ogłasza nazwę (tytuł) przy otwarciu.
+- Kliknięcie przesłony zamyka Dialog (nie zamyka ConfirmDialog). Kliknięcie wewnątrz okna nie zamyka go.
+- Przycisk zamknięcia: nazwa dostępna z propsa `closeLabel` (komponent nie ma własnego tekstu, bo teksty przekazuje aplikacja), ikona `aria-hidden`, cel 36 x 36 px (WCAG 2.5.8 wymaga 24 x 24).
+- Kontrast: tekst w oknie leży na `--card`: `--foreground` 14,68:1, `--muted-foreground` 7,56:1, `--primary-foreground` na `--primary` 5,17:1, `--destructive-foreground` na `--destructive` 6,47:1. Okno względem przyciemnionej strony: 4,33:1 nad `--background`, 4,04:1 nad `--card` (próg 3:1, WCAG 1.4.11); granicę wyznacza także ramka `--border` (dekoracja, nie nośnik informacji).
+- Ruch: okno pojawia się i znika bez animacji (R01.6); globalna reguła `prefers-reduced-motion: reduce` w `styles.css` zeruje przejścia przycisków.
+- Przewijanie: blokada przewijania strony za oknem (Radix) działa przy pierwszym oknie; okno w oknie nie jest wspierane.
+
+## 8. Treść
+
+- Tytuł: czynność i obiekt, rzeczowo: "Zmień kwotę od miesiąca", nie "Uwaga" ani "Edycja" (R01.7). Jedno zdanie, do ok. 60 znaków; dłuższy zawija się (`wrap-anywhere`), nie jest ucinany.
+- Opis: co się stanie i czego dotyczy, do 2 zdań, bez wykrzykników (A1).
+- Przyciski: czasownik i obiekt ("Zapisz kwotę", "Anuluj"), nigdy "OK" ani "Tak". Teksty przekazuje aplikacja.
+- Dane w przykładach oznaczaj "(przykład)" (A5). Kwoty w formacie "1 850,00 zł".
+- Tłumaczenie na dłuższy język: okno rośnie w dół i przewija się; nie ustawiaj stałej wysokości.
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | okno ma 288 px szerokości (margines 16 px po bokach, `--space-4`), do wysokości ekranu minus 32 px; przewija się wewnątrz; stopka zawija przyciski |
+| 768 px | okno wyśrodkowane, szerokość do 448 px |
+| 1440 px | bez zmian |
+
+<Canvas of={Stories.LongContentNarrowScreen} />
+
+## 10. API
+
+`Dialog` (korzeń Radix `Dialog.Root`): `open`, `defaultOpen`, `onOpenChange`, `modal`.
+
+`DialogContent`:
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `closeLabel` | `string` | | nazwa dostępna przycisku zamknięcia w rogu; bez niego przycisku nie ma |
+| `dismissOnOverlayClick` | `boolean` | `true` | `false`: kliknięcie przesłony nie zamyka okna |
+| `onOpenAutoFocus`, `onCloseAutoFocus`, `onEscapeKeyDown`, `onPointerDownOutside`, `onInteractOutside` | zdarzenia Radix | | zachowanie fokusu i zamykania; wywołanie `preventDefault()` anuluje domyślną akcję |
+| `className` i atrybuty `div` | `ComponentProps` | | `className`, `aria-describedby`, `data-*` (bez `asChild`) |
+
+`DialogTrigger`, `DialogClose` (`asChild` dla własnego przycisku), `DialogHeader`, `DialogTitle` (`h2`), `DialogDescription`, `DialogFooter`: atrybuty odpowiednich elementów Radix lub `div`.
+
+<Controls of={Stories.Playground} />
+
+## 11. Kod
+
+Minimalny przykład:
+
+```tsx
+import { Button, Dialog, DialogClose, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@aitl/ui';
+
+<Dialog>
+  <DialogTrigger asChild>
+    <Button variant="secondary">Zmień kwotę</Button>
+  </DialogTrigger>
+  <DialogContent aria-describedby={undefined}>
+    <DialogTitle>Zmień kwotę od miesiąca</DialogTitle>
+    <DialogFooter>
+      <DialogClose asChild>
+        <Button variant="secondary">Anuluj</Button>
+      </DialogClose>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>;
+```
+
+Typowy przykład z produktu, zmiana kwoty serii (E02-S03):
+
+```tsx
+import {
+  Button,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  Field,
+  Input,
+} from '@aitl/ui';
+
+<Dialog>
+  <DialogTrigger asChild>
+    <Button variant="secondary">Zmień kwotę od miesiąca</Button>
+  </DialogTrigger>
+  <DialogContent closeLabel="Zamknij okno">
+    <DialogHeader>
+      <DialogTitle>Zmień kwotę od miesiąca</DialogTitle>
+      <DialogDescription>Nowa kwota obowiązuje od wybranego miesiąca. Wcześniejsze miesiące zostają bez zmian.</DialogDescription>
+    </DialogHeader>
+    <Field label="Nowa kwota">
+      <Input type="amount" defaultValue="1 850,00" />
+    </Field>
+    <DialogFooter>
+      <DialogClose asChild>
+        <Button variant="secondary">Anuluj</Button>
+      </DialogClose>
+      <Button onClick={saveAmount}>Zapisz kwotę</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>;
+```
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: ConfirmDialog (decyzja o nieodwracalnej akcji), Alert (komunikat w stronie), Toast (znika sam), Popover (nie blokuje strony; brak w systemie), Menu (lista akcji).
+- Występuje we wzorcach: zmiana kwoty serii (E02-S03), potwierdzenie usunięcia (przez ConfirmDialog), "Zakończ od miesiąca" (przez ConfirmDialog).
+
+## Czego brakuje
+
+- Panel boczny (Sheet) i okno pełnoekranowe na telefonie: brak ekranu, który ich potrzebuje.
+- Animacja otwarcia i zamknięcia: nie dodana (R01.6, brak ruchu poza hoverem); jeśli właściciel ją zatwierdzi, potrzebny będzie token czasu i obsługa `prefers-reduced-motion`.
+- Okno w oknie i kilka okien jednocześnie: nie wspierane, nie testowane.
+- Przewijanie wewnątrz okna z przyklejoną stopką: dziś przewija się cała treść razem ze stopką; decyzja przy pierwszym długim formularzu.
+- Komunikat o błędzie zapisu w oknie (Alert w treści okna): wzorzec dojdzie w etapie 3 razem z formularzem.
+- Zachowanie fokusu na Safari: przycisk kliknięty myszą nie dostaje fokusu, więc po zamknięciu okna otwartego bez `DialogTrigger` fokus może trafić na `body`; sprawdzone tylko w Chromium.
+- Ciemny motyw: czeka na L3; przesłona i okno nie mają wartości dla ciemnego motywu.
+- Krycie przesłony 60%: propozycja z PR L, czeka na akceptację właściciela.
+- Maksymalna szerokość okna 448 px (`max-w-md`): propozycja z PR L, czeka na akceptację właściciela.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: otwarcie klikiem, `Enter` i spacją; nazwa z tytułu, opis i ukrycie reszty strony przed czytnikiem; fokus początkowy na pierwszym polu i przycisk zamknięcia jako ostatni w kolejności; pułapka fokusu (`Tab` nie wychodzi z okna); `Escape` zamyka okno, a fokus wraca na wyzwalacz; kliknięcie przesłony zamyka Dialog, a z `dismissOnOverlayClick={false}` nie zamyka; przycisk zamknięcia ma nazwę z propsa i cel 36 x 36 px; brak opisu usuwa `aria-describedby`; kolory przesłony (`--overlay`), okna (`--card`), ramki (`--border`), brak cienia i animacji, typografia z tokenów; przy 320 px margines 16 px, przewijanie wewnątrz okna i brak przewijania strony.

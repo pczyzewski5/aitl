@@ -27,6 +27,8 @@
   --color-expense: var(--expense);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-hover: var(--destructive-hover);
+  --color-overlay: var(--overlay);
   --color-badge-shared: var(--badge-shared-bg);
   --color-badge-shared-foreground: var(--badge-shared-fg);
   --color-badge-personal: var(--badge-personal-bg);

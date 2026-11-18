@@ -23,6 +23,12 @@ export const RAW_COLORS: readonly TokenEntry[] = [
   { name: '--raw-blue-700', origin: 'R01.1, K1', use: SOURCE_ONLY, avoid: NOT_DIRECT },
   { name: '--raw-green-700', origin: 'K2, R01.2', use: SOURCE_ONLY, avoid: NOT_DIRECT },
   { name: '--raw-red-700', origin: 'K2, R01.2', use: SOURCE_ONLY, avoid: NOT_DIRECT },
+  {
+    name: '--raw-red-800',
+    origin: 'propozycja z PR L, czeka na akceptację właściciela (jeden stopień ciemniej niż --raw-red-700, wartość ze skali czerwieni Tailwinda)',
+    use: SOURCE_ONLY,
+    avoid: NOT_DIRECT,
+  },
   { name: '--raw-violet-100', origin: 'R01.2', use: SOURCE_ONLY, avoid: NOT_DIRECT },
   { name: '--raw-violet-700', origin: 'R01.2', use: SOURCE_ONLY, avoid: NOT_DIRECT },
 ];
@@ -50,6 +56,18 @@ export const MEANING_COLORS: readonly TokenEntry[] = [
     origin: 'propozycja z PR E, zatwierdzona przez właściciela produktu, 2026-11-17',
     use: 'tekst na przycisku usuwającym (na --destructive)',
     avoid: '—',
+  },
+  {
+    name: '--destructive-hover',
+    origin: 'propozycja z PR L, czeka na akceptację właściciela',
+    use: 'hover przycisku usuwającego (tło pod --destructive-foreground, 8,31:1)',
+    avoid: 'stan spoczynku',
+  },
+  {
+    name: '--overlay',
+    origin: 'nowy token znaczeniowy zatwierdzony przez właściciela produktu, 2026-11-18; wartość to --raw-gray-900 z krytością 60% (krycie: propozycja z PR L, czeka na akceptację właściciela)',
+    use: 'przesłona za oknem Dialog i ConfirmDialog',
+    avoid: 'tło treści; tekst bezpośrednio na przesłonie',
   },
   { name: '--form-surface', origin: 'R01.5', use: 'tło rozwijanego formularza', avoid: 'tło strony' },
   {

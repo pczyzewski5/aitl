@@ -200,6 +200,33 @@ export const KeyboardFocusesAndActivates: Story = {
   },
 };
 
+const HEADER_LINK_CLASS = 'text-primary-foreground hover:text-primary-foreground';
+const STANDALONE_LINK_CLASS = 'inline-flex min-h-control items-center';
+const MIN_STANDALONE_TARGET_PX = 24;
+
+export const OnPrimaryBar: Story = {
+  name: 'Na pasku nagłówka (tło --primary): kolor --primary-foreground z podkreśleniem',
+  render: () => (
+    <div className="flex items-center justify-between gap-(--space-within-group) bg-primary p-(--space-panel) text-primary-foreground">
+      <p className="font-semibold">AITL</p>
+      <TextLink href="#wyloguj" className={`${HEADER_LINK_CLASS} ${STANDALONE_LINK_CLASS}`} onClick={preventNavigation}>
+        Wyloguj
+      </TextLink>
+    </div>
+  ),
+};
+
+export const StandaloneLinkHasLargeTarget: Story = {
+  name: 'Samodzielny link w osobnym wierszu ma cel co najmniej 24 px (tu 36 px)',
+  render: () => (
+    <div className="flex flex-col gap-(--space-within-group)">
+      <TextLink href="#lista-kont" className={STANDALONE_LINK_CLASS} onClick={preventNavigation}>
+        Wróć do listy kont
+      </TextLink>
+    </div>
+  ),
+};
+
 export const IsUnderlinedAndUsesActionColour: Story = {
   name: 'Test: podkreślenie zawsze, kolor --primary, bez cienia',
   play: async ({ canvasElement }) => {
@@ -251,5 +278,33 @@ export const WrapsLongTextAtNarrowWidth: Story = {
 
     await expect(paragraph?.getBoundingClientRect().width).toBeLessThanOrEqual(NARROW_WIDTH_PX);
     await expect(paragraph?.scrollWidth).toBeLessThanOrEqual(paragraph?.clientWidth ?? 0);
+  },
+};
+
+export const HeaderLinkUsesForegroundOnPrimary: Story = {
+  ...OnPrimaryBar,
+  name: 'Test: link na pasku --primary ma kolor --primary-foreground, podkreślenie i cel co najmniej 24 px',
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    const link = canvas.getByRole('link', { name: 'Wyloguj' });
+    const styles = getComputedStyle(link);
+
+    await expect(styles.color).toBe(resolveToken('color', '--primary-foreground'));
+    await expect(styles.textDecorationLine).toBe('underline');
+    await expect(link.getBoundingClientRect().height).toBeGreaterThanOrEqual(MIN_STANDALONE_TARGET_PX);
+  },
+};
+
+export const StandaloneTargetIsAtLeast24px: Story = {
+  ...StandaloneLinkHasLargeTarget,
+  name: 'Test: samodzielny link ma wysokość celu co najmniej 24 px i zachowuje podkreślenie',
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    const link = canvas.getByRole('link', { name: 'Wróć do listy kont' });
+
+    await expect(link.getBoundingClientRect().height).toBeGreaterThanOrEqual(MIN_STANDALONE_TARGET_PX);
+    await expect(getComputedStyle(link).textDecorationLine).toBe('underline');
   },
 };

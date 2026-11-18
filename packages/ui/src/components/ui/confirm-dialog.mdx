@@ -1,0 +1,217 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './confirm-dialog.stories';
+
+<Meta of={Stories} />
+
+# ConfirmDialog
+
+Okno potwierdzenia nieodwracalnej akcji: mówi, co się stanie i czego nie da się cofnąć, i daje dwa jednoznaczne wyjścia. To kompozycja Dialogu (Radix Dialog z zainstalowanego `radix-ui`, bez nowej zależności). Źródło reguł: E02-S03 i E02-Q8, Q14, Q15 (specyfikacja wpisów), R01.7, A1, A3 (referencje), tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-18, WCAG 2.2 i WAI-ARIA APG (wzorzec Alert Dialog). Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+Okna w dokumentacji są pokazane w ramce (iframe), bo okno modalne zasłania całą stronę. Otwórz je przyciskiem w ramce.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Chroni użytkownika przed przypadkowym wykonaniem akcji, której nie da się cofnąć, i mówi mu dokładnie, co się wtedy stanie.
+
+## 2. Kiedy używać
+
+- Twarde usunięcie wpisu jednorazowego: "Usuń wpis" (E02-Q8: bez historii zmian i bez odtworzenia; usunięcie wpisu z miesiąca historycznego zmienia wynik tego miesiąca).
+- Usunięcie całej serii cyklicznej, tylko gdy seria nie ma miesięcy z przeszłości: "Usuń całkowicie" (E02-Q15).
+- "Zakończ od miesiąca" dla serii: usuwa definicje od wybranego miesiąca i oznaczenia "zapłacone" od niego (E02-S03, Q14).
+- Zawsze wtedy, gdy skutku nie da się cofnąć jednym kliknięciem.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Krótki formularz albo informacja bez nieodwracalnego skutku | Dialog |
+| Akcja, którą da się cofnąć (np. zmiana kwoty od miesiąca) | wykonaj od razu i pokaż Toast (PR N) albo użyj Dialogu z formularzem |
+| Usunięcie serii, która ma miesiące z przeszłości | akcja niedostępna (E02-Q15); zostaje "Zakończ od miesiąca" |
+| Błąd operacji | Alert w oknie albo przy liście (patrz "Czego brakuje") |
+| Potwierdzenie przy każdej akcji "na wszelki wypadek" | nic; zbędne okno uczy klikać "OK" bez czytania |
+
+## 4. Anatomia
+
+1. Przesłona `--overlay` (nie zamyka okna po kliknięciu).
+2. Okno jak w Dialogu (`--card`, ramka `--border`, `rounded-card`).
+3. Tytuł (wymagany): pytanie z nazwą obiektu, np. "Usunąć wpis „Czynsz (przykład)”?".
+4. Opis (wymagany): co się stanie i że nie można tego cofnąć; 16 px w kolorze `--foreground` (nie przygaszony `--muted-foreground`, bo to najważniejsza informacja okna).
+5. Treść dodatkowa (`children`, opcjonalna): lista skutków (np. przy zakończeniu serii).
+6. Stopka: "Anuluj" (Button `secondary`) i przycisk potwierdzenia (Button `destructive`).
+
+Nie ma przycisku zamknięcia w rogu: wyjściem jest "Anuluj" i `Escape`.
+
+<Canvas of={Stories.DeleteOneOffEntry} />
+<Canvas of={Stories.EndSeriesFromMonth} />
+<Canvas of={Stories.DeleteWholeSeries} />
+
+## 5. Warianty
+
+Jedna postać; różnią się tekstami przekazanymi propsami i opcjonalnymi `children`:
+
+| Postać | Kiedy wybrać |
+|---|---|
+| tytuł + opis | skutek mieści się w jednym zdaniu (usunięcie wpisu) |
+| tytuł + opis + lista skutków (`children`) | akcja ma kilka skutków (zakończenie serii: koniec powtarzania, miesiące bez zmian, usunięte oznaczenia) |
+
+Przycisk potwierdzenia jest zawsze `destructive`; przesłona nigdy nie zamyka okna. Potwierdzenie czegoś, co nie jest nieodwracalne, to zadanie zwykłego Dialogu. Źródło: decyzje właściciela, 2026-11-18.
+
+## 6. Stany
+
+| Stan | Wygląd |
+|---|---|
+| Zamknięty | nic nie jest renderowane; okno otwiera aplikacja (prop `open`) |
+| Otwarty | fokus na "Anuluj"; "Usuń wpis" ma tło `--destructive` i tekst `--destructive-foreground` (6,47:1) |
+| Najechanie | przycisk potwierdzenia ciemnieje do `--destructive-hover` (8,31:1 z białym tekstem; propozycja z PR L, czeka na akceptację właściciela); "Anuluj" przechodzi na `--muted-hover` |
+| Fokus | globalny obrys 2 px; zaczyna na "Anuluj" |
+| Ładowanie (`confirming`) | przycisk potwierdzenia: `aria-busy`, `aria-disabled`, kliknięcia ignorowane; etykietę zmienia aplikacja ("Usuwanie…"); okno zostaje otwarte do końca operacji |
+| Zablokowany | okno nie ma stanu zablokowanego; zablokowany bywa wyzwalacz (patrz niżej) |
+| Błąd | brak w komponencie: patrz "Czego brakuje" |
+| Wybrany | nie dotyczy |
+
+Najechanie i fokus są pokazane jako zamrożony podgląd (`data-preview-state`).
+
+<Canvas of={Stories.States} />
+
+### Jak użytkownik dowie się, dlaczego wyzwalacz jest zablokowany
+
+Gdy usunięcie jest niedostępne (seria ma miesiące z przeszłości, E02-Q15), przycisk otwierający okno jest zablokowany przez `aria-disabled`, a obok stoi tekst z powodem i tym, co zrobić zamiast ("Możesz ją tylko zakończyć od wybranego miesiąca"), powiązany przez `aria-describedby`. Samo zablokowanie kolorem jest niedopuszczalne (A3).
+
+<Canvas of={Stories.TriggerDisabledWithReason} />
+
+### Ładowanie
+
+<Canvas of={Stories.Confirming} />
+
+## 7. Zachowanie i dostępność
+
+- Rola `dialog` z nazwą z tytułu i opisem z opisu skutków. Zgodnie z APG okno potwierdzenia zasługuje na `alertdialog`, ale Radix Dialog nadaje rolę `dialog`; zachowanie (fokus na bezpiecznej akcji, brak zamykania przesłoną) jest to samo. **Propozycja:** zostać przy roli `dialog`; do decyzji, jeśli czytniki ekranu w testach z użytkownikami będą ogłaszać go słabo.
+- **Fokus domyślny na "Anuluj"**, nie na przycisku usuwającym (decyzja właściciela, 2026-11-18): przypadkowe `Enter` zaraz po otwarciu rezygnuje, zamiast usuwać.
+- Klawiatura: `Tab` krąży między "Anuluj" i przyciskiem potwierdzenia (`Shift+Tab` w odwrotną stronę), fokus nie wychodzi z okna; `Escape` zamyka okno (rezygnacja); `Enter` i spacja aktywują przycisk z fokusem.
+- Kliknięcie przesłony **nie** zamyka okna (decyzja właściciela, 2026-11-18): przypadkowe kliknięcie obok nie powinno zamykać okna z decyzją ani sprawiać wrażenia, że akcja została wykonana.
+- Po zamknięciu fokus wraca na element, który otworzył okno (ConfirmDialog zapamiętuje go przy otwarciu); jeśli ten element zniknął (np. wiersz usunięty po potwierdzeniu), przenieś fokus w aplikacji na sensowne miejsce, np. nagłówek listy.
+- Czytnik ekranu: po otwarciu ogłasza nazwę (tytuł) i opis; w trakcie `confirming` przycisk ogłasza stan zajęty (`aria-busy`). Wynik operacji ogłasza komunikat aplikacji (Alert `status` albo Toast).
+- Kontrast: `--destructive-foreground` na `--destructive` 6,47:1, na `--destructive-hover` 8,31:1; `--foreground` na `--muted` ("Anuluj") 11,86:1; tekst opisu `--foreground` na `--card` 14,68:1. Okno względem przyciemnionej strony 4,33:1 nad `--background`.
+- Cel kliknięcia obu przycisków: 36 px wysokości (WCAG 2.5.8).
+- Ruch: bez animacji (R01.6); `prefers-reduced-motion` zeruje przejścia kolorów przycisków.
+
+## 8. Treść
+
+Wzorzec treści (E02-S03, R01.7, A1):
+
+- **Tytuł**: pytanie z nazwą obiektu: "Usunąć wpis „Czynsz (przykład)”?", "Zakończyć serię od lutego 2027?". Nie "Czy na pewno?" ani "Uwaga".
+- **Opis**: (1) co się stanie, (2) czego nie da się cofnąć: "Wpis zniknie z listy, a wynik miesiąca zostanie przeliczony. Tej operacji nie można cofnąć." Do 2-3 zdań.
+- **Lista skutków** (opcjonalna): konkretne rzeczy, które się zmienią (miesiące, oznaczenia "zapłacone").
+- **Przyciski**: czasownik i obiekt: "Usuń wpis", "Zakończ serię", "Usuń serię" oraz "Anuluj". Nigdy "OK", "Tak", "Nie". Teksty przekazuje aplikacja (`confirmLabel`, `cancelLabel`).
+- W trakcie operacji etykieta opisuje trwającą czynność: "Usuwanie…".
+- Długi tytuł, opis i etykiety zawijają się (`wrap-anywhere`), okno przewija się wewnątrz, gdy treść jest za wysoka.
+- Dane w przykładach oznaczaj "(przykład)" (A5). Tłumaczenie na dłuższy język: okno rośnie w dół.
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | okno 288 px szerokości (margines 16 px), długi tekst zawija się, przyciski w stopce zawijają się do kolejnych wierszy, treść przewija się wewnątrz okna |
+| 768 px | okno wyśrodkowane, do 448 px |
+| 1440 px | bez zmian |
+
+<Canvas of={Stories.LongContentNarrowScreen} />
+
+## 10. API
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `open` | `boolean` | | czy okno jest otwarte (wymagany; steruje aplikacja) |
+| `onOpenChange` | `(open: boolean) => void` | | wywoływane przy `Escape` i "Anuluj" z `false` (wymagane) |
+| `title` | `string` | | tytuł, nazwa dostępna okna (wymagany) |
+| `description` | `string` | | co się stanie i czego nie da się cofnąć (wymagany) |
+| `confirmLabel` | `string` | | etykieta przycisku potwierdzenia, czasownik i obiekt (wymagana) |
+| `cancelLabel` | `string` | | etykieta przycisku rezygnacji (wymagana) |
+| `onConfirm` | `() => void` | | wywoływane po kliknięciu potwierdzenia; okno nie zamyka się samo, zamyka je aplikacja po zakończeniu operacji (wymagane) |
+| `confirming` | `boolean` | `false` | przycisk potwierdzenia zajęty (`aria-busy`, kliknięcia ignorowane) |
+| `children` | `ReactNode` | | dodatkowa treść między opisem a przyciskami, np. lista skutków |
+
+Okno otwiera aplikacja: ustaw `open` po kliknięciu przycisku (wyzwalacza). `onOpenChange` dostaje `false` po "Anuluj" i `Escape`; po potwierdzeniu zamykasz okno sama, gdy operacja się powiedzie.
+
+## 11. Kod
+
+Minimalny przykład:
+
+```tsx
+import { ConfirmDialog } from '@aitl/ui';
+
+<ConfirmDialog
+  open={open}
+  onOpenChange={setOpen}
+  title="Usunąć wpis?"
+  description="Tej operacji nie można cofnąć."
+  confirmLabel="Usuń wpis"
+  cancelLabel="Anuluj"
+  onConfirm={deleteEntry}
+/>;
+```
+
+Typowy przykład z produktu, usunięcie wpisu jednorazowego (E02-S03) z blokadą podwójnego wysłania:
+
+```tsx
+import { Button, ConfirmDialog } from '@aitl/ui';
+
+<Button variant="secondary" onClick={() => setOpen(true)}>
+  Usuń wpis
+</Button>
+<ConfirmDialog
+  open={open}
+  onOpenChange={setOpen}
+  title="Usunąć wpis „Czynsz (przykład)”?"
+  description="Wpis zniknie z listy, a wynik miesiąca zostanie przeliczony. Tej operacji nie można cofnąć."
+  confirmLabel={isDeleting ? 'Usuwanie…' : 'Usuń wpis'}
+  cancelLabel="Anuluj"
+  confirming={isDeleting}
+  onConfirm={deleteEntry}
+/>;
+```
+
+Zakończenie serii z listą skutków:
+
+```tsx
+<ConfirmDialog
+  open={open}
+  onOpenChange={setOpen}
+  title="Zakończyć serię od lutego 2027?"
+  description="Seria przestanie obowiązywać od wybranego miesiąca. Tej operacji nie można cofnąć."
+  confirmLabel="Zakończ serię"
+  cancelLabel="Anuluj"
+  onConfirm={endSeries}
+>
+  <ul className="list-disc pl-(--space-6) text-sm">
+    <li>Miesiące do stycznia 2027 zostają bez zmian.</li>
+    <li>Oznaczenia „zapłacone” od lutego 2027 zostaną usunięte.</li>
+  </ul>
+</ConfirmDialog>;
+```
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: Dialog (formularz, informacja), Alert (komunikat w stronie), Toast (znika sam), Menu (lista akcji; pozycje "Usuń całkowicie" i "Zakończ od miesiąca" w menu serii otwierają ConfirmDialog, PR M).
+- Występuje we wzorcach: potwierdzenie usunięcia (etap 3), akcje serii (E02-S03: "Zakończ od miesiąca", "Usuń całkowicie").
+
+## Czego brakuje
+
+- **Błąd operacji w oknie** (np. serwer odrzucił usunięcie): komponent nie pokazuje błędu. Wzorzec (ErrorState lub Alert w treści okna, fokus na komunikacie, okno zostaje otwarte) dojdzie w etapie 3; do tego czasu aplikacja przekazuje komunikat jako `children`.
+- Zamykanie w trakcie operacji: w trakcie `confirming` "Anuluj" i `Escape` nadal działają, a zamknięcie nie przerywa żądania; decyzja przy pierwszej integracji (zablokować czy przerywać).
+- Rola `alertdialog` zamiast `dialog`: patrz sekcja 7 (propozycja).
+- Szerokość okna 448 px: propozycja z PR L, czeka na akceptację właściciela.
+- Zachowanie fokusu na Safari: przycisk kliknięty myszą nie dostaje tam fokusu, więc fokus po zamknięciu może trafić na `body`; sprawdzone tylko w Chromium.
+- Ciemny motyw: czeka na L3.
+- Kolor `--destructive-hover`: propozycja z PR L, czeka na akceptację właściciela (luka z PR E zamknięta propozycją).
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: fokus po otwarciu na "Anuluj"; nazwa z tytułu, opis skutków i przyciski nazwane czasownikiem (bez "OK"); `Tab` krąży po dwóch przyciskach i nie wychodzi z okna; `Escape` zamyka okno, a fokus wraca na wyzwalacz; kliknięcie przesłony nie zamyka okna; "Anuluj" zamyka bez wywołania akcji; "Usuń wpis" wywołuje akcję raz; w trakcie usuwania przycisk ma `aria-busy` i ignoruje kliknięcia; kolory z tokenów (`--destructive`, `--destructive-foreground`, `--muted`), wysokość 36 px, brak przycisku zamknięcia w rogu; przy 320 px margines 16 px i brak przewijania poziomego.

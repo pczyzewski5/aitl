@@ -66,6 +66,9 @@ export const PROPOSED_PAIRS: readonly ApprovedPair[] = [
   pair('--destructive-foreground', '--destructive', 'text', 6.47),
   pair('--ring', '--muted-hover', 'ui', 3.51),
   pair('--ring', '--muted', 'ui', 4.17),
+  pair('--destructive-foreground', '--destructive-hover', 'text', 8.31),
+  pair('--destructive-hover', '--card', 'ui', 8.31),
+  pair('--destructive-hover', '--background', 'ui', 7.55),
 ];
 
 export function evaluatePairs(css: string, pairs: readonly ApprovedPair[] = APPROVED_PAIRS): EvaluatedPair[] {
