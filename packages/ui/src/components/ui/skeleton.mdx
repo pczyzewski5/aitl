@@ -1,0 +1,156 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './skeleton.stories';
+
+<Meta of={Stories} />
+
+# Skeleton
+
+Statyczny blok w miejscu treści, która się ładuje. Źródło reguł: R01.6 (referencje: praktycznie brak ruchu), A2, tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-18, WCAG 2.2 i WAI-ARIA. Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Pokazuje, że w tym miejscu zaraz pojawi się treść, i zachowuje jej układ, żeby po załadowaniu nic nie skakało.
+
+## 2. Kiedy używać
+
+- Lista wpisów konta w trakcie ładowania: wiersze z datą, opisem i kwotą (E02, `LoadingMessage` w specyfikacji).
+- Karty "Ile zostanie" per konto w trakcie ładowania (E03).
+- Lista kont na `/` w trakcie ładowania (E01).
+- Zawsze, gdy znamy kształt treści i ładowanie trwa na tyle długo, że pusty ekran wyglądałby jak błąd.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Nie znamy kształtu treści albo ładuje się jeden krótki element | tekst "Ładowanie…" w miejscu treści (wskaźnik tekstowy) |
+| Wysyłanie formularza | Button z `loading` ("Zapisywanie…") |
+| Lista jest załadowana i pusta | EmptyState |
+| Ładowanie nie powiodło się | ErrorState |
+| Ozdoba lub placeholder dla treści statycznej | nie używać |
+
+## 4. Anatomia
+
+1. `Skeleton`: jeden prostokątny blok z tłem `--muted` i promieniem `rounded-control` (6 px); domyślnie 16 px wysokości (jedna linia tekstu) i pełna szerokość. Rozmiar ustawia `className` (`h-6`, `w-1/2` itd.), wyłącznie ze skali odstępów.
+2. Kontener ładowania (część dokumentowanego wzorca, nie komponent): element z `aria-busy="true"`, który zawiera wszystkie bloki. Widoczny nagłówek sekcji zostaje poza szkieletem i jest prawdziwą treścią.
+3. Kompozycje (linie tekstu, karta konta, wiersze wpisów) składamy z bloków na stronie, która ich używa: poniżej przykłady z dokumentowanych ekranów.
+
+<Canvas of={Stories.Variants} />
+
+## 5. Warianty
+
+Jeden komponent, bez wariantów. Źródło: zasada 6 promptu i decyzja właściciela z 2026-11-18. Kompozycje to przykłady użycia, nie warianty komponentu:
+
+| Kompozycja | Gdzie | Z czego |
+|---|---|---|
+| Linie tekstu | akapity, opisy | 2-3 bloki `h-4`, ostatni węższy (`w-2/3`) |
+| Karta konta | "Ile zostanie" (E03), lista kont (E01) | `Card` z blokami w miejscu nazwy, plakietki, etykiety i kwoty |
+| Wiersze wpisów | lista wpisów konta (E02) | wiersz: blok daty (`w-16`), opisu (`flex-1`), kwoty (`w-24`), `h-4` |
+
+Kompozycje dokumentowanych ekranów:
+
+<Canvas of={Stories.AccountRemainderLoading} />
+<Canvas of={Stories.EntryListLoading} />
+
+## 6. Stany
+
+| Stan | Wygląd |
+|---|---|
+| Domyślny | blok `--muted` bez ruchu |
+| Najechanie, fokus, wciśnięty, zablokowany, wybrany, błąd | nie dotyczy: szkielet nie jest interaktywny |
+| Ładowanie | to jest sam szkielet: stan ładowania kontenera (`aria-busy`), nie bloku |
+
+Szkielet jest **statyczny**: bez pulsowania i bez przesuwającego się połysku (R01.6: prawie bez ruchu; decyzja właściciela 2026-11-18). Dzięki temu nie wymaga osobnej obsługi `prefers-reduced-motion` (globalna reguła w `styles.css` zeruje czasy, ale tu nie ma czego zerować).
+
+<Canvas of={Stories.States} />
+
+## 7. Zachowanie i dostępność
+
+- Klawiatura: szkielet nie przyjmuje fokusu i nie przenosi go.
+- `aria-hidden="true"` na każdym bloku: czytnik ekranu nie czyta pustych prostokątów blok po bloku.
+- Cały kontener ładowania ma `aria-busy="true"` (WAI-ARIA): technologia asystująca wie, że region jeszcze się zmienia, i nie ogłasza go w częściach. Gdy treść jest gotowa, zmień atrybut na `false` albo usuń go razem ze szkieletem.
+- Nagłówek sekcji ("Ile zostanie w tym miesiącu", "Wpisy") jest widoczny od początku, więc użytkownik czytnika wie, gdzie jest.
+- Kontrast: `--muted` na `--card` ma 1,24:1, na `--background` 1,13:1. To dekoracja bez informacji (WCAG 1.4.11 dotyczy elementów niosących informację), a każdy blok jest ukryty przed czytnikiem. Informację o ładowaniu niesie kontener, nie kolor.
+- Brak ruchu: WCAG 2.3.3 i R01.6 spełnione bez wyjątku.
+- Cel kliknięcia: nie dotyczy.
+
+## 8. Treść
+
+- Szkielet nie zawiera tekstu. Jeśli trzeba powiedzieć "Ładowanie", zrób to osobnym, widocznym tekstem obok, nie wewnątrz bloku.
+- Kształt bloków odpowiada kształtowi treści po załadowaniu: liczba wierszy zbliżona do oczekiwanej (w liście wpisów 4, nie 20), szerokości zróżnicowane (data, opis, kwota).
+- Długi tekst i tłumaczenie: nie dotyczy (bloki bez treści); szerokość `flex-1` dopasowuje się do kontenera.
+- Liczby: nie ma. Kwoty pokazujemy dopiero po załadowaniu; blok kwoty ma szerokość typowej kwoty ("1 234,50 zł").
+- Niczego nie wymyślamy: bloki nie udają konkretnych danych (A5).
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | bloki mają `w-full`, `flex-1` albo stałą szerokość z kontenera; bez przewijania poziomego; karty jedna pod drugą |
+| 768 px | bez zmian; karty kont obok siebie (auto-fit, R01.4) |
+| 1440 px | kolumna do 960 px (R01.4) |
+
+<Canvas of={Stories.NarrowScreen} />
+
+## 10. API
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `className` | `string` | `h-4 w-full rounded-control bg-muted` | rozmiar i położenie; klasy łączone przez `cn`, więc `h-6` nadpisuje `h-4` |
+| pozostałe atrybuty `div` | `ComponentProps<'div'>` | | `id`, `data-*` itd.; `aria-hidden="true"` jest ustawione na stałe i można je nadpisać tylko świadomie |
+
+## 11. Kod
+
+Minimalny przykład:
+
+```tsx
+import { Skeleton } from '@aitl/ui';
+
+<div aria-busy="true">
+  <Skeleton className="h-4 w-48" />
+</div>;
+```
+
+Typowy przykład z produktu, lista wpisów w trakcie ładowania:
+
+```tsx
+import { Card, CardContent, CardHeader, Skeleton } from '@aitl/ui';
+
+<Card>
+  <CardHeader>
+    <h2 className="text-lg font-semibold">Wpisy</h2>
+  </CardHeader>
+  <div aria-busy="true" className="flex flex-col gap-(--space-between-fields)">
+    {[1, 2, 3, 4].map((row) => (
+      <div key={row} className="flex items-center gap-(--space-between-groups)">
+        <Skeleton className="w-16" />
+        <Skeleton className="flex-1" />
+        <Skeleton className="w-24" />
+      </div>
+    ))}
+  </div>
+</Card>;
+```
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: EmptyState (załadowane, ale pusto), ErrorState (nie udało się załadować), Button `loading` (wysyłanie formularza), tekst "Ładowanie…".
+- Występuje we wzorcach: lista wpisów (E02), karty "Ile zostanie" (E03), lista kont (E01). Pełne wzorce stanów danych dojdą w etapie 3.
+
+## Czego brakuje
+
+- Ogłoszenie ładowania czytnikiem ekranu (jedno krótkie "Ładowanie wpisów", np. w regionie `status`): decyzja właściciela mówi tylko o `aria-busy` na kontenerze; zachowanie `aria-busy` jest różnie obsługiwane przez czytniki i nie było sprawdzone z żadnym w tym repo.
+- Gotowy komponent kontenera ładowania i gotowe kompozycje w pakiecie: kompozycje są tylko przykładami w dokumentacji (decyzja 2026-11-18); do rozważenia przy pierwszym drugim użyciu tej samej kompozycji w aplikacji.
+- Czas, po którym pokazujemy szkielet (próg opóźnienia, żeby nie mrugał przy szybkiej odpowiedzi): brak decyzji i brak ekranu.
+- Kontrast `--muted` na tle: celowo poniżej 3:1 (dekoracja ukryta przed czytnikiem); do potwierdzenia przez właściciela, jeśli ma być wyraźniejszy.
+- Ciemny motyw: czeka na L3.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: bloki są `aria-hidden`, kontener ma `aria-busy="true"`, nagłówek sekcji zostaje widoczny, w drzewie dostępności nie ma `status` ani `alert`, blok ma tło `--muted`, promień 6 px, brak animacji, przejścia i cienia, wiersze mają 16 px wysokości, przy 320 px nie ma przewijania poziomego.

@@ -1,0 +1,191 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './error-state.stories';
+
+<Meta of={Stories} />
+
+# ErrorState
+
+Widok, który zastępuje treść, gdy nie udało się jej pokazać (wczytać). Źródło reguł: R01.5, R01.7, A1, A3 (referencje), tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-18, WCAG 2.2 (4.1.3) i WAI-ARIA. Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Mówi, że lista albo sekcja nie mogła się wczytać, i daje jeden sposób, by spróbować jeszcze raz, bez zgadywania, co dalej.
+
+## 2. Kiedy używać
+
+- Nie udało się wczytać wpisów konta (sieć, serwer): "Nie udało się wczytać wpisów" + "Spróbuj ponownie" (E02, `ErrorMessage` w specyfikacji).
+- Nie udało się wczytać listy kont na `/` albo kart "Ile zostanie" (E01, E03).
+- Zawsze wtedy, gdy zamiast treści nie ma co pokazać i jedyny sensowny ruch to ponowienie.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Błąd przy formularzu: nieudany zapis, 422 "zbyt wiele wpisów", błąd logowania | Alert `error` obok formularza (dane zostają w polach) |
+| Błąd jednego pola | błąd pod polem w Field |
+| Lista załadowana i pusta | EmptyState |
+| Dane jeszcze się ładują | Skeleton |
+| Brak dostępu do zasobu (403) albo zasób nie istnieje (404) | komunikat z odsyłaczem do listy kont (TextLink); ponowienie nic nie zmieni |
+| Potwierdzenie, które samo znika | Toast (PR N); błąd wymagający działania nigdy nie jest toastem |
+
+### ErrorState czy Alert
+
+| | Alert | ErrorState |
+|---|---|---|
+| Co robi | komunikat obok formularza lub pola; widok wokół nadal działa | zastępuje treść widoku, której nie dało się pokazać |
+| Wygląd | ramka 1 px, tło karty, tekst w kolorze błędu | bez ramki i tła, tytuł `--foreground`, opis `--muted-foreground` |
+| Akcja | brak (użytkownik poprawia dane w polach) | jeden przycisk "Spróbuj ponownie" |
+| Rola | `alert` zawsze (wariant `error`) | brak domyślnie; `alert` tylko przy `announce` |
+| Przykład | "Nie udało się zapisać wpisu" | "Nie udało się wczytać wpisów" |
+
+Źródło: decyzja właściciela, 2026-11-18 (rozgraniczenie Alert / ErrorState).
+
+<Canvas of={Stories.AlertVersusErrorState} />
+
+## 4. Anatomia
+
+1. Tytuł (wymagany): nagłówek `h2`, `h3` (domyślnie) lub `h4` (prop `titleLevel`), 16 px, waga 600, kolor `--foreground`. Mówi, co się stało.
+2. Opis (opcjonalny): co zrobić, 14 px, `--muted-foreground`, do ok. 65 znaków w linii.
+3. Przycisk ponowienia (wymagany): Button w wariancie głównym, etykieta z `retryLabel`, akcja z `onRetry`.
+
+Bez ikony i bez ilustracji (decyzja właściciela, 2026-11-18). Znaczenie niesie tekst, nie kolor ani ikona (A3). Komponent nie ma własnej ramki ani tła.
+
+<Canvas of={Stories.FailedEntryList} />
+<Canvas of={Stories.FailedAccountList} />
+
+## 5. Warianty
+
+Jeden wygląd, bez wariantów; różnią się treścią i tym, czy jest `announce`:
+
+| Postać | Kiedy wybrać |
+|---|---|
+| tytuł + opis + przycisk | domyślna: przyczyna i następny krok |
+| tytuł + przycisk | powód jest oczywisty z tytułu |
+| `announce` | stan pojawia się dynamicznie po nieudanym wczytaniu (patrz sekcja 7) |
+
+Źródło: decyzje właściciela z 2026-11-18.
+
+<Canvas of={Stories.TitleOnly} />
+
+## 6. Stany
+
+| Stan | Wygląd |
+|---|---|
+| Domyślny | tytuł, opis, przycisk |
+| Najechanie, fokus, wciśnięty | tylko przycisk (jak w Button) |
+| Ponawianie (`retrying`) | przycisk z `aria-busy` i `aria-disabled`, kliknięcia ignorowane; etykietę zmienia aplikacja ("Ponawianie…") |
+| Zablokowany, wybrany | nie dotyczy |
+| Błąd | to jest stan błędu; jeśli ponowienie zawiedzie, zostaje ten sam widok |
+
+<Canvas of={Stories.Retrying} />
+<Canvas of={Stories.States} />
+
+## 7. Zachowanie i dostępność
+
+- Klawiatura: `Tab` wchodzi na przycisk ponowienia, `Enter` i spacja go wywołują.
+- Kolejność fokusu: nagłówek i opis nie przyjmują fokusu; jedyny element interaktywny to przycisk.
+- **Reguła ról (decyzja właściciela, 2026-11-18):** domyślnie ErrorState **nie ma roli**. `role="alert"` (prop `announce`) ustawiasz tylko wtedy, gdy widok pojawia się **dynamicznie po nieudanym wczytaniu** (użytkownik zrobił coś, widok się zmienił i czytnik musi o tym powiedzieć; WCAG 4.1.3). Jeśli ErrorState jest od początku w stronie (np. renderowany po stronie serwera), `alert` nie zostanie ogłoszony i tylko dodaje szum: nie ustawiaj go.
+- Rola `alert` ogłasza treść natychmiast (assertive), więc nie używaj jej na czas ładowania ani przy każdej zmianie: raz, gdy błąd się pojawia.
+- Czytnik ekranu: nagłówek, opis i nazwa przycisku w kolejności czytania; przycisk ponowienia po `retrying` ogłasza stan zajęty (`aria-busy`).
+- Kontrast: tytuł `--foreground` na `--card` 14,68:1, opis `--muted-foreground` 7,56:1, przycisk `--primary-foreground` na `--primary` 5,17:1.
+- Cel kliknięcia: przycisk 36 px wysokości (WCAG 2.5.8).
+- Po ponowieniu przenieś fokus na nową treść albo zostaw go na przycisku, jeśli błąd wraca (wzorzec w etapie 3, patrz "Czego brakuje").
+
+Obie postaci obok siebie:
+
+<Canvas of={Stories.PresentFromFirstRender} />
+<Canvas of={Stories.AnnouncedAfterFailedLoad} />
+
+## 8. Treść
+
+Zasada: **co się stało i co zrobić** (R01.7), bez obwiniania i bez kodów.
+
+- Tytuł: co się nie udało: "Nie udało się wczytać wpisów", "Nie udało się wczytać kont".
+- Opis: co zrobić: "Sprawdź połączenie z internetem i spróbuj ponownie."
+- Przycisk: "Spróbuj ponownie" (czasownik); w trakcie "Ponawianie…". Tekst przekazuje aplikacja.
+- Zabronione: "Coś poszło nie tak", "Błąd 500", sam kod błędu, wykrzykniki, "OK" jako etykieta ponowienia.
+- Długość: tytuł jedno zdanie, opis do 2 zdań.
+- Tłumaczenie: tekst zawija się, wysokość elastyczna; nie obcinaj.
+- Nie podawaj szczegółów technicznych (stos wywołań, adresy) w treści dla użytkownika.
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | jedna kolumna do lewej; długi tytuł, opis i etykieta przycisku zawijają się; bez przewijania poziomego |
+| 768 px | bez zmian; opis do 65 znaków w linii |
+| 1440 px | bez zmian; kolumna do 960 px (R01.4) |
+
+<Canvas of={Stories.LongTextNarrowScreen} />
+
+## 10. API
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `title` | `string` | | tytuł (wymagany); tekst przekazuje aplikacja |
+| `description` | `string` | | opis (opcjonalny) |
+| `retryLabel` | `string` | | etykieta przycisku ponowienia (wymagana) |
+| `onRetry` | `() => void` | | wywoływane po kliknięciu przycisku (wymagane) |
+| `retrying` | `boolean` | `false` | przycisk zajęty: `aria-busy`, kliknięcia ignorowane |
+| `announce` | `boolean` | `false` | nadaje `role="alert"`; tylko dla widoku pojawiającego się po nieudanym wczytaniu |
+| `titleLevel` | `'h2' \| 'h3' \| 'h4'` | `'h3'` | poziom nagłówka tytułu |
+| `className` i atrybuty `div` | `ComponentProps<'div'>` | | `className`, `id`, `data-*` (bez `title`) |
+
+<Canvas of={Stories.HeadingLevels} />
+
+## 11. Kod
+
+Minimalny przykład:
+
+```tsx
+import { ErrorState } from '@aitl/ui';
+
+<ErrorState title="Nie udało się wczytać kont" retryLabel="Spróbuj ponownie" onRetry={reload} />;
+```
+
+Typowy przykład z produktu, lista wpisów po nieudanym wczytaniu (widok pojawia się dynamicznie, więc `announce`):
+
+```tsx
+import { Card, CardContent, CardHeader, CardTitle, ErrorState } from '@aitl/ui';
+
+<Card>
+  <CardHeader>
+    <CardTitle as="h2">Wpisy</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <ErrorState
+      announce
+      title="Nie udało się wczytać wpisów"
+      description="Sprawdź połączenie z internetem i spróbuj ponownie."
+      retryLabel={isRetrying ? 'Ponawianie…' : 'Spróbuj ponownie'}
+      retrying={isRetrying}
+      onRetry={reload}
+    />
+  </CardContent>
+</Card>;
+```
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: Alert (komunikat przy formularzu), EmptyState (nic nie ma, a nie "nie udało się"), Toast (znika sam; nie dla błędów wymagających działania), Dialog (wymaga decyzji).
+- Występuje we wzorcach: lista wpisów konta (E02), lista kont (E01), sekcja "Ile zostanie" (E03). Wzorzec obsługi błędów sieci w formularzu dojdzie w etapie 3.
+
+## Czego brakuje
+
+- Ikona lub ilustracja: wykluczone decyzją właściciela (2026-11-18); do ponownej oceny razem z luką L5.
+- Wariant bez przycisku ponowienia (403, 404, błąd trwały): dziś `retryLabel` i `onRetry` są wymagane; osobna postać "brak dostępu" z odsyłaczem do listy kont dojdzie z widokiem szczegółów (etap 3).
+- Zachowanie fokusu po ponowieniu (na nowej treści albo na przycisku, gdy błąd wraca): wzorzec w etapie 3.
+- Liczba prób i automatyczne ponawianie: brak decyzji.
+- Rola `alert` w środku regionu z przyciskiem: zachowanie czytników nie było sprawdzone w tym repo; test automatyczny sprawdza tylko obecność roli.
+- Ciemny motyw: czeka na L3.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: nagłówek `h3` i przycisk, domyślnie brak roli `alert`, `announce` ją nadaje, rola pojawia się dopiero po nieudanym wczytaniu i znika po ponowieniu, "Spróbuj ponownie" działa myszą, `Enter` i spacją, `Tab` ustawia fokus z obrysem 2 px, w trakcie ponawiania przycisk ma `aria-busy` i nie wywołuje akcji, rozmiary i kolory z tokenów, brak ramki i cienia, długi tekst zawija się przy 320 px.
