@@ -1,0 +1,214 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './entry-table.stories';
+
+<Meta of={Stories} />
+
+# EntryTable i EntryRow
+
+Tabela wpisów (wpływów i wydatków) jednego konta bankowego w jednym miesiącu: opis, kwota ze znakiem, data, przełącznik "Zapłacone" i miejsce na akcje. `EntryRow` to jeden wiersz (`<tr>`) składany przez `EntryTable`; osobno używa się go tylko w testach i wyjątkowych układach. Źródło reguł: R01.5 (tabela wpisów), R01.2 (kolory stanu, kolor wzmacnia znak), A3 (kolor nie jest jedynym nośnikiem), specyfikacja E02 (`.ai/specs/2026-11-17-entries-income-expenses.md`: E02-Q4, Q6, Q10, Q13, Q14, UI/UX, dostępność, lista `GET .../entries?month=YYYY-MM`), E03 (R02: flaga nie zmienia sum), decyzje właściciela z 2026-11-18 (poniżej), WCAG 2.2 (1.3.1, 1.4.1, 1.4.10, 2.1.1, 2.5.8) i WAI-ARIA APG (tabela, region przewijany).
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## Decyzje właściciela (zatwierdzone przez właściciela produktu, 2026-11-18)
+
+- **Wąski ekran:** poniżej ok. 600 px przewija się **sama tabela**, wewnątrz kontenera; **strona nigdy nie przewija się w poziomie**. Kontener ma widoczną podpowiedź, że się przewija, jest dostępny z klawiatury (`tabindex="0"`), ma nazwę i rolę `region`. Układu kartowego nie ma.
+- **Wiersz zapłacony:** wyłącznie zaznaczone pole wyboru z nazwą zbudowaną z opisu wpisu. Bez wyszarzenia, przekreślenia i zmiany koloru wiersza.
+- **Flaga jest informacyjna i nigdy nie zmienia sum** (R02).
+- **Wpływ nie ma kontrolki "Zapłacone"** (flaga tylko dla wydatków, E02-Q6): komórka jest pusta, z tekstem "Nie dotyczy wpływów" tylko dla czytnika.
+- **Kwoty** przez `formatMoneyMinor(kwota, { sign: 'always' })`: plus dla wpływu w kolorze `--income`, minus U+2212 dla wydatku w kolorze `--expense`; znak niesie znaczenie, kolor je wzmacnia. Kolumna kwoty wyrównana do prawej z cyframi tabelarycznymi.
+- **Cykliczność:** neutralna plakietka z tekstem "Co miesiąc" przy wpisie z serii; przy wpisie jednorazowym nic.
+- **Kolumny:** Opis, Kwota, Data, Zapłacone, Akcje (miejsce na `Menu` przekazywane przez wołającego; budowa menu serii to PR S). Typ wpisu niesie znak kwoty i tekst dla czytnika, nie osobna kolumna.
+- **Limit 500 wpisów** (E02-Q13): ostrzeżenie nad tabelą, nic nie jest po cichu ucinane.
+- Teksty domyślne po polsku w jednym pliku `entry-table.messages.ts`, nadpisywane propem `messages`.
+
+## 1. Do czego służy
+
+Pokazuje wszystkie wpisy jednego konta w wybranym miesiącu i pozwala jednym kliknięciem oznaczyć wydatek jako zapłacony.
+
+## 2. Kiedy używać
+
+- Widok konta `/bank-accounts/{id}?month=YYYY-MM` (E02): pod `MonthSwitcher` i kartą wyniku konta.
+- Każda lista wpisów jednego konta i jednego miesiąca, ograniczona limitem 500 wierszy (bez paginacji, E02-Q10).
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Lista kont bankowych | BankAccountList |
+| Wynik miesiąca ("ile zostanie") | AccountRemainderCard |
+| Lista wpisów wielu kont naraz, wpisy "łącznie" | nie istnieje: R03 zakazuje listy łącznej |
+| Dodawanie i edycja wpisu | EntryForm (PR S) |
+| Menu akcji serii (zakończ, zmień kwotę, usuń) | `Menu` składane przez wołającego w slocie `actions` (SeriesActions, PR S) |
+| Dane inne niż wpisy (np. raporty) | osobny komponent; tabela wpisów zna pola wpisu |
+
+## 4. Anatomia
+
+1. Kontener przewijany (`region`, `tabindex="0"`, nazwa z podpisu tabeli), ramka `--border`, tło `--card`, `rounded-card`.
+2. Podpowiedź o przewijaniu (widoczna tylko, gdy tabela nie mieści się: poniżej 576 px szerokości kontenera).
+3. `<table>` z `<caption>` (podany propem, domyślnie ukryty wizualnie, `captionVisible` go pokazuje).
+4. Nagłówki kolumn `<th scope="col">`: Opis, Kwota, Data, Zapłacone, opcjonalnie ukryty "Akcje".
+5. Wiersz: opis jako `<th scope="row">` (z plakietką "Co miesiąc" dla serii), kwota ze znakiem, data albo dzień miesiąca, pole "Zapłacone" (wydatek) albo pusta komórka (wpływ), komórka akcji.
+
+<Canvas of={Stories.Loaded} />
+
+## 5. Warianty
+
+Jeden wygląd; różnią się dane i `status`:
+
+| Postać | Kiedy |
+|---|---|
+| `status="loaded"` z wpisami | tabela |
+| `status="loaded"` bez wpisów | stan pusty (EmptyState) |
+| `status="loading"` | szkielety w kontenerze `aria-busy` |
+| `status="error"` | ErrorState z "Spróbuj ponownie" |
+| `status="limit-exceeded"` | ostrzeżenie o limicie (Alert `error`) zamiast listy |
+| z `actions` | dodatkowa kolumna z menu wiersza |
+
+<Canvas of={Stories.Income} />
+<Canvas of={Stories.Recurring} />
+<Canvas of={Stories.WithActions} />
+
+## 6. Stany
+
+| Stan | Wygląd |
+|---|---|
+| Wiersz zwykły | tekst, kwota z kolorem i znakiem; separator `--border` |
+| Wydatek zapłacony | zaznaczone pole "Zapłacone"; reszta wiersza bez zmian |
+| Wydatek niezapłacony | puste pole |
+| Wpływ | pusta komórka "Zapłacone", plus przy kwocie |
+| Zapisywanie flagi (`savingEntryIds`) | pole ma `aria-busy="true"` i `aria-disabled="true"`, wygląda jak pole zablokowane, **zachowuje fokus** i ignoruje kliknięcia do końca zapisu |
+| Fokus | globalny obrys 2 px `--ring`: na polu, na przycisku menu i na kontenerze przewijanym |
+| Ładowanie | pięć szkieletów, tekst "Wczytywanie wpisów" dla czytnika, brak tabeli |
+| Pusto | EmptyState z tekstem i opcjonalną akcją |
+| Błąd | ErrorState z `role="alert"` i przyciskiem ponowienia |
+| Limit | Alert `error` z tytułem i opisem, bez tabeli |
+
+<Canvas of={Stories.PaidAndUnpaid} />
+<Canvas of={Stories.Saving} />
+<Canvas of={Stories.Loading} />
+<Canvas of={Stories.Empty} />
+<Canvas of={Stories.FailedToLoad} />
+<Canvas of={Stories.LimitExceeded} />
+
+### Dlaczego `aria-disabled`, a nie `disabled` w czasie zapisu
+
+Natywnie zablokowane pole traci fokus, więc osoba na klawiaturze po spacji zostałaby na `body` i musiałaby szukać miejsca w tabeli od początku. Pole zostaje fokusowalne, ma `aria-busy` i `aria-disabled`, a kliknięcia i spacja są ignorowane do końca zapisu (ta sama zasada co w Menu i MonthSwitcher).
+
+## 7. Zachowanie i dostępność
+
+- Semantyka: `<table>` z `<caption>`, `<th scope="col">` w nagłówku i `<th scope="row">` z opisem w każdym wierszu; czytnik odczytuje komórkę razem z nazwą wiersza i kolumny.
+- Pole "Zapłacone" to Checkbox z `aria-label` zbudowanym z opisu: "Zapłacone: Czynsz (przykład)". Etykieta jest widoczna jako nagłówek kolumny, a nazwa pola jednoznaczna dla każdego wiersza. Cel kliknięcia co najmniej 36 px (WCAG 2.5.8).
+- Typ wpisu: znak kwoty (plus albo minus U+2212) i ukryty prefiks "Wpływ:" / "Wydatek:" czytany przed kwotą. Kolor tylko wzmacnia (A3).
+- Wpływ w kolumnie "Zapłacone": tekst "Nie dotyczy wpływów" (ukryty wizualnie), żeby czytnik nie czytał pustej komórki.
+- Kontener przewijany: `role="region"` nazwany podpisem tabeli, `tabindex="0"` (przewijanie strzałkami z klawiatury), opis (`aria-describedby`) wskazuje podpowiedź. Fokus ma obrys 2 px.
+- Błąd zapisu flagi: tabela go **nie pokazuje**; wołający dostaje wynik własnego wywołania i pokazuje Toast (patrz wzorzec "Lista wpisów konta"). Tabela jest sterowana propsami: `paid` w wierszu to jedyne źródło prawdy o polu.
+- Kontrast: `--income` 5,02:1 i `--expense` 6,47:1 na `--card`, `--muted-foreground` (data) 7,56:1.
+- Liczba wierszy: bez wirtualizacji; testy renderują 120 wierszy, limit domeny to 500.
+
+<Canvas of={Stories.PaidRowLooksLikeAnyOtherRow} />
+
+## 8. Treść
+
+- Domyślne teksty są po polsku w jednej stałej: `entry-table.messages.ts`; nadpisz propem `messages` (np. dla innego języka). W JSX nie ma polskich literałów.
+- Podpis tabeli (`caption`) podaje wołający, np. "Wpisy: Konto wspólne, listopad 2026". Jest wymagany: to nazwa tabeli i kontenera dla czytnika.
+- **Kwoty**: wyłącznie `formatMoneyMinor` (PLN, grosze jako liczba całkowita), `sign: 'always'`. Tabela nie sumuje niczego i nie pokazuje sumy.
+- **Data**: wpis jednorazowy pokazuje `occurredOn` jako `DD.MM.RRRR` w elemencie `<time dateTime="RRRR-MM-DD">`, bez `Date` i bez zegara przeglądarki. Wpis cykliczny pokazuje tylko informację "Dzień miesiąca: N" (dzień jest informacyjny, E02-Q4); data początku serii nie jest pokazywana.
+- Opis wpisu to tekst wolny do 200 znaków; zawija się (`wrap-anywhere`).
+- Tekst ostrzeżenia o limicie mówi, co się stało i co zrobić; liczbę 500 podaje `limit` (domyślnie `ENTRY_LIST_LIMIT`).
+- Nie pisz "Razem" ani "Suma" w żadnej postaci (R03).
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | tabela ma stałą minimalną szerokość 576 px i przewija się w kontenerze; podpowiedź widoczna; długi opis zawija się w komórce; strona stoi w miejscu |
+| 768 px | tabela mieści się, podpowiedź ukryta |
+| 1440 px | bez zmian; kolumna treści do 960 px (R01.4) |
+
+Podpowiedź i próg to zapytanie kontenerowe (`@xl`, 36 rem), a nie ekranowe: tabela w wąskiej kolumnie też dostaje podpowiedź.
+
+<Canvas of={Stories.NarrowScreen} />
+<Canvas of={Stories.LongDescriptionNarrowScreen} />
+<Canvas of={Stories.NarrowStates} />
+<Canvas of={Stories.ManyRows} />
+
+## 10. API
+
+`EntryTableProps`:
+
+| Prop | Typ | Opis |
+|---|---|---|
+| `status` | `'loading' \| 'error' \| 'loaded' \| 'limit-exceeded'` | stan danych (wymagany) |
+| `caption` | `string` | podpis tabeli i nazwa kontenera (wymagany) |
+| `entries` | `readonly EntryRowData[]` | wpisy w kolejności z API (sortowanie robi serwer) |
+| `onPaidChange` | `(entryId: string, paid: boolean) => void` | zmiana pola "Zapłacone"; wołający zapisuje i aktualizuje `entries` |
+| `savingEntryIds` | `readonly string[]` | wpisy, których flaga się zapisuje (`aria-busy`) |
+| `actions` | `(entry: EntryRowData) => ReactNode` | slot kolumny akcji (np. `Menu`); bez niego kolumny nie ma |
+| `captionVisible` | `boolean` | pokazuje podpis (domyślnie ukryty wizualnie) |
+| `onRetry`, `retrying` | `() => void`, `boolean` | ponowienie po błędzie |
+| `emptyAction` | `{ label, onClick }` | akcja w stanie pustym (np. "Dodaj wpis") |
+| `limit` | `number` | liczba w ostrzeżeniu o limicie (domyślnie 500) |
+| `headingLevel` | `'h2' \| 'h3' \| 'h4'` | poziom nagłówka w stanach (domyślnie `h3`) |
+| `messages` | `Partial<EntryTableMessages>` | teksty |
+| `className` | `string` | klasa kontenera |
+
+`EntryRowData` (kształt zgodny z odpowiedzią `GET .../entries?month=`):
+
+| Pole | Typ | Opis |
+|---|---|---|
+| `id` | `string` | identyfikator wpisu |
+| `type` | `'income' \| 'expense'` | typ; decyduje o znaku, kolorze i polu "Zapłacone" |
+| `description` | `string` | opis |
+| `amountMinor` | `number` | kwota w groszach, liczba dodatnia (znak wynika z typu) |
+| `occurredOn` | `string` | `RRRR-MM-DD` |
+| `recurrence` | `'none' \| 'monthly'` | `monthly` wymaga `dayOfMonth` |
+| `dayOfMonth` | `number` | tylko seria; informacyjny |
+| `paid` | `boolean \| null` | dla wydatku stan **w wyświetlanym miesiącu** (dla serii flaga jest per miesiąc, `entry_paid_months`), `null` dla wpływu |
+
+Stan "zapłacone" wpisu cyklicznego to po prostu `paid` w danych wiersza dla wyświetlanego miesiąca: po zmianie miesiąca aplikacja dostaje nową listę z nowymi wartościami. Tabela nie zna "miesięcy".
+
+Tabela nie importuje pakietów `@aitl/*`, niczego nie sumuje i nie pobiera danych.
+
+## 11. Kod
+
+```tsx
+import { EntryTable } from '@aitl/ui';
+
+<EntryTable
+  status={query.status}
+  caption={`Wpisy: ${account.name}, ${monthLabel}`}
+  entries={query.entries}
+  savingEntryIds={savingIds}
+  onPaidChange={(entryId, paid) => savePaid(entryId, paid)}
+  onRetry={query.refetch}
+  actions={(entry) => <Menu triggerLabel={`Akcje wpisu ${entry.description}`} items={itemsFor(entry)} align="end" />}
+  emptyAction={{ label: 'Dodaj wpis', onClick: openForm }}
+/>;
+```
+
+Kolumna akcji pojawia się tylko, gdy przekażesz `actions`. Przykład z pozycją zablokowaną z powodem (reguła "Usuń całkowicie", E02-Q15): `{ id: 'delete', label: 'Usuń całkowicie', destructive: true, disabled: true, disabledReason: '…' }`.
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: DataTable z `AGENTS.md` (docelowy generyczny komponent tabeli; ta tabela jest wyspecjalizowana dla wpisów), BankAccountList (lista linków).
+- Występuje we wzorcach: "Lista wpisów konta" (E02).
+- Współpracuje z: `MonthSwitcher`, `AccountRemainderCard`, `Menu`, Checkbox, Badge, Alert, EmptyState, ErrorState, Skeleton, Toast (po stronie wołającego), `formatMoneyMinor`.
+
+## Czego brakuje
+
+- Data wpisu cyklicznego: kontrakt API zwraca surowy `dayOfMonth`, a kolejność wierszy na serwerze opiera się na dniu przyciętym do długości miesiąca (31 w lutym to 28/29). Tabela pokazuje dzień z API ("Dzień miesiąca: 31"); jeśli właściciel woli dzień efektywny, API musi go zwracać.
+- Sortowanie i filtrowanie po stronie klienta: nie istnieje (spec: bez filtrów, miesiąc zamiast filtrów).
+- Zaznaczanie wielu wierszy, masowe akcje: poza zakresem.
+- Wirtualizacja: niepotrzebna przy limicie 500; do rozważenia, jeśli limit wzrośnie.
+- Ostrzeżenie o limicie nie podpowiada zawężenia: miesiąc jest już najwęższym filtrem (spec E02-Q10), więc komunikat każe wybrać inny miesiąc.
+- Cyfry tabelarycznie (`tabular-nums`, klasa Tailwind bez nowego tokenu) w kolumnie kwoty: pierwszy raz w systemie; propozycja do zatwierdzenia przez właściciela.
+- Ciemny motyw: czeka na L3.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: semantyka tabeli (podpis, `scope`, liczba wierszy), nazwa pola "Zapłacone" z opisu i przełączanie myszą i spacją, zapłacony wiersz bez zmian wyglądu, flaga bez wpływu na kwoty, wpływ bez kontrolki, plus i minus U+2212 z kolorami z tokenów i wyrównaniem do prawej, plakietka "Co miesiąc" tylko przy serii, kontener przewijany przy 320 px (fokus, nazwa, podpowiedź, strona bez przewijania), podpowiedź ukryta na szerokim ekranie, zawijanie długiego opisu, cel pola co najmniej 36 px, pole zajęte zachowuje fokus, kolumna akcji, ładowanie, stan pusty, błąd, limit, 120 wierszy.
