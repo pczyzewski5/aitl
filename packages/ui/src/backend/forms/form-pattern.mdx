@@ -1,0 +1,301 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './form-pattern.stories';
+
+<Meta of={Stories} />
+
+# Wzorzec: formularz
+
+Jak w AITL zbudować formularz (logowanie E01, wpis E02): kiedy pokazać błąd, gdzie ustawić fokus po nieudanym wysłaniu, co zrobić z błędem serwera, jak zablokować podwójne wysłanie. To wzorzec, nie komponent: składa się z istniejących elementów (Field, Input, Select, Checkbox, RadioGroup, Button, Alert, Toast) i małego, czystego pomocnika `useFormValidation` z `ErrorSummary`. Źródło reguł: R01.5 i R01.7 (referencje), decyzje właściciela produktu z 2026-11-18 (reguły wzorca), specyfikacje E01 (logowanie: komunikat ogólny, blokada 429 z sekundami) i E02 (kwota "12,50" parsowana w formularzu), WCAG 2.2 (1.3.1, 3.3.1, 3.3.3, 4.1.3, 2.4.3) i WAI-ARIA. Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+Przykład poniżej to kształt formularza logowania; kontrolka `scenario` zmienia symulowaną odpowiedź serwera (błędne dane, blokada, brak sieci, sukces, oczekiwanie).
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Prowadzi użytkownika przez wpisanie danych tak, żeby wiedział, co poprawić i gdzie, bez pokazywania błędów, zanim miał szansę coś wpisać, i bez gubienia wpisanych danych, gdy coś pójdzie nie tak.
+
+## 2. Kiedy używać
+
+- Każdy formularz z polami do wpisania: logowanie (e-mail, hasło), wpis wpływu lub wydatku (typ, kwota, data, cykliczność, opis, zapłacone), przyszłe okna z polem (np. zmiana kwoty od miesiąca).
+- Formularz wysyłany do serwera, który może odpowiedzieć błędem pola, błędem ogólnym albo brakiem sieci.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Pojedyncza akcja bez pól (usuń, zakończ) | ConfirmDialog z przyciskiem opisanym czasownikiem |
+| Przełącznik zapisywany od razu po kliknięciu (flaga "zapłacone" w wierszu) | Checkbox bez formularza i bez przycisku "Zapisz" |
+| Filtr listy (miesiąc, konto) | wzorzec listy z filtrami (PR T) |
+| Potwierdzenie samego zapisu | Toast po stronie wywołującego (patrz sekcja 12) |
+
+## 4. Anatomia
+
+1. `form` z `noValidate` (daje go `formProps`).
+2. Alert błędu serwera u góry formularza (opcjonalny, tylko po odpowiedzi serwera).
+3. `ErrorSummary` (opcjonalny, tylko gdy po wysłaniu jest więcej niż jeden błąd).
+4. Pola: Field z Input albo Select, RadioGroup, Checkbox. Każde z widoczną etykietą nad polem (albo legendą grupy) i błędem pod polem.
+5. Przycisk wysłania (Button `type="submit"`) ze stanem `loading`.
+
+Jedna kolumna, pola jedno pod drugim, odstęp `--space-between-fields` (R01.4). Szerokość formularza ogranicza kontener (`max-w-md` w przykładach); formularz nie ma własnego układu szerokiego ani wąskiego.
+
+## 5. Kiedy sprawdzać pola (decyzja właściciela, 2026-11-18)
+
+| Moment | Co się dzieje |
+|---|---|
+| Pisanie w polu jeszcze nie opuszczonym | nic: błąd nie pojawia się w trakcie pierwszego wpisywania |
+| Opuszczenie pola (`blur`) | pole dostaje błąd, jeśli jest nieprawidłowe; od tej chwili jest sprawdzane na bieżąco i błąd znika, gdy wartość stanie się poprawna |
+| Opuszczenie pola, którego nie dotknięto | tak samo jak opuszczenie: pole jest "dotknięte" po pierwszym opuszczeniu |
+| Wysłanie (`submit`) | sprawdzane są wszystkie pola; od tej chwili wszystkie błędy są widoczne i aktualizują się na bieżąco |
+| Pierwszy wpis w polu z błędem serwera | błąd serwera tego pola znika (serwer odpowie ponownie przy następnym wysłaniu) |
+
+<Canvas of={Stories.Pristine} />
+<Canvas of={Stories.TouchedInvalid} />
+
+Czyste pole nigdy nie pokazuje błędu "wymagane" przed dotknięciem (R01.7: ton spokojny, bez zrzędzenia). Reguły sprawdzania nie leżą w pomocniku: formularz podaje funkcję `validate(values)`, która zwraca mapę `pole -> komunikat` (patrz sekcja 10).
+
+## 6. Stany formularza
+
+| Stan | Co widać | Story |
+|---|---|---|
+| Czysty | brak błędów, pola oznaczone `aria-required` | Logowanie: czysty formularz |
+| Pole po opuszczeniu | błąd pod tym jednym polem, `aria-invalid` | Logowanie: pole po opuszczeniu |
+| Wysłanie z jednym błędem | komunikat pod polem, fokus na polu, bez podsumowania | Logowanie: wysłanie z jednym błędem; Wpis: jeden błąd |
+| Wysłanie z kilkoma błędami | podsumowanie (Alert z linkami) + komunikaty pod polami, fokus na pierwszym polu | Logowanie: wysłanie z kilkoma błędami; Wpis: kilka błędów |
+| Wysyłanie | przycisk w stanie `loading` ("Logowanie…"), dane zostają, kolejne wysłanie zablokowane | Logowanie: wysyłanie |
+| Błąd serwera ogólny | Alert błędu u góry formularza, dane zostają | Logowanie: błąd serwera, komunikat ogólny; Wpis: błąd serwera |
+| Blokada (429) | Alert z liczbą sekund | Logowanie: blokada; blokada, liczba pojedyncza |
+| Brak sieci | Alert błędu u góry, dane zostają | Logowanie: brak sieci |
+| Błąd pola z serwera | komunikat pod polem, fokus na polu | Wpis: błąd pola z serwera |
+| Sukces | dopiero po potwierdzeniu serwera: logowanie pokazuje stan, wpis Toast i czysty formularz | Logowanie: sukces; Wpis: zapisany |
+
+## 7. Podsumowanie błędów (decyzja właściciela, 2026-11-18)
+
+Podsumowanie (`ErrorSummary`: Alert `error`, rola `alert`, lista linków) pojawia się **tylko wtedy, gdy po wysłaniu jest więcej niż jeden błąd**. Przy jednym błędzie wystarczy komunikat pod polem i fokus na polu: podsumowanie z jednym punktem dubluje komunikat i zajmuje miejsce.
+
+Każdy punkt to link z treścią komunikatu; aktywowanie linku przenosi fokus do pola (zamiast przewijania do kotwicy). Dlatego komunikat musi być zrozumiały bez etykiety pola: "Podaj kwotę, np. 12,50." a nie "Wymagane".
+
+<Canvas of={Stories.SubmitSeveralErrors} />
+<Canvas of={Stories.EntrySeveralErrors} />
+
+Podsumowanie zależy od aktualnej liczby błędów: gdy użytkownik poprawi pola i zostanie jeden błąd, podsumowanie znika (zostaje komunikat pod polem). Fokus po nieudanym wysłaniu idzie na **pierwsze nieprawidłowe pole** (w kolejności pól), nie na podsumowanie.
+
+## 8. Błędy serwera i ładowanie
+
+- Odpowiedź serwera wraca do formularza jako wynik wysłania: sukces, błędy pól (`fieldErrors`) albo komunikat ogólny (`formError`).
+- Błąd pola z serwera pojawia się pod polem i przenosi na nie fokus, tak jak błąd sprawdzenia przed wysłaniem.
+- Błąd, który nie dotyczy pola, to Alert `error` u góry formularza (zatwierdzone przez właściciela). Fokus zostaje na przycisku; komunikat ogłasza `role="alert"`. Przy logowaniu komunikat jest ogólny i **taki sam** dla nieznanego e-maila i błędnego hasła (E01); blokada 429 podaje liczbę sekund.
+- Wysyłanie: Button `loading` (`aria-busy`, `aria-disabled`, ignoruje kliknięcia) i dodatkowa blokada w `useFormValidation`, która obejmuje też Enter w polu. Dane zostają w polach. Jeden komunikat wysyłania na raz.
+- Brak sieci to ten sam przypadek co błąd serwera: Alert u góry, dane zostają, użytkownik może wysłać ponownie.
+
+<Canvas of={Stories.Loading} />
+<Canvas of={Stories.WrongCredentials} />
+<Canvas of={Stories.Lockout} />
+<Canvas of={Stories.LockoutOneSecond} />
+<Canvas of={Stories.NetworkError} />
+<Canvas of={Stories.Success} />
+
+Liczbę sekund trzeba odmienić ("1 sekundę", "2 sekundy", "87 sekund"): w przykładzie robi to `Intl.PluralRules('pl')` w kodzie story. Teksty komunikatów żyją w aplikacji lub w story; ogólny kod niczego po polsku nie zawiera.
+
+## 9. Zachowanie i dostępność
+
+- `noValidate` na formularzu i `aria-required` na polach zamiast natywnego `required` (zatwierdzone 2026-11-17): komunikaty są nasze, spójne i po polsku, nie dymki przeglądarki.
+- Błąd pola to `Field`: `aria-invalid="true"`, `aria-describedby` wskazuje komunikat, komunikat ma `role="alert"` (ogłaszany po pojawieniu się).
+- Kolejność fokusu: zgodna z kolejnością w dokumencie; po nieudanym wysłaniu fokus jest ustawiany programowo na pierwszym nieprawidłowym polu (dla grupy opcji: na opcji w kolejności klawisza `Tab`).
+- Podsumowanie to Alert z `role="alert"`; linki prowadzą do pól klawiaturą (`Enter`).
+- Przycisk wysłania zachowuje fokus podczas wysyłania (nie jest `disabled`).
+- Stany nie opierają się na samym kolorze (A3): błąd to tekst pod polem plus czerwona ramka.
+- Cel kliknięcia pól i przycisków co najmniej 36 px (`--control-height`).
+
+<Canvas of={Stories.ErrorLinkedToField} />
+
+## 10. API
+
+`useFormValidation<Values>(options)`. `Values` to **alias typu** (`type Values = { email: string; ... }`), nie `interface`: wartości to `string` albo `boolean`.
+
+| Opcja | Typ | Opis |
+|---|---|---|
+| `initialValues` | `Values` | wartości początkowe; **kolejność kluczy to kolejność pól** (od niej zależy "pierwsze nieprawidłowe pole") |
+| `validate` | `(values) => Partial<Record<pole, string>>` | czysta funkcja: zwraca komunikat dla każdego nieprawidłowego pola (`undefined` lub brak = poprawne); nie zależy od Zoda ani od `@aitl/core` |
+| `onSubmit` | `(values, { reset }) => Promise<SubmitResult>` | wywoływana tylko z poprawnymi wartościami; zwraca `{ ok: true }`, `{ ok: false, fieldErrors }` i/lub `{ ok: false, formError }`; `reset()` czyści formularz (po zapisie wpisu) |
+
+Zwraca:
+
+| Pole | Opis |
+|---|---|
+| `formProps` | `{ noValidate: true, onSubmit }` dla `<form>` |
+| `getFieldProps(name)` | `{ id, error }` dla `Field` i `RadioGroup` (id potrzebne do fokusu, błąd do wyświetlenia) |
+| `getInputProps(name)` | `{ name, value, onChange, onBlur }` dla Input i Select (tylko pola tekstowe) |
+| `setValue(name, value)`, `touch(name)` | dla pól innych niż tekstowe: RadioGroup (`onValueChange`, `onBlur`), Checkbox (`onCheckedChange`) |
+| `values`, `errors` | bieżące wartości i widoczne błędy (po zasadach z sekcji 5) |
+| `summary` | lista do `ErrorSummary`; pusta, gdy błędów jest mniej niż dwa lub nie było wysłania |
+| `formError`, `submitting` | komunikat ogólny serwera i stan wysyłania (do `loading`) |
+| `focusField(name)`, `reset()` | ustaw fokus, wyczyść formularz |
+
+`ErrorSummary`: `title` (tekst od aplikacji), `errors` (z `summary`), `onSelect` (z `focusField`), opcjonalnie `className`.
+
+`parseAmountToMinor(text)` zwraca `{ ok: true, minor }` albo `{ ok: false, reason }` (sekcja 11).
+
+**Zod:** pomocnik nie importuje `@aitl/core`. Aplikacja podłącza wspólny schemat Zod, mapując jego błędy na mapę `pole -> komunikat` w funkcji `validate` (po jednym komunikacie na pole, z tekstami z tłumaczeń). Serwer jest źródłem prawdy; formularz powtarza tylko to, co daje szybką informację zwrotną.
+
+## 11. Kod i kwoty
+
+Najkrótszy formularz:
+
+```tsx
+import { Alert, AlertDescription, Button, ErrorSummary, Field, Input, useFormValidation } from '@aitl/ui';
+
+type Values = { email: string; password: string };
+
+function LoginForm() {
+  const form = useFormValidation<Values>({
+    initialValues: { email: '', password: '' },
+    validate: (values) => ({
+      email: values.email === '' ? 'Wpisz adres e-mail, np. jan@example.com.' : undefined,
+      password: values.password === '' ? 'Wpisz hasło.' : undefined,
+    }),
+    onSubmit: async (values) => {
+      const response = await login(values);
+      return response.ok ? { ok: true } : { ok: false, formError: response.message };
+    },
+  });
+
+  return (
+    <form {...form.formProps} aria-label="Logowanie" className="flex flex-col gap-(--space-between-fields)">
+      {form.formError && (
+        <Alert variant="error">
+          <AlertDescription>{form.formError}</AlertDescription>
+        </Alert>
+      )}
+      <ErrorSummary title="Popraw dane logowania" errors={form.summary} onSelect={form.focusField} />
+      <Field label="Adres e-mail" {...form.getFieldProps('email')}>
+        <Input type="email" {...form.getInputProps('email')} />
+      </Field>
+      <Field label="Hasło" {...form.getFieldProps('password')}>
+        <Input type="password" {...form.getInputProps('password')} />
+      </Field>
+      <Button type="submit" loading={form.submitting}>
+        Zaloguj
+      </Button>
+    </form>
+  );
+}
+```
+
+Pola wyboru (typ wpisu, "Zapłacone") podpina się przez `setValue` i `touch`:
+
+```tsx
+<RadioGroup
+  legend="Typ wpisu"
+  options={ENTRY_TYPES}
+  value={form.values.type}
+  onValueChange={(value) => form.setValue('type', value)}
+  onBlur={() => form.touch('type')}
+  {...form.getFieldProps('type')}
+/>
+<Checkbox label="Zapłacone" checked={form.values.paid} onCheckedChange={(checked) => form.setValue('paid', checked === true)} />
+```
+
+### Kwoty (propozycja do decyzji właściciela)
+
+Pole kwoty to zwykły Input `type="amount"` (tekst z `inputMode="decimal"`, nie `type="number"`), a tekst jest zamieniany w formularzu na **liczbę całkowitą groszy** przez `parseAmountToMinor` (R01: liczby całkowite, tylko PLN): "12,50" daje 1250, "12" daje 1200. Reguły (**propozycja**, zgodna z E02-Q11):
+
+| Wejście | Wynik |
+|---|---|
+| `12,50`, `12.50`, `12,5`, `12` | przyjęte (przecinek i kropka jako separator groszy; spacje i twarde spacje na brzegach obcinane) |
+| puste | odrzucone: pusta |
+| `-12,50` | odrzucone: ujemna (typ wpisu wybiera się osobno) |
+| `12,505` | odrzucone: więcej niż dwa miejsca po przecinku (bez zaokrąglania w tle) |
+| `1 234,50`, `1,234.50`, `12 zł`, `1e2`, `12,` | odrzucone: zły format (bez separatora tysięcy) |
+| `0`, `0,00` | odrzucone: zero |
+| powyżej 99 999 999,99 | odrzucone: za duża (8 cyfr przed separatorem, jak w E02) |
+
+Odrzucenie podaje powód (`reason`), a komunikat po polsku dobiera aplikacja ("Kwota ma więcej niż dwa miejsca po przecinku. Zaokrąglij do groszy, np. 12,50."). Serwer przyjmuje tylko liczbę całkowitą większą od zera i jest źródłem prawdy; do czasu pojawienia się parsera w `core` (E02, Step 2.2) ten sam kod w `ui` może go zastąpić, bez zależności `ui` od `core`.
+
+## 12. Przykład: formularz wpisu, jeden błąd i wiele błędów
+
+Pola z E02: typ (RadioGroup), kwota, data, cykliczność (Select), opis, flaga "Zapłacone" (tylko dla wydatku). Poniżej jeden błąd (kwota z trzema miejscami po przecinku: komunikat pod polem, fokus, bez podsumowania) i kilka błędów (podsumowanie z trzema linkami).
+
+<Canvas of={Stories.EntryPristine} />
+<Canvas of={Stories.EntryOneError} />
+<Canvas of={Stories.EntrySeveralErrors} />
+
+### Sukces: Toast po zapisie (kompozycja, nie część formularza)
+
+Formularz nie wie o Toaście. Po odpowiedzi serwera wywołujący pokazuje potwierdzenie i czyści formularz w `onSubmit`:
+
+```tsx
+const { toast } = useToast();
+
+onSubmit: async (values, { reset }) => {
+  const response = await saveEntry(values);
+  if (!response.ok) return { ok: false, formError: response.message };
+  toast({ message: `Zapisano wpis ${values.description}: ${formatAmount(response.amountMinor)}.` });
+  reset();
+  return { ok: true };
+},
+```
+
+Toast jest potwierdzeniem, które samo znika; błąd wymagający działania nigdy nie jest toastem (zostaje Alert albo błąd pola). Po zapisie fokus zostaje na przycisku.
+
+<Canvas of={Stories.EntrySaved} />
+
+### Błędy serwera we formularzu wpisu
+
+<Canvas of={Stories.EntryServerFieldError} />
+<Canvas of={Stories.EntryServerError} />
+
+## 13. Treść komunikatów, długie teksty i 320 px
+
+Komunikat mówi, **co się stało i co zrobić**, jednym lub dwoma zdaniami, bez żargonu i bez "Nieprawidłowa wartość" (R01.7, WCAG 3.3.1, 3.3.3):
+
+| Źle | Dobrze |
+|---|---|
+| Nieprawidłowa wartość. | Kwota ma więcej niż dwa miejsca po przecinku. Zaokrąglij do groszy, np. 12,50. |
+| Wymagane | Wpisz adres e-mail, np. jan@example.com. |
+| Błąd 429 | Zbyt wiele prób logowania. Spróbuj ponownie za 87 sekund. |
+| Hasło lub e-mail niepoprawne dla tego użytkownika | Nie udało się zalogować. Sprawdź adres e-mail i hasło, a potem spróbuj ponownie. |
+
+- Etykiety są zawsze widoczne nad polem; placeholder podaje tylko przykład formatu ("np. 12,50"), nigdy nazwy pola.
+- Błąd pod polem i w podsumowaniu to ten sam tekst, bez prefiksu z nazwą pola.
+- Komunikat nie wymaga koloru ani ikony, żeby był zrozumiały.
+- Formaty: kwoty z przecinkiem ("12,50"), daty w polu tekstowym RRRR-MM-DD z podpowiedzią (**propozycja**: selektor daty jest poza zakresem PR O).
+- Długie etykiety, podpowiedzi, komunikaty i adresy zawijają się w kolumnie (`wrap-anywhere`); przy 320 px nic nie wychodzi poza ekran i strona nie przewija się poziomo.
+
+<Canvas of={Stories.LongLabelsNarrowScreen} />
+
+### Pola wyboru (propozycja do decyzji właściciela)
+
+Etykieta pola tekstowego leży nad polem. Dla pól wyboru wzorzec **nie** wprowadza układu poziomego etykiety (etykieta po lewej, pole po prawej): RadioGroup ma legendę nad opcjami (układ opcji poziomy dla dwóch opcji, jak dotąd), a Checkbox ma etykietę obok pola. Jedna kolumna i jedna reguła czytania wystarczają, a układ poziomy wymagałby nowego wariantu `Field` i osobnego układu przy 320 px. Wspólny komponent grupy pól wyboru nie jest potrzebny, dopóki żaden ekran go nie zażąda.
+
+## Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## Powiązane
+
+- Field, Input, Select, Checkbox, RadioGroup: elementy formularza (każdy ma własną stronę).
+- Button (stan `loading`), Alert (błąd serwera), Toast (potwierdzenie po zapisie), ConfirmDialog (akcja bez pól).
+- Występuje w: LoginForm (PR P) i EntryForm (PR S).
+
+## Czego brakuje
+
+- Pola daty: brak komponentu (Input `type` nie ma `date`); data to tekst z podpowiedzią formatu.
+- Pole wielowierszowe (Textarea) i pole z wyszukiwaniem: celowo niezbudowane, brak ekranu, który ich wymaga.
+- Komunikat ogólny to jeden tekst (`formError`); tytuł i opis osobno wymagałyby zmiany typu na treść Reacta.
+- Alert błędu serwera u góry formularza nie jest przewijany do widoku: na wąskim ekranie przy długim formularzu może leżeć poza kadrem, a ogłasza go tylko czytnik ekranu (**propozycja**: przewijanie do alertu po błędzie serwera).
+- Pola z błędem same ogłaszają się (`role="alert"` w Field); przy podsumowaniu i kilku błędach czytnik odczyta więcej niż jeden komunikat naraz.
+- Podsumowanie znika, gdy zostaje jeden błąd (zamiast zostać do następnego wysłania).
+- Odmiana liczebników ("sekund") jest w kodzie story; aplikacja potrzebuje tłumaczeń z liczbą mnogą.
+- Rzeczywiste czytniki ekranu, Safari i urządzenia dotykowe nie były sprawdzane (tylko Chromium, klawiatura i mysz).
+- Ciemny motyw: czeka na L3.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w tym wzorcu (oraz stany z `play`) uruchamiają się w `npm run test:storybook`: błąd pola pojawia się dopiero po opuszczeniu pola i dotyczy tylko jego; wysłanie sprawdza wszystkie pola i ustawia fokus na pierwszym błędnym; podsumowanie pojawia się tylko przy więcej niż jednym błędzie, a jego link przenosi fokus do pola; `aria-invalid` i `aria-describedby` wskazują komunikat; formularz ma `noValidate`; podwójne wysłanie (przycisk i Enter) wywołuje serwer raz; dane zostają po błędzie serwera; komunikat ogólny jest taki sam dla dwóch różnych błędnych logowań; blokada podaje sekundy w poprawnej formie; kwota "1850,5" trafia do serwera jako 185050 groszy; po zapisie wpisu pojawia się Toast, formularz jest czysty, a fokus zostaje na przycisku; przy 320 px strona nie przewija się poziomo.
+
+<Canvas of={Stories.NoNativeValidation} />
+<Canvas of={Stories.ErrorDisappearsWhenFixed} />
+<Canvas of={Stories.DoubleSubmitBlocked} />
+<Canvas of={Stories.SummaryLinksMoveFocus} />

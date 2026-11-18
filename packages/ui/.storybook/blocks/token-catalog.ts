@@ -246,10 +246,4 @@ export const MOTION_TOKENS: readonly TokenEntry[] = [
     use: 'czas wyświetlania potwierdzenia (Toast); odczytywany przy pokazaniu toastu',
     avoid: 'animacje i przejścia (to --duration-feedback)',
   },
-  {
-    name: '--toast-duration-with-action',
-    origin: 'decyzja właściciela produktu, 2026-11-18 (ok. 6 s dla toastu z akcją)',
-    use: 'zarezerwowany dla toastu z akcją; do czasu dodania akcji nieużywany',
-    avoid: 'toast bez akcji (to --toast-duration)',
-  },
 ];

@@ -101,7 +101,7 @@ Wstrzymanie nie ma wyglądu, więc nie ma podglądu stanu (`data-preview-state`)
 | od 768 px | w prawym dolnym rogu, 384 px szerokości (`w-96`), margines `--toast-viewport-offset` od prawej i dolnej krawędzi |
 | 1280 px i więcej | bez zmian |
 
-Granica 768 px to breakpoint `md` Tailwinda (po szerokości okna przeglądarki). 384 px to wartość ze skali Tailwinda, nie token (**propozycja**).
+Granica 768 px to breakpoint `md` Tailwinda (po szerokości okna przeglądarki). 384 px to wartość ze skali Tailwinda, nie token (zatwierdzone przez właściciela produktu, 2026-11-18).
 
 <Canvas of={Stories.LongTextNarrowScreen} />
 <Canvas of={Stories.WideScreen} />
@@ -124,7 +124,7 @@ Granica 768 px to breakpoint `md` Tailwinda (po szerokości okna przeglądarki).
 | `toast({ message, announce? })` | dodaje toast do kolejki i zwraca jego identyfikator; `announce`: `'polite'` (domyślnie) albo `'assertive'` |
 | `dismiss(id)` | usuwa toast o danym identyfikatorze, widoczny albo czekający |
 
-Czas wyświetlania nie jest propsem: to token `--toast-duration` (3 s), odczytywany w chwili pokazania toastu (`--toast-duration-with-action`, 6 s, jest zarezerwowany dla toastu z akcją i na razie nieużywany). Komponent nie przyjmuje `className` ani innych atrybutów: wygląd jest jeden.
+Czas wyświetlania nie jest propsem: to token `--toast-duration` (3 s), odczytywany w chwili pokazania toastu. Komponent nie przyjmuje `className` ani innych atrybutów: wygląd jest jeden.
 
 ## 11. Kod
 
@@ -170,13 +170,13 @@ toast({ message: 'Nie udało się odświeżyć podsumowania; pokazujemy poprzedn
 
 ## Czego brakuje
 
-- **Akcja w toaście** (np. "Cofnij"): nie jest zbudowana, bo żaden ekran jej nie wymaga. API jest rozszerzalne bez zmian dla istniejących wywołań: `toast()` dostanie opcjonalne pole akcji, a dla toastu z akcją czas z zarezerwowanego tokenu `--toast-duration-with-action` (6 s). Akcja wymaga decyzji właściciela (wygląd, etykieta, co dokładnie cofa).
+- **Akcja w toaście** (np. "Cofnij"): nie jest zbudowana, bo żaden ekran jej nie wymaga. API jest rozszerzalne bez zmian dla istniejących wywołań: `toast()` dostanie opcjonalne pole akcji, a dla toastu z akcją wróci token na dłuższy czas (6 s), usunięty do tego czasu razem z nieużywaną wartością. Akcja wymaga decyzji właściciela (wygląd, etykieta, co dokładnie cofa).
 - **Ikona**: brak (zgodnie z EmptyState i ErrorState).
 - **Wariant błędu o innym wyglądzie**: `announce="assertive"` zmienia tylko ogłaszanie, nie wygląd; błąd wymagający działania to Alert albo ErrorState.
 - **Kilka toastów naraz**: decyzja właściciela to jeden widoczny, reszta w kolejce; brak ograniczenia długości kolejki.
 - **Zachowanie na dotyk i czytniki ekranu**: sprawdzone w Chromium (mysz, klawiatura); rzeczywiste urządzenia dotykowe, Safari i ogłoszenia czytników ekranu nie były sprawdzane.
 - **Ciemny motyw**: czeka na L3.
-- Wymiary: szerokość 384 px i granica 768 px to **propozycje** (wartości ze skali Tailwinda), czekają na akceptację właściciela.
+- Wymiary: szerokość 384 px i granica 768 px (wartości ze skali Tailwinda) zatwierdzone przez właściciela produktu, 2026-11-18.
 
 ## Testy interakcji w tej dokumentacji
 
