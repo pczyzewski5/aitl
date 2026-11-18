@@ -27,3 +27,13 @@
   outline: var(--ring-width) solid var(--ring);
   outline-offset: 2px;
 }
+
+[data-slot='menu-item'][data-preview-state='hover'],
+[data-slot='menu-item'][data-preview-state='focus-visible'] {
+  background-color: var(--muted);
+}
+
+[data-slot='menu-item'][data-preview-state='focus-visible'] {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: -2px;
+}

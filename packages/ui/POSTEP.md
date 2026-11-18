@@ -307,7 +307,9 @@ Zatwierdzone przez właściciela produktu, 2026-11-18:
 1. Link samodzielny w osobnym wierszu (np. "Wyloguj") ma cel co najmniej 24 px wysokości; link na tle `--primary` (pasek nagłówka) ma kolor `--primary-foreground` z podkreśleniem; ładowanie ogłaszane wyłącznie przez `aria-busy` na kontenerze. Dokumentacja TextLink i Skeleton zaktualizowana w PR L (stories z testami: pasek nagłówka, cel 24 px).
 2. Dialog na Radix Dialog z zainstalowanego `radix-ui` (bez nowej zależności), przesłona jako nowy token znaczeniowy z istniejącej palety, ConfirmDialog z fokusem domyślnym na "Anuluj" i bez zamykania przesłoną (pełna lista w pliku tokenów).
 
-## Propozycje z PR L (czekają na akceptację właściciela)
+## Propozycje z PR L (zatwierdzone przez właściciela produktu, 2026-11-18)
+
+Wszystkie cztery pozycje poniżej oraz rola `dialog` zamiast `alertdialog` dla ConfirmDialog zostały zatwierdzone (patrz też plik tokenów).
 
 - `--destructive-hover` = nowy surowy `--raw-red-800` #991b1b (tylko w `tokens.css`): biały tekst 8,31:1, na `--card` 8,31:1, na `--background` 7,55:1. Zamyka lukę "hover destructive" z PR E.
 - `--overlay` = `--raw-gray-900` z krytością 60% (`color-mix`): okno `--card` względem przyciemnionej strony 4,33:1 nad `--background`, 4,04:1 nad `--card`, 9,98:1 nad paskiem `--primary`. Nazwa i rola tokenu zatwierdzone, krycie 60% to propozycja.
@@ -324,14 +326,25 @@ Zatwierdzone przez właściciela produktu, 2026-11-18:
 - Button `destructive`: hover `--destructive-hover` (klasa, podgląd `data-preview-state` w `preview-states.css`, test klasy, dokumentacja, katalog tokenów).
 - Foundations: katalog tokenów ma `--raw-red-800`, `--destructive-hover`, `--overlay`; strona Kształt ma sekcję "Przesłona za oknem"; nowe pary kontrastu `--destructive-hover` są w teście `contrast-pairs.test.ts`.
 
+## Notatki z PR M (Menu)
+
+- Komponent: `Menu` w `src/components/ui/menu.tsx`, jeden komponent z danymi (`items`: `id`, `label`, `onSelect`, `destructive`, `disabled` + `disabledReason`), bez części do składania. Radix DropdownMenu z `radix-ui` (bez nowej zależności), wyzwalacz Button `ghost` `icon` z `lucide-react/icons/ellipsis`, nazwa dostępna w `triggerLabel`. Bez nowych tokenów; `npm audit --omit=dev` bez zmian.
+- Pozycja zablokowana jest widoczna z powodem w tekście: `aria-disabled` + `data-disabled` zamiast `disabled` Radixa (które pomija pozycję przy strzałkach i czytnik nie dotarłby do powodu); wybór takiej pozycji jest ignorowany, menu zostaje otwarte. Typ (unia) wymusza `disabledReason` przy `disabled`.
+- Menu jest niemodalne (`modal={false}`): modalne wygaszało stronę przez `aria-hidden`, a przycisk wewnątrz pozostawał fokusowalny, więc axe (a11y `test: 'error'`) zgłaszał błąd na każdej story z otwartym menu. Efekt uboczny: kliknięcie poza menu je zamyka, strona się nie blokuje.
+- Powrót fokusu: akcja pozycji (`onSelect`) jest uruchamiana w `onCloseAutoFocus` menu przez `queueMicrotask`, czyli po zamknięciu menu i powrocie fokusu na przycisk. Bez tego okno otwierane z pozycji zapamiętywało `body` (pozycja już zniknęła z DOM) i po zamknięciu fokus ginął.
+- Zmiana w Dialogu: `DialogContent` zapamiętuje element z fokusem przy otwarciu i oddaje mu fokus po zamknięciu, gdy konsument nie zablokował `onCloseAutoFocus` (Radix wracał tylko na `DialogTrigger`); przy samym `body` zostawia zachowanie Radixa. Testy jednostkowe w `dialog.test.tsx`, opis w `dialog.mdx`. Tak samo działa `ConfirmDialog` (jego własne obsługi mają pierwszeństwo).
+- Obrys fokusu pozycji: globalny 2 px z ujemnym odstępem (`-outline-offset-2`), żeby nie wychodził poza ramkę menu; tło `--muted` przy najechaniu i fokusie (`--muted-hover` nieużywany).
+- Podgląd najechania i fokusu pozycji to zamrożone stany w dokumentacji: hook w pliku stories ustawia `data-preview-state` na pozycjach otwartego menu (`defaultOpen`), reguły w `preview-states.css`. `defaultOpen` w API istnieje tylko dla dokumentacji i testów.
+- Testy jednostkowe w jsdom wymagają stubów `ResizeObserver` i `scrollIntoView`; powrót fokusu, strzałki, `Home`/`End` i wpisywanie liter sprawdza Storybook w prawdziwej przeglądarce.
+- Propozycje do zatwierdzenia przy przeglądzie PR M (lista w pliku tokenów i w sekcji "Czego brakuje" strony Menu): separator ramką `--border`, niemodalność, ujemny odstęp obrysu, `aria-disabled` zamiast `disabled`, odstępy 4/16 px, szerokość powodu `max-w-72`, brak zawijania fokusu strzałkami.
+
 ## Dalsze komponenty bazowe (etap 2, ciąg dalszy) i czego potrzeba od właściciela
 
-PR K (TextLink, Skeleton, EmptyState, ErrorState) i PR L (Dialog, ConfirmDialog) zakończone. Pozostałe komponenty bazowe powstają tylko tam, gdzie ekran ich potrzebuje; po nich etap 3 (komponenty produktu, wzorce, ekrany epików).
+PR K (TextLink, Skeleton, EmptyState, ErrorState), PR L (Dialog, ConfirmDialog) i PR M (Menu) zakończone. Pozostałe komponenty bazowe powstają tylko tam, gdzie ekran ich potrzebuje; po nich etap 3 (komponenty produktu, wzorce, ekrany epików).
 
 | PR | Komponent | Czego potrzeba od właściciela |
 |---|---|---|
-| M | Menu | Radix DropdownMenu dla akcji serii (E02-S03: "Zakończ od miesiąca", "Zmień kwotę od miesiąca", "Usuń całkowicie" tylko dla serii bez miesięcy z przeszłości, E02-Q15; pozycje otwierają Dialog i ConfirmDialog). Potrzebne: wygląd wyzwalacza (przycisk ikony 36 px; która ikona z `lucide-react`, np. trzy kropki, i nazwa dostępna), kolory pozycji (propozycja `--muted` przy najechaniu i fokusie), wygląd pozycji destrukcyjnej ("Usuń całkowicie": `--destructive` na `--card` 6,47:1?), zachowanie na dotyk (cel pozycji 36 px, otwieranie dotknięciem) i czy pozycje zablokowane mają być widoczne z powodem czy ukryte; powrót fokusu na wyzwalacz po wyborze pozycji, która otwiera okno |
-| N | Toast | Radix Toast z zainstalowanego `radix-ui` (bez nowej zależności); czas wyświetlania jako token (propozycja z `--duration-feedback`: potwierdzenie ok. 3 s), miejsce na ekranie, `aria-live`, ruch |
+| N | Toast | Radix Toast z zainstalowanego `radix-ui` (bez nowej zależności). Potrzebne decyzje: (1) czas wyświetlania jako token (propozycja: potwierdzenie ok. 3 s, osobno dłuższy, np. 6 s, dla komunikatów z akcją; błąd wymagający działania nigdy nie jest toastem); (2) miejsce na ekranie (propozycja: u dołu przy 320 px, w prawym dolnym rogu od 768 px); (3) uprzejmość `aria-live` (propozycja: `polite` dla potwierdzenia, `assertive` tylko dla błędu, który nie wymaga działania); (4) maksymalna liczba widocznych naraz (propozycja: 1, kolejne czekają w kolejce); (5) czy toast może mieć akcję (np. "Cofnij") i jak wygląda; (6) bez ikony (zgodnie z EmptyState i ErrorState) i bez przycisku zamknięcia czy z nim; (7) wstrzymanie odliczania przy fokusie i najechaniu (WCAG 2.2.1) |
 | brak | Textarea, Tabs | brak, gdy ekran zażąda (decyzja 2026-11-18) |
 
-Układ poziomy etykiety w Field (etykieta obok pola) dla Checkboxa i RadioGroup oraz wspólny komponent grupy pól wyboru: do rozstrzygnięcia przy wzorcu formularza (etap 3). Kolor hover dla `destructive`: propozycja z PR L czeka na akceptację właściciela.
+Układ poziomy etykiety w Field (etykieta obok pola) dla Checkboxa i RadioGroup oraz wspólny komponent grupy pól wyboru: do rozstrzygnięcia przy wzorcu formularza (etap 3).

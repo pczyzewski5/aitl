@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   Dialog,
@@ -210,5 +211,66 @@ describe('Dialog', () => {
     expect(screen.getByText('Opis').className).toContain('description-extra');
     expect(document.querySelector('[data-slot="dialog-header"]')?.className).toContain('header-extra');
     expect(document.querySelector('[data-slot="dialog-footer"]')?.className).toContain('footer-extra');
+  });
+
+  describe('focus return without a trigger', () => {
+    interface ControlledProps {
+      readonly onOpenAutoFocus?: (event: Event) => void;
+      readonly onCloseAutoFocus?: (event: Event) => void;
+    }
+
+    function Controlled({ onOpenAutoFocus, onCloseAutoFocus }: ControlledProps) {
+      const [open, setOpen] = useState(false);
+
+      return (
+        <>
+          <button type="button" onClick={() => setOpen(true)}>
+            Otwórz z przycisku
+          </button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogContent onOpenAutoFocus={onOpenAutoFocus} onCloseAutoFocus={onCloseAutoFocus}>
+              <DialogTitle>Zmień kwotę od miesiąca</DialogTitle>
+              <DialogClose>Zamknij okno</DialogClose>
+            </DialogContent>
+          </Dialog>
+        </>
+      );
+    }
+
+    it('returns focus to the element that was focused when the dialog opened', async () => {
+      render(<Controlled />);
+      const opener = screen.getByRole('button', { name: 'Otwórz z przycisku' });
+      opener.focus();
+      fireEvent.click(opener);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Zamknij okno' }));
+
+      await waitFor(() => expect(document.activeElement).toBe(opener));
+    });
+
+    it('calls the passed focus handlers and respects a prevented close focus', async () => {
+      const onOpenAutoFocus = vi.fn();
+      const onCloseAutoFocus = vi.fn((event: Event) => event.preventDefault());
+      render(<Controlled onOpenAutoFocus={onOpenAutoFocus} onCloseAutoFocus={onCloseAutoFocus} />);
+      const opener = screen.getByRole('button', { name: 'Otwórz z przycisku' });
+      opener.focus();
+      fireEvent.click(opener);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Zamknij okno' }));
+
+      await waitFor(() => expect(onCloseAutoFocus).toHaveBeenCalledTimes(1));
+      expect(onOpenAutoFocus).toHaveBeenCalledTimes(1);
+      expect(document.activeElement).not.toBe(opener);
+    });
+
+    it('leaves focus handling to Radix when nothing but the body was focused', async () => {
+      render(<Controlled />);
+      fireEvent.click(screen.getByRole('button', { name: 'Otwórz z przycisku' }));
+
+      fireEvent.click(screen.getByRole('button', { name: 'Zamknij okno' }));
+
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+      expect(document.activeElement).toBe(document.body);
+    });
   });
 });
