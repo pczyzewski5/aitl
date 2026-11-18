@@ -40,6 +40,7 @@
   --leading-base: var(--line-height-base);
 
   --spacing-control: var(--control-height);
+  --spacing-checkbox: var(--checkbox-size);
 
   --radius-control: var(--radius);
   --radius-card: var(--radius-surface);

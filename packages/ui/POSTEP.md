@@ -10,12 +10,12 @@ Etap 0 (ten plik) niczego nie instaluje i nie zmienia kodu. Zainstalowane zależ
 |---|---|---|
 | 0 | Inwentaryzacja i plan (ten plik) | PR A, do przeglądu |
 | 1 | Fundamenty: Storybook, tokeny, Tailwind, przełącznik motywu, Foundations, skrypt `check:tokens` | zrobiony: PR B, PR C i PR D (Foundations, `check:tokens`, joby CI); PR D do przeglądu |
-| 2 | Komponenty bazowe, partiami po ok. sześć | w toku: partia 1 zakończona (Button, Input, Label+Field, Card, Badge, Alert; PR E, F i G zrobione); następna partia 2: Checkbox, Select, RadioGroup + `lucide-react` |
+| 2 | Komponenty bazowe, partiami po ok. sześć | w toku: partia 1 zakończona (Button, Input, Label+Field, Card, Badge, Alert; PR E, F i G zrobione); partia 2 rozpoczęta: PR H (Checkbox + `lucide-react`) zrobiony; dalej PR I (Select) i PR J (RadioGroup) |
 | 3 | Komponenty produktu, wzorce, ekrany epików | nie rozpoczęty |
 | 4 | Strony, które uczą, plik dla agentów | nie rozpoczęty |
 | 5 | Sprawdzenie i raport | nie rozpoczęty |
 
-Następny krok: właściciel przegląda PR G (Card, Badge, Alert); potem partia 2 (Checkbox, Select, RadioGroup z `lucide-react`); czego potrzeba od właściciela: sekcja "Partia 2" niżej.
+Następny krok: właściciel przegląda PR H (Checkbox); potem PR I (Select, natywny `<select>`) i PR J (RadioGroup); czego potrzeba od właściciela: sekcja "Partia 2" niżej.
 
 ## Materiały (źródła)
 
@@ -84,6 +84,7 @@ Decyzje z referencji (skrót, 10 linii):
 | E (zrobiony) | Infrastruktura komponentów (ręczny `components.json`, `cn` z testami, zależności `class-variance-authority`, `clsx`, `tailwind-merge`, `radix-ui`, peer `react`/`react-dom`) + Button (shadcn dopasowany do tokenów, strona dokumentacji z 13 sekcjami, stories, testy interakcji); nowe tokeny jako propozycje | tokeny zaakceptowane 2026-11-17 (`--muted-hover`, `--destructive-foreground`, `--control-height`, `--line-height-base`, `prefers-reduced-motion`); kolor hover dla `destructive` nadal otwarty |
 | F (zrobiony) | Input (text, email, password, amount) + Label + Field (etykieta, podpowiedź, błąd pod polem, "(opcjonalne)"), token `--space-label-field` 4 px, tekst pól 16 px poniżej 768 px i 14 px od 768 px, dwie strony dokumentacji z 13 sekcjami, stories i testy interakcji | propozycje zatwierdzone 2026-11-17: `readOnly` (tło `--form-surface`), odstęp podpowiedź-błąd 4 px, brak hovera pól, `aria-required` zamiast natywnego `required` |
 | G (zrobiony, do przeglądu) | Card (Card, CardHeader, CardTitle, CardContent), Badge (shared, personal, neutral), Alert (neutral `status`, error `alert`; Title, Description), token `--space-card-gap` 12 px, trzy strony dokumentacji z 13 sekcjami, stories (320 px, długi tekst, logowanie: błąd i blokada 429), testy interakcji | przegląd; decyzje zatwierdzone 2026-11-17 (patrz niżej) |
+| H (zrobiony, do przeglądu) | Checkbox (Radix + `Check`/`Minus` z `lucide-react` 1.74.0), token `--checkbox-size` 20 px, strona dokumentacji z 13 sekcjami, stories (stany, 320 px, tabela, Field, grupa "Wszystkie") i testy interakcji; usunięta nieużywana zależność `cn` | przegląd; decyzje zatwierdzone 2026-11-17 (patrz niżej) |
 
 Każdy PR: jeden temat, zielone checki (typecheck, lint, test:coverage, build, audit), wpis w `.ai/runs/`, lekcja przy napotkanej pułapce.
 
@@ -112,7 +113,13 @@ Decyzje właściciela produktu, 2026-11-17 (PR G), zatwierdzone przez właścici
 12. Card: ramka `--border` bez cienia (A2), `bg-card`, `rounded-card`, padding 16 px (`--space-panel`), odstęp wewnętrzny 12 px jako nowy token `--space-card-gap` (= `var(--space-3)`, pochodzenie: odstęp nagłówka panelu w makiecie).
 13. Alert: warianty `neutral` (`role="status"`) i `error` (`role="alert"`); tekst i ramka odróżniają rodzaj; bez ikony w partii 1; tytuł opcjonalny plus opis; treść "co się stało i co zrobić".
 
-Nadal otwarte: brak.
+Decyzje właściciela produktu, 2026-11-17 (PR H), zatwierdzone przez właściciela produktu:
+
+14. `lucide-react` zatwierdzony wyłącznie tam, gdzie komponent wymaga ikony (Checkbox: `Check`, `Minus`; później strzałka w Select); Alert i Badge zostają bez ikon.
+15. Checkbox: pole 20 px (token `--checkbox-size`) z celem kliknięcia 36 px (etykieta jest częścią celu), zaznaczony = wypełnienie `--primary` i biała ikona `Check`, pośredni = kreska, fokus globalny 2 px, ramka `--input`, bez cienia, `rounded-control`, stany disabled i invalid, etykieta zawsze widoczna (w tabeli nazwa dostępna z opisu wpisu), kolor nigdy jedynym nośnikiem.
+16. Natywny `<select>` dla Select i układ RadioGroup rozstrzygane w PR I i J. Kolor hover dla `destructive` nadal otwarty.
+
+Nadal otwarte: kolor hover dla `destructive`.
 
 ## Komponenty (lista wyprowadzona z ekranów w specyfikacjach)
 
@@ -232,10 +239,17 @@ Reguły bez źródła są propozycjami do decyzji. Każda wartość z tokenu. St
 - Alert: rola wynika z wariantu (`ALERT_ROLES`), można ją nadpisać atrybutem `role`. Brak ikony, brak przycisku zamknięcia, brak odliczania czasu blokady (luki na stronie Alert).
 - Karta i Alert używają `border-border`/`border-destructive` jawnie (Tailwind 4: `border` bez koloru to `currentColor`).
 
-## Partia 2: czego potrzeba od właściciela (Checkbox, Select, RadioGroup + `lucide-react`)
+## Notatki z PR H (Checkbox i lucide-react)
 
-- Zgoda na zależność `lucide-react` (rozmiar ikony i grubość kreski; ikona w Checkboxie i strzałka w Select) oraz decyzja, czy ikony wejdą też do Alert i Badge (dziś bez ikon).
-- Checkbox: wymiar pola (cel >= 24 px, propozycja 20 px z obszarem klikalnym 36 px), wygląd stanu zaznaczonego i pośredniego (`--primary`), kolor ramki (`--input`, 3,18:1 na `--card`), zachowanie "Zapłacone" w wierszu tabeli (E02-S04, Faza 4).
-- Select: natywny `select` czy Radix Select (stack zatwierdzony: shadcn/Radix); wybór miesiąca i typu wpisu (E02); wygląd listy rozwijanej (tło `--card`, ramka, bez cienia, A2), wybór opcji klawiaturą.
+- Checkbox na `Checkbox` z `radix-ui` (przycisk `role="checkbox"`): daje spację jako przełącznik, `aria-checked="mixed"` dla stanu pośredniego, ukryte pole formularza i poprawne `data-state`; natywne `input` wymagałoby ręcznego `indeterminate` i atrapy znacznika. Radix jest już zatwierdzoną zależnością, więc koszt to zero nowych pakietów. Wada: w jsdom spacja nie wywołuje kliknięcia przycisku, więc spacja i Enter są sprawdzone w testach Storybooka (prawdziwa przeglądarka), a nie w jednostkowych.
+- `lucide-react` 1.74.0 przypięte dokładnie (peer React do 19), ikony importowane z podścieżek (`lucide-react/icons/check`, `.../minus`), więc do paczki trafiają tylko dwie ikony. `npm audit --omit=dev` bez zmian (0).
+- Usunięto nieużywaną zależność `cn` (^0.5.2): zaciągnął ją placeholder `"cn"` z kodu shadcn (lekcja w `.ai/lessons/`).
+- Prop `label` jest opcjonalny (typ nie wymusza nazwy dostępnej, bo unia typów psuje typowanie stories); brak `label` i `aria-label` łapie test a11y w Storybooku.
+- Obrys fokusu przechodzi przez `transition-colors` (kolor obrysu też jest animowany 150 ms), więc test mierzy szerokość, odstęp i styl obrysu, nie jego kolor tuż po fokusie.
+
+## Partia 2: czego potrzeba od właściciela (Select, RadioGroup)
+
+- Select: natywny `select` czy Radix Select (stack zatwierdzony: shadcn/Radix); wybór miesiąca i typu wpisu (E02); wygląd listy rozwijanej (tło `--card`, ramka, bez cienia, A2), strzałka z `lucide-react` (zatwierdzona), wybór opcji klawiaturą.
 - RadioGroup: układ poziomy czy pionowy dla typu wpisu (wpływ/wydatek) i cykliczności; `fieldset` z `legend` jako etykieta grupy.
+- Układ poziomy etykiety w Field (etykieta obok pola): potrzebny dla Checkboxa i RadioGroup przy wzorcu formularza (etap 3).
 - Zamrożone podglądy hover/fokus dla nowych kontrolek; kolor hover dla `destructive` nadal otwarty (luka z PR E).

@@ -25,4 +25,10 @@ describe('cn', () => {
 
     expect(actual).toBe('h-control w-control');
   });
+
+  it('treats the checkbox size as a size', () => {
+    const actual = cn('size-4', 'size-checkbox');
+
+    expect(actual).toBe('size-checkbox');
+  });
 });
