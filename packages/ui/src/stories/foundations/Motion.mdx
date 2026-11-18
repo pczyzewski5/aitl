@@ -5,9 +5,11 @@ import * as Stories from './Motion.stories';
 
 # Ruch
 
-Decyzja z R01.6: prawie bez ruchu. Jedyne ruchy to hover i potwierdzenie po zapisie wpisu. Animacje dekoracyjne są zabronione.
+Decyzja z R01.6: prawie bez ruchu. Jedyny ruch to hover; potwierdzenie po zapisie wpisu (Toast) pojawia się i znika bez animacji. Animacje dekoracyjne są zabronione.
 
-## Token
+## Tokeny
+
+`--duration-feedback` to czas przejścia (hover). Czas wyświetlania potwierdzenia Toast to osobne tokeny `--toast-duration` (3 s) i zarezerwowany `--toast-duration-with-action` (6 s), zatwierdzone przez właściciela produktu, 2026-11-18.
 
 <Canvas of={Stories.Tokens} />
 
@@ -19,4 +21,4 @@ Hover zmienia kolor przycisku głównego z `--primary` na `--primary-hover` w cz
 
 ## Czego brakuje
 
-Decyzja właściciela (2026-11-17): przy `prefers-reduced-motion: reduce` czasy przejść i animacji wynoszą 0 (globalna reguła w `styles.css`). Potwierdzenie po zapisie (widoczne ok. 3 s) powstanie razem z komponentem Toast w etapie 2.
+Decyzja właściciela (2026-11-17): przy `prefers-reduced-motion: reduce` czasy przejść i animacji wynoszą 0 (globalna reguła w `styles.css`). Potwierdzenie po zapisie (Toast, widoczne 3 s) nie ma animacji pojawiania i znikania, więc ta reguła go nie dotyczy.

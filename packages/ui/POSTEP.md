@@ -10,12 +10,12 @@ Etap 0 (ten plik) niczego nie instaluje i nie zmienia kodu. Zainstalowane zależ
 |---|---|---|
 | 0 | Inwentaryzacja i plan (ten plik) | PR A, do przeglądu |
 | 1 | Fundamenty: Storybook, tokeny, Tailwind, przełącznik motywu, Foundations, skrypt `check:tokens` | zrobiony: PR B, PR C i PR D (Foundations, `check:tokens`, joby CI); PR D do przeglądu |
-| 2 | Komponenty bazowe, partiami po ok. sześć | w toku: partia 1 zakończona (Button, Input, Label+Field, Card, Badge, Alert; PR E, F i G); partia 2 ZAKOŃCZONA: PR H (Checkbox + `lucide-react`), PR I (Select) i PR J (RadioGroup) zrobione; dalsze komponenty bazowe tylko tam, gdzie ekran ich potrzebuje: PR K (TextLink, Skeleton, EmptyState, ErrorState) zrobiony, dalej PR L (Dialog + ConfirmDialog), PR M (Menu), PR N (Toast); patrz sekcja "Dalsze komponenty bazowe" |
+| 2 | Komponenty bazowe, partiami po ok. sześć | ZAKOŃCZONY (PR N, Toast, ostatni komponent bazowy): partia 1 (Button, Input, Label+Field, Card, Badge, Alert; PR E, F i G), partia 2 (Checkbox + `lucide-react`, Select, RadioGroup; PR H, I i J), PR K (TextLink, Skeleton, EmptyState, ErrorState), PR L (Dialog + ConfirmDialog), PR M (Menu), PR N (Toast); Textarea i Tabs celowo nie zbudowane (brak, gdy ekran zażąda); patrz sekcja "Etap 2 zakończony i plan etapu 3" |
 | 3 | Komponenty produktu, wzorce, ekrany epików | nie rozpoczęty |
 | 4 | Strony, które uczą, plik dla agentów | nie rozpoczęty |
 | 5 | Sprawdzenie i raport | nie rozpoczęty |
 
-Następny krok: właściciel przegląda PR K (TextLink, Skeleton, EmptyState, ErrorState); potem PR L (Dialog + ConfirmDialog), PR M (Menu), PR N (Toast); Textarea i Tabs nie są budowane, dopóki ekran ich nie zażąda (decyzja 2026-11-18). Czego każdy potrzebuje od właściciela: sekcja "Dalsze komponenty bazowe" na dole. Po nich etap 3: komponenty produktu, wzorce i ekrany epików.
+Następny krok: właściciel przegląda PR N (Toast); potem ETAP 3 (komponenty produktu, wzorce, ekrany epików E01-E03): propozycja podziału na PR-y i potrzebne decyzje w sekcji "Etap 2 zakończony i plan etapu 3" na dole.
 
 ## Materiały (źródła)
 
@@ -336,15 +336,42 @@ Wszystkie cztery pozycje poniżej oraz rola `dialog` zamiast `alertdialog` dla C
 - Obrys fokusu pozycji: globalny 2 px z ujemnym odstępem (`-outline-offset-2`), żeby nie wychodził poza ramkę menu; tło `--muted` przy najechaniu i fokusie (`--muted-hover` nieużywany).
 - Podgląd najechania i fokusu pozycji to zamrożone stany w dokumentacji: hook w pliku stories ustawia `data-preview-state` na pozycjach otwartego menu (`defaultOpen`), reguły w `preview-states.css`. `defaultOpen` w API istnieje tylko dla dokumentacji i testów.
 - Testy jednostkowe w jsdom wymagają stubów `ResizeObserver` i `scrollIntoView`; powrót fokusu, strzałki, `Home`/`End` i wpisywanie liter sprawdza Storybook w prawdziwej przeglądarce.
-- Propozycje do zatwierdzenia przy przeglądzie PR M (lista w pliku tokenów i w sekcji "Czego brakuje" strony Menu): separator ramką `--border`, niemodalność, ujemny odstęp obrysu, `aria-disabled` zamiast `disabled`, odstępy 4/16 px, szerokość powodu `max-w-72`, brak zawijania fokusu strzałkami.
+- Propozycje z PR M (separator ramką `--border`, niemodalność, ujemny odstęp obrysu, `aria-disabled` zamiast `disabled`, odstępy 4/16 px, szerokość powodu `max-w-72`, brak zawijania fokusu strzałkami): zatwierdzone przez właściciela produktu, 2026-11-18 (plik tokenów i strona Menu zaktualizowane w PR N).
 
-## Dalsze komponenty bazowe (etap 2, ciąg dalszy) i czego potrzeba od właściciela
+## Notatki z PR N (Toast)
 
-PR K (TextLink, Skeleton, EmptyState, ErrorState), PR L (Dialog, ConfirmDialog) i PR M (Menu) zakończone. Pozostałe komponenty bazowe powstają tylko tam, gdzie ekran ich potrzebuje; po nich etap 3 (komponenty produktu, wzorce, ekrany epików).
+- Decyzje właściciela, zatwierdzone przez właściciela produktu, 2026-11-18: propozycje z PR M zatwierdzone (separator ramką `--border`, menu niemodalne, ujemny odstęp obrysu w pozycjach, `aria-disabled` zamiast `disabled`, odstępy 4/16 px, `max-w-72` dla powodu, brak zawijania fokusu strzałkami); Toast na Radix Toast bez nowej zależności, czas jako tokeny (3 s, 6 s dla toastu z akcją), bez ikon, u dołu przy 320 px i w prawym dolnym rogu od 768 px, `polite` dla potwierdzeń, jeden widoczny naraz, wstrzymanie przy najechaniu i fokusie, błąd wymagający działania nigdy nie jest toastem, bez akcji w tej partii, przycisk zamknięcia jako tekst 36 px. Pełny zapis w pliku tokenów, sekcja "Toast (PR N)".
 
-| PR | Komponent | Czego potrzeba od właściciela |
+- Komponent: `ToastProvider` + `useToast()` (`toast({ message, announce? })` zwraca identyfikator, `dismiss(id)`) w `src/components/ui/toast.tsx`; Radix Toast z `radix-ui`, bez nowej zależności. Najprostsze API wystarczające dla przykładów: provider trzyma kolejkę, renderuje jeden `Toast.Root` z kluczem identyfikatora; teksty (`closeLabel`, `viewportLabel` ze znacznikiem `{hotkey}`, `announcementLabel`) przekazuje aplikacja, bo domyślne teksty Radixa są angielskie ("Notifications ({hotkey})", "Notification").
+- Ogłaszanie: Radix nie nadaje roli `status` samemu toastowi, tylko dokłada niewidoczny element w `body` (`role="status"`, `aria-live` `polite` dla `type="background"`, `assertive` dla `type="foreground"`) na 1 s. Potwierdzenie = `background` (polite); `announce: 'assertive'` = `foreground`, opisane i przetestowane, na ekranach nieużywane.
+- Czas: token `--toast-duration` (3000ms) odczytywany z `getComputedStyle(documentElement)` przy pokazaniu toastu i przekazywany do Radixa jako liczba ms; testy i dokumentacja nadpisują token na `documentElement` (krótki czas w testach, godzina w dokumentacji, zawsze sprzątane w `finally`/efekcie). Tokeny `--toast-duration-with-action` (6 s, na razie nieużywany) i `--toast-viewport-offset` (16 px) dodane do `tokens.css`, katalogu Foundations i pliku tokenów.
+- Wstrzymanie (WCAG 2.2.1) zweryfikowane w przeglądarce: Radix wstrzymuje przy `pointermove` nad regionem i `focusin` w regionie, wznawia po `pointerleave`/wyjściu fokusu; `F8` (zdarzenie `keydown` z `code: 'F8'`) fokusuje region, `Tab` prowadzi do toastu i przycisku "Zamknij". Gest przesunięcia wyłączony przez `swipeThreshold` równy nieskończoności (test przeciągnięcia o 300 px). Brak animacji, więc reduced-motion nie wymaga obsługi.
+- Położenie: region `fixed`, `left`/`right`/`bottom` = `--toast-viewport-offset`; od `md` (768 px) `left-auto` i `w-96`. W Storybooku wąski widok to `mobile1` (320 px), a `desktop` ma 1280 px (nie 1024), więc test szerokiego ekranu sprawdza 1280 px.
+- Znane ograniczenie: gdy wskaźnik albo fokus pozostaje w regionie po zamknięciu toastu, kolejny z kolejki czeka z odliczaniem do zjechania lub wyjścia fokusu (wspólna flaga wstrzymania w Radixie). Otwarty Dialog wygasza resztę strony dla czytnika ekranu, więc toast wywołuj po zamknięciu okna.
+- Propozycje PR N do zatwierdzenia (plik tokenów, sekcja "Toast (PR N)"): szerokość 384 px, granica `md`, przycisk zamknięcia jako Button `secondary`, prop `announcementLabel`, odczyt tokenu z CSS, wyłączenie przesunięcia przez próg.
+
+## Etap 2 zakończony i plan etapu 3
+
+### Co zbudowano, a czego celowo nie
+
+Zbudowane (18 plików komponentów w `packages/ui/src/components/ui/`, każdy z testami jednostkowymi 100%, stories ze stanami, testami `play` w przeglądarce, stroną dokumentacji po polsku z 13 sekcjami i "Czego brakuje"): Button, Input, Label + Field, Card, Badge, Alert, Checkbox, Select, RadioGroup, TextLink, Skeleton, EmptyState, ErrorState, Dialog + ConfirmDialog, Menu, Toast.
+
+Celowo niezbudowane (brak, gdy ekran zażąda): Textarea, Tabs, Tooltip, Popover, Avatar; Toast bez akcji ("Cofnij") i bez ikony; ciemny motyw (L3).
+
+Dług do rozstrzygnięcia w etapie 3: układ poziomy etykiety w Field dla Checkboxa i RadioGroup oraz wspólny komponent grupy pól wyboru (przy wzorcu formularza); odświeżenie zdania w `Shape.mdx` o "oczekiwaniu na akceptację" 60% `--overlay` (zatwierdzone).
+
+### Proponowany podział etapu 3 na PR-y
+
+Wejście: backlog E01-E03 (`.ai/specs/backlog.md`) i specyfikacje w `.ai/specs/`. Każdy PR: komponenty z testami jednostkowymi 100%, stories ze stanami danych (ładowanie, pusto, błąd, częściowe dane, dużo danych, długie teksty, 320 px), testy `play`, dokumentacja po polsku.
+
+| PR | Zakres | Czego potrzeba od właściciela |
 |---|---|---|
-| N | Toast | Radix Toast z zainstalowanego `radix-ui` (bez nowej zależności). Potrzebne decyzje: (1) czas wyświetlania jako token (propozycja: potwierdzenie ok. 3 s, osobno dłuższy, np. 6 s, dla komunikatów z akcją; błąd wymagający działania nigdy nie jest toastem); (2) miejsce na ekranie (propozycja: u dołu przy 320 px, w prawym dolnym rogu od 768 px); (3) uprzejmość `aria-live` (propozycja: `polite` dla potwierdzenia, `assertive` tylko dla błędu, który nie wymaga działania); (4) maksymalna liczba widocznych naraz (propozycja: 1, kolejne czekają w kolejce); (5) czy toast może mieć akcję (np. "Cofnij") i jak wygląda; (6) bez ikony (zgodnie z EmptyState i ErrorState) i bez przycisku zamknięcia czy z nim; (7) wstrzymanie odliczania przy fokusie i najechaniu (WCAG 2.2.1) |
-| brak | Textarea, Tabs | brak, gdy ekran zażąda (decyzja 2026-11-18) |
+| O | Wzorzec formularza (bez ekranu): etykiety zawsze widoczne, walidacja po opuszczeniu pola i przy wysłaniu, fokus na pierwszym błędzie po nieudanym wysłaniu, dane zostają, blokada podwójnego wysłania, sukces po potwierdzeniu z serwera; odpowiedzi API symulowane (sukces, oczekiwanie, błąd pola, błąd serwera, brak sieci); rozstrzygnięcie układu poziomego etykiety dla pól wyboru | decyzje: kiedy walidować (po opuszczeniu pola czy przy wysłaniu), treść komunikatów błędów po polsku, czy fokus po błędzie ma też czytelny komunikat zbiorczy |
+| P | E01: LoginForm (stany: wysyłanie, błąd ogólny, blokada z czasem 429), BankAccountList (plakietki "Wspólne"/"Osobiste", stan pusty, błąd wczytania) + stories ekranów `/login` i `/` z mapą stanów | akceptacja treści komunikatów logowania (R01.7) i zachowania blokady z czasem; czy lista kont ma kolejność inną niż z API |
+| Q | MonthSwitcher (strzałki miesiąca, nazwa miesiąca, granice) i AccountRemainderCard ("ile zostanie" per konto, aktywne konto `aria-pressed`, stany: ładowanie, brak wpisów, wynik ujemny; R01.8) | decyzja o wyglądzie stanu aktywnego karty (ramka 2 px grozi przeskokiem układu), formacie kwot ujemnych i sposobie oznaczenia znaku (kolor + znak, A3) |
+| R | E02 wpisy: EntryTable / EntryRow (przełącznik "zapłacone", znak +/-, oznaczenie cykliczności, długie nazwy, dużo wierszy, wąski ekran: układ kartowy albo przewijany kontener) | decyzja o układzie tabeli poniżej ok. 600 px (jest otwarta w specyfikacji), liczbie wierszy w "dużo danych", wyglądzie wiersza zapłaconego |
+| S | EntryForm (rozwijany nad listą, pola: nazwa, kwota, typ, cykliczność, miesiąc), SeriesActions (Menu + okna: zakończ, zmień kwotę, usuń całkowicie), potwierdzenie usunięcia, Toast po zapisie | akceptacja treści pytań potwierdzających i etykiet, potwierdzenie czy po zapisie wpisu formularz zostaje otwarty, czy toast ma akcję "Cofnij" (dziś brak) |
+| T | Ekrany epików jako stories pełnoekranowe: `/login`, `/` (lista kont), strona konta z wpisami (E02), przegląd miesiąca per konto (E03), z mapą stanów (która story pokazuje który stan); wzorce: lista z filtrami (miesiąc zamiast filtrów, "brak wyników" i "jeszcze nic tu nie ma"), widok szczegółów, przegląd miesiąca per konto | przegląd ekranów po złożeniu; decyzja, czy ekrany trafiają też do aplikacji (`packages/app`) w tym etapie, czy dopiero po etapie 5 |
 
-Układ poziomy etykiety w Field (etykieta obok pola) dla Checkboxa i RadioGroup oraz wspólny komponent grupy pól wyboru: do rozstrzygnięcia przy wzorcu formularza (etap 3).
+Kolejność O, P, Q, R, S, T wynika z zależności (formularz przed LoginForm i EntryForm, Q i R przed ekranem konta). PR P i Q można równolegle po O.
+

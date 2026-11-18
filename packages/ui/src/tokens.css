@@ -71,6 +71,9 @@
   --radius-surface: 8px;
   --shadow-card: none;
   --duration-feedback: 150ms;
+  --toast-duration: 3000ms;
+  --toast-duration-with-action: 6000ms;
+  --toast-viewport-offset: var(--space-4);
 
   --badge-shared-bg: var(--raw-blue-100);
   --badge-shared-fg: var(--raw-blue-700);

@@ -5,7 +5,7 @@ import * as Stories from './menu.stories';
 
 # Menu
 
-Menu rozwijane z akcjami jednego obiektu, otwierane przyciskiem z trzema kropkami: akcje serii wpisu (E02-S03). To jeden komponent `Menu` na Radix DropdownMenu z zainstalowanego `radix-ui` (bez nowej zależności); pozycje są danymi (`items`), więc nie ma części do składania. Źródło reguł: E02-S03 i E02-Q15 (specyfikacja wpisów), R01.4-R01.7, A1-A3 (referencje), tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-18, WCAG 2.2 (1.4.3, 1.4.11, 2.1.1, 2.4.3, 2.4.7, 2.5.8, 4.1.2) i WAI-ARIA APG (wzorzec Menu Button). Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+Menu rozwijane z akcjami jednego obiektu, otwierane przyciskiem z trzema kropkami: akcje serii wpisu (E02-S03). To jeden komponent `Menu` na Radix DropdownMenu z zainstalowanego `radix-ui` (bez nowej zależności); pozycje są danymi (`items`), więc nie ma części do składania. Źródło reguł: E02-S03 i E02-Q15 (specyfikacja wpisów), R01.4-R01.7, A1-A3 (referencje), tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-18, WCAG 2.2 (1.4.3, 1.4.11, 2.1.1, 2.4.3, 2.4.7, 2.5.8, 4.1.2) i WAI-ARIA APG (wzorzec Menu Button). Propozycje z przeglądu PR M (separator, niemodalność, ujemny odstęp obrysu, `aria-disabled`, odstępy, szerokość powodu, brak zawijania fokusu) są zatwierdzone przez właściciela produktu, 2026-11-18.
 
 Menu w dokumentacji jest pokazane w ramce (iframe). Otwórz je przyciskiem z trzema kropkami albo klawiaturą.
 
@@ -53,7 +53,7 @@ Jedna postać; różnią się pozycje przekazane w `items`:
 | destrukcyjna (`destructive`) | akcja nieodwracalna ("Usuń całkowicie"); kolor `--destructive` i separator; po wyborze zwykle ConfirmDialog |
 | zablokowana (`disabled` z `disabledReason`) | akcja istnieje, ale jest teraz niedostępna; powód jest tekstem pod etykietą |
 
-Pozycje destrukcyjne ustaw na końcu listy: separator pojawia się przed pierwszą z nich. Wyrównanie zawartości względem przycisku (`align`): `end` domyślnie (przycisk na prawym brzegu wiersza), `start` dla przycisku przy lewej krawędzi. Źródło: decyzje właściciela, 2026-11-18; separator i wyrównanie to **propozycje**.
+Pozycje destrukcyjne ustaw na końcu listy: separator pojawia się przed pierwszą z nich. Wyrównanie zawartości względem przycisku (`align`): `end` domyślnie (przycisk na prawym brzegu wiersza), `start` dla przycisku przy lewej krawędzi. Źródło: decyzje właściciela, 2026-11-18; separator jest zatwierdzone przez właściciela produktu, 2026-11-18; wyrównanie to wybór bez osobnej decyzji.
 
 ## 6. Stany
 
@@ -78,7 +78,7 @@ Pozycja zablokowana jest **widoczna** i ma pod etykietą powód zapisany tekstem
 
 <Canvas of={Stories.DisabledItemWithReason} />
 
-Wybór świadomy, **propozycja** (do zatwierdzenia): pozycja zablokowana nie używa atrybutu `disabled` z Radixa, tylko `aria-disabled="true"` i `data-disabled`. Radix z `disabled` pomija pozycję przy strzałkach, więc czytnik ekranu użytkownika klawiatury nigdy by do niej nie dotarł i nie przeczytał powodu. Z `aria-disabled` pozycja dostaje fokus, czytnik ogłasza ją jako niedostępną razem z powodem (tekst powodu jest częścią nazwy dostępnej), a wybór (kliknięcie, Enter, spacja) jest ignorowany i menu zostaje otwarte. Zgodne z APG (pozycje wyłączone mogą być fokusowalne).
+Wybór świadomy (zatwierdzone przez właściciela produktu, 2026-11-18): pozycja zablokowana nie używa atrybutu `disabled` z Radixa, tylko `aria-disabled="true"` i `data-disabled`. Radix z `disabled` pomija pozycję przy strzałkach, więc czytnik ekranu użytkownika klawiatury nigdy by do niej nie dotarł i nie przeczytał powodu. Z `aria-disabled` pozycja dostaje fokus, czytnik ogłasza ją jako niedostępną razem z powodem (tekst powodu jest częścią nazwy dostępnej), a wybór (kliknięcie, Enter, spacja) jest ignorowany i menu zostaje otwarte. Zgodne z APG (pozycje wyłączone mogą być fokusowalne).
 
 ## 7. Zachowanie i dostępność
 
@@ -87,8 +87,8 @@ Wybór świadomy, **propozycja** (do zatwierdzenia): pozycja zablokowana nie uż
 - `Escape` zamyka menu bez wykonania akcji; kliknięcie poza menu też je zamyka.
 - Role: przycisk ma `aria-haspopup="menu"` i `aria-expanded`; zawartość ma rolę `menu` nazwaną przez przycisk (`aria-labelledby`); pozycje to `menuitem`; separator to `separator`.
 - Fokus wraca na przycisk po zamknięciu (Escape, wybór, kliknięcie poza menu). Gdy pozycja otwiera Dialog albo ConfirmDialog, akcja pozycji jest uruchamiana dopiero po zamknięciu menu i powrocie fokusu na przycisk, dzięki czemu okno zapamiętuje przycisk jako element, na który wróci po zamknięciu. Bez tego fokus po oknie trafiał na `body`.
-- Menu jest niemodalne (`modal={false}`): strona za nim nie jest wygaszana dla czytnika ekranu ani blokowana, a menu zamyka się przy kliknięciu poza nim. **Propozycja:** wybór z powodu testów dostępności (modalne menu ukrywa przycisk przez `aria-hidden`, który zostaje fokusowalny, i narzędzie axe zgłasza to jako błąd) oraz współpracy z oknami otwieranymi z pozycji.
-- Obrys fokusu: obowiązuje globalna reguła 2 px (`--ring`) ze `styles.css`; w menu odstęp obrysu jest ujemny (`-outline-offset-2`), bo domyślny odstęp +2 px wychodziłby poza ramkę menu i na sąsiednie pozycje. Obrys pojawia się tylko przy fokusie klawiaturą (`:focus-visible`); przy myszy widać samo tło `--muted`. **Propozycja:** odstęp ujemny w pozycjach menu.
+- Menu jest niemodalne (`modal={false}`): strona za nim nie jest wygaszana dla czytnika ekranu ani blokowana, a menu zamyka się przy kliknięciu poza nim. Wybór zatwierdzony przez właściciela produktu, 2026-11-18, z powodu testów dostępności (modalne menu ukrywa przycisk przez `aria-hidden`, który zostaje fokusowalny, i narzędzie axe zgłasza to jako błąd) oraz współpracy z oknami otwieranymi z pozycji.
+- Obrys fokusu: obowiązuje globalna reguła 2 px (`--ring`) ze `styles.css`; w menu odstęp obrysu jest ujemny (`-outline-offset-2`), bo domyślny odstęp +2 px wychodziłby poza ramkę menu i na sąsiednie pozycje. Obrys pojawia się tylko przy fokusie klawiaturą (`:focus-visible`); przy myszy widać samo tło `--muted`. Odstęp ujemny w pozycjach menu: zatwierdzone przez właściciela produktu, 2026-11-18.
 - Czytnik ekranu: przycisk niesie nazwę z `triggerLabel` oraz `aria-haspopup="menu"` i `aria-expanded`; pozycja zablokowana ma `aria-disabled="true"`, a powód jest częścią jej nazwy dostępnej. Ogłoszenia konkretnego czytnika ekranu nie były sprawdzane.
 - Cele: przycisk 36 × 36 px, pozycje co najmniej 36 px wysokości (WCAG 2.5.8 wymaga 24 px; 36 px jak kontrolki systemu, na dotyk wygodniej).
 - Kontrast: `--card-foreground` na `--card` 14,68:1, `--destructive` na `--card` 6,47:1, `--muted-foreground` na `--card` 7,56:1; ramka `--border` 1,47:1 jest dekoracją (jak ramka karty), więc zawartość menu odróżnia od strony także kolor tła `--card` i układ.
@@ -207,11 +207,11 @@ Pełna kompozycja z oknami (Dialog, dwa ConfirmDialog) i testem powrotu fokusu:
 - **Tooltip i Popover**: nie istnieją, dlatego powód zablokowania jest tekstem w pozycji.
 - **Pozycje z ikonami, skrótami klawiszowymi, pola wyboru i podmenu**: nie są zbudowane; ekrany ich nie potrzebują.
 - **Dostosowanie wyglądu** (`className`, wariant wyzwalacza `secondary`): brak; jedyny wyzwalacz to ikona na tle strony. Przycisk `ghost` nie ma ramki, więc na dużym ekranie jego rozpoznawalność zależy od ikony; sprawdzić z użytkownikami.
-- **Zawijanie fokusu strzałkami** z ostatniej pozycji na pierwszą: domyślnie wyłączone (zachowanie Radixa), bez decyzji.
+- **Zawijanie fokusu strzałkami** z ostatniej pozycji na pierwszą: domyślnie wyłączone (zachowanie Radixa); brak zawijania zatwierdzony przez właściciela produktu, 2026-11-18.
 - **Ciemny motyw**: czeka na L3.
 - **Najechanie na pozycję zablokowaną**: tło `--muted` jak dla zwykłej; bez osobnej decyzji.
 - Zachowanie na dotyk sprawdzone tylko w Chromium (kliknięcie); rzeczywiste urządzenia dotykowe i Safari nie były sprawdzane.
-- Wszystkie oznaczone wyżej **propozycje** (separator, niemodalność, ujemny odstęp obrysu, `aria-disabled` zamiast `disabled`, szerokość powodu) czekają na akceptację właściciela.
+- Propozycje z PR M (separator, niemodalność, ujemny odstęp obrysu, `aria-disabled` zamiast `disabled`, odstępy 4/16 px, szerokość powodu `max-w-72`, brak zawijania fokusu) są zatwierdzone przez właściciela produktu, 2026-11-18; nie ma już otwartych propozycji.
 
 ## Testy interakcji w tej dokumentacji
 
