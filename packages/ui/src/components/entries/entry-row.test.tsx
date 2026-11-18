@@ -100,6 +100,15 @@ describe('EntryRow', () => {
     expect(screen.queryByText('10.11.2026')).toBeNull();
   });
 
+  it('shows the effective day it receives, not the day of the start date', () => {
+    renderRow({ entry: { ...INCOME, occurredOn: '2026-01-31', dayOfMonth: 28 } });
+
+    const actual = screen.getByText('Dzień miesiąca: 28');
+
+    expect(actual.textContent).toBe('Dzień miesiąca: 28');
+    expect(screen.queryByText('Dzień miesiąca: 31')).toBeNull();
+  });
+
   it('marks only a recurring entry with the neutral text badge', () => {
     renderRow({ entry: INCOME });
 

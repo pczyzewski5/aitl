@@ -1,0 +1,185 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './series-actions.stories';
+
+<Meta of={Stories} />
+
+# SeriesActions
+
+Menu akcji jednego wpisu w kolumnie "Akcje" tabeli wpisów razem z oknami, które te akcje otwierają. Dla wpisu **jednorazowego**: "Edytuj" i "Usuń". Dla wpisu **cyklicznego** (serii): "Edytuj opis", "Zakończ od miesiąca…", "Zmień kwotę od miesiąca…" i "Usuń całkowicie…". Każda akcja nieodwracalna prosi o potwierdzenie. Komponent składa istniejące elementy (`Menu`, `ConfirmDialog`, `Dialog`, `Select`, `Input`, `Alert`) i nie woła API: wszystkie operacje są propsami zwracającymi wynik. Źródło reguł: specyfikacja E02 (Q5, Q8, Q14, Q15, kontrakty `end`, `revisions`, `DELETE`, współbieżność), wzorzec formularza, ConfirmDialog (PR L), Menu (PR M), WCAG 2.2 (2.4.3, 3.3.1, 3.3.4 zapobieganie błędom, 4.1.3) i decyzje właściciela z 2026-11-18.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## Decyzje (zatwierdzone przez właściciela produktu, 2026-11-18, oraz propozycje agenta)
+
+Zatwierdzone: "Usuń całkowicie" zablokowane **z widocznym powodem**, gdy seria ma miesiące w przeszłości ("Seria ma miesiące w przeszłości. Użyj „Zakończ od miesiąca”."); każda akcja nieodwracalna ma potwierdzenie z opisem skutków i przyciskiem-czasownikiem ("Usuń wpis", "Usuń całkowicie", "Zakończ od miesiąca", "Zmień kwotę") oraz domyślnym fokusem na "Anuluj"; stan zapisu na przycisku i błąd w oknie (okno zostaje otwarte); bez "Cofnij".
+
+Propozycje agenta (do decyzji, plik tokenów, "Wpisy: formularz i akcje serii (PR S)"):
+
+| Propozycja | Wartość |
+|---|---|
+| Wybór miesiąca | `Select` z miesiącami podanymi przez wołającego (`endMonthOptions`, `amountMonthOptions`), z polskimi nazwami ("grudzień 2026") z nazw miesięcy MonthSwitchera; bez domyślnej wartości, więc wybór jest świadomy |
+| Okna z miesiącem | zwykłe `Dialog` z formularzem (wzorzec formularza), nie `ConfirmDialog`: fokus startuje na polu miesiąca (formularz), a nie na "Anuluj"; przycisk "Zakończ od miesiąca" jest `destructive`, "Zmień kwotę" zwykły |
+| "Edytuj opis" dla serii | dodatkowa pozycja menu (spec: `PUT` serii zmienia tylko opis); brak jej w zestawie z zadania |
+| Pozycje bez miesięcy | gdy wołający poda pustą listę miesięcy, "Zakończ" i "Zmień kwotę" są zablokowane z powodem ("Nie ma miesiąca, od którego można to zrobić.") |
+| Wywołanie po sukcesie | `onCompleted(action)` po zamknięciu okna (na Toast i odświeżenie), zamiast sprzątania w `onDelete` |
+| Oznaczenie destrukcyjności | pozycja "Usuń"/"Usuń całkowicie…" za separatorem, kolor `--destructive` (Menu PR M) |
+
+## 1. Do czego służy
+
+Daje jedno, spójne miejsce na akcje wpisu i pilnuje, żeby żadna nieodwracalna nie wykonała się bez świadomego potwierdzenia.
+
+## 2. Kiedy używać
+
+- Slot `actions` tabeli `EntryTable` (`actions={(entry) => <SeriesActions ... />}`).
+- Każde menu akcji pojedynczego wpisu.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Dodanie nowego wpisu | EntryForm w trybie `create` (przycisk nad tabelą, nie menu wiersza) |
+| Prosty komunikat o błędzie przy akcji | Alert w oknie (już jest w komponencie) |
+| Dowolne inne menu | `Menu` |
+| Potwierdzenie innej operacji | `ConfirmDialog`, wzorzec "Potwierdzenie usunięcia" |
+
+## 4. Anatomia
+
+1. Przycisk menu (`ghost`, ikona, nazwa "Akcje wpisu {opis}").
+2. Pozycje: zwykłe, separator, pozycja destrukcyjna.
+3. Okno potwierdzenia (`ConfirmDialog`): tytuł z opisem wpisu, tekst skutków, "Anuluj" (fokus), przycisk-czasownik, Alert błędu w oknie.
+4. Okno z miesiącem (`Dialog`): tytuł, opis skutków, Select miesiąca, dla zmiany kwoty pole "Nowa kwota" z tekstem PLN i podpowiedzią z obecną kwotą, Alert błędu, "Anuluj" i przycisk-czasownik.
+
+<Canvas of={Stories.OneOffEntryMenu} />
+<Canvas of={Stories.RecurringEntryMenu} />
+
+## 5. Warianty
+
+| Wpis | Pozycje menu |
+|---|---|
+| jednorazowy (`series` nie podane) | Edytuj; Usuń (potwierdzenie) |
+| cykliczny, `deletable: true` | Edytuj opis; Zakończ od miesiąca…; Zmień kwotę od miesiąca…; Usuń całkowicie… |
+| cykliczny, `deletable: false` | jak wyżej, ale "Usuń całkowicie…" zablokowane z powodem |
+| cykliczny bez miesięcy do wyboru | "Zakończ…" i/lub "Zmień kwotę…" zablokowane z powodem |
+
+<Canvas of={Stories.DeleteDisabledWithReason} />
+<Canvas of={Stories.NoMonthsToChoose} />
+
+## 6. Stany
+
+| Okno | Stany |
+|---|---|
+| Potwierdzenie usunięcia | otwarte (fokus na "Anuluj"), usuwanie w toku (przycisk `aria-busy`, okno nie zamyka się), błąd w oknie (Alert, okno zostaje, ponowna próba możliwa), sukces (okno się zamyka, `onCompleted`) |
+| Zakończ od miesiąca | czyste, brak miesiąca (błąd przy polu, fokus na polu), konflikt/sieć (Alert), błąd pola z serwera, w toku, sukces |
+| Zmień kwotę | czyste, kilka błędów z podsumowaniem, błąd pola z serwera (miesiąc albo kwota), w toku, sukces |
+
+<Canvas of={Stories.DeleteOneOffConfirmation} />
+<Canvas of={Stories.DeleteSeriesConfirmation} />
+<Canvas of={Stories.EndSeriesDialog} />
+<Canvas of={Stories.ChangeAmountDialog} />
+<Canvas of={Stories.DeleteConfirmationConflict} />
+<Canvas of={Stories.DeleteConfirmationNetworkError} />
+<Canvas of={Stories.DeleteConfirmationLoading} />
+<Canvas of={Stories.EndSeriesValidationErrors} />
+<Canvas of={Stories.ChangeAmountSeveralErrors} />
+<Canvas of={Stories.ChangeAmountServerFieldError} />
+<Canvas of={Stories.EndSeriesConflict} />
+<Canvas of={Stories.ChangeAmountLoading} />
+
+## 7. Zachowanie i dostępność
+
+- **Powód zablokowania jest widoczny w tekście pozycji** i pozycja ma `aria-disabled` (nie `disabled`), więc czytnik ekranu do niej dociera; wybór takiej pozycji jest ignorowany, menu zostaje otwarte (Menu, PR M).
+- Okno otwarte z menu oddaje fokus na przycisk menu po zamknięciu (akcja pozycji jest uruchamiana po zamknięciu menu i powrocie fokusu; patrz lekcja "A dialog opened from a menu item does not return focus").
+- **Potwierdzenie ma domyślny fokus na "Anuluj"**, nie na przycisku destrukcyjnym; Escape zamyka; kliknięcie tła nie zamyka (nie gubimy decyzji).
+- W trakcie operacji okno nie zamyka się (Escape i "Anuluj" zablokowane), a drugie kliknięcie nie wywołuje serwera po raz drugi.
+- Błąd serwera jest w **oknie** (Alert `role="alert"`): okno zostaje otwarte, wpis na liście się nie zmienia; ponowna próba czyści poprzedni błąd.
+- Okna z miesiącem używają wzorca formularza: walidacja przy wysłaniu, fokus na pierwszym błędnym polu, podsumowanie przy więcej niż jednym błędzie, błędy pól z serwera przy polach.
+- Po udanym usunięciu wiersz znika z tabeli razem z menu, więc **fokus trafia na `body`**: wołający powinien przenieść fokus na sensowny element (np. podpis tabeli albo przycisk "Dodaj wpis"). Komponent tego nie zrobi, bo sam znika.
+
+## 8. Treść
+
+- Teksty w `series-actions.messages.ts` (`DEFAULT_SERIES_ACTIONS_MESSAGES`), nadpisywane propem `messages`; w JSX nie ma polskich literałów. Nazwy miesięcy domyślnie z `MonthSwitcher`.
+- Każde pytanie potwierdzające mówi, **co się stanie i czego nie da się cofnąć**: "Wpis zniknie ze wszystkich miesięcy, razem z oznaczeniami „Zapłacone”. Tej operacji nie można cofnąć."
+- Przycisk potwierdzenia to czasownik zgodny z akcją: "Usuń wpis", "Usuń całkowicie", "Zakończ od miesiąca", "Zmień kwotę".
+- Wielokropek w pozycji menu ("Zakończ od miesiąca…") zapowiada kolejny krok (okno).
+
+## 9. Responsywność
+
+Menu i okna zachowują się jak `Menu` i `Dialog`: przy 320 px okno ma marginesy 16 px, tytuł i opis zawijają się (`wrap-anywhere`), długi opis wpisu w tytule nie poszerza okna.
+
+<Canvas of={Stories.NarrowScreen} />
+
+## 10. API
+
+`SeriesActionsProps` (unia: wpis jednorazowy bez `series`, wpis cykliczny z `series`):
+
+| Prop | Typ | Opis |
+|---|---|---|
+| `entry` | `OneOffEntry` albo `RecurringEntry` | wpis (z `EntryRowData`); decyduje o zestawie pozycji |
+| `onEdit` | `(entry: EntryRowData) => void` | otwarcie EntryForm (`mode: { kind: 'edit', entry }`) |
+| `onDelete` | `(entryId: string) => Promise<EntryActionResult>` | `DELETE .../entries/{id}` (dla serii: całkowite usunięcie) |
+| `onCompleted` | `(action: 'delete' \| 'end' \| 'change-amount') => void` | po udanej akcji, po zamknięciu okna (odświeżenie, Toast) |
+| `series` | `SeriesControls` | tylko dla wpisu cyklicznego |
+| `messages` | `Partial<SeriesActionsMessages>` | teksty |
+
+`SeriesControls`:
+
+| Pole | Typ | Opis |
+|---|---|---|
+| `deletable` | `boolean` | z odpowiedzi listy (`deletable`, E02-Q15); fałsz blokuje "Usuń całkowicie…" |
+| `endMonthOptions` | `readonly MonthKey[]` | miesiące, od których można zakończyć serię (spec: `fromMonth > seriesStartMonth`) |
+| `amountMonthOptions` | `readonly MonthKey[]` | miesiące, od których można zmienić kwotę (spec: `fromMonth` w ogonie serii) |
+| `onEnd` | `(entryId, fromMonth) => Promise<EntryActionResult<'month'>>` | `POST .../end` |
+| `onChangeAmount` | `(entryId, fromMonth, amountMinor) => Promise<EntryActionResult<'month' \| 'amount'>>` | `POST .../revisions` |
+
+Wynik i jego mapowanie na kopertę API: jak w EntryForm (`{ ok: true }` albo `{ ok: false, kind: 'validation' \| 'conflict' \| 'network' \| 'limit', fieldErrors? }`; 409 `conflict` na `DELETE` serii z przeszłością i na `expectedUpdatedAt` to `kind: 'conflict'`). `expectedUpdatedAt` dokłada `app` (komponent go nie zna).
+
+## 11. Kod
+
+```tsx
+import { SeriesActions } from '@aitl/ui';
+
+<EntryTable
+  entries={entries}
+  actions={(entry) =>
+    entry.recurrence === 'none' ? (
+      <SeriesActions entry={entry} onEdit={openEditForm} onDelete={deleteEntry} onCompleted={afterChange} />
+    ) : (
+      <SeriesActions
+        entry={entry}
+        onEdit={openEditForm}
+        onDelete={deleteEntry}
+        onCompleted={afterChange}
+        series={{
+          deletable: seriesById[entry.id].deletable,
+          endMonthOptions,
+          amountMonthOptions,
+          onEnd: endSeries,
+          onChangeAmount: changeSeriesAmount,
+        }}
+      />
+    )
+  }
+/>;
+```
+
+## 12. Dobrze i źle
+
+- Dobrze: zablokowana pozycja z powodem w tekście; błąd w oknie z możliwością ponowienia; wynik jako dane.
+- Źle: pozycja zablokowana bez powodu; potwierdzenie z fokusem na przycisku destrukcyjnym; zamknięcie okna przed odpowiedzią serwera; "Cofnij" po twardym usunięciu; pytanie "Czy na pewno?" bez opisu skutków.
+
+## 13. Powiązane
+
+`Menu`, `ConfirmDialog`, `Dialog`, `Select`, `Alert`, `EntryTable` (slot `actions`), `EntryForm`, `MonthSwitcher` (nazwy miesięcy); wzorce "Potwierdzenie usunięcia" i "Lista wpisów konta".
+
+## Czego brakuje
+
+- **Luka w specyfikacji E02:** odpowiedź listy nie ma `updatedAt`, a `end`, `revisions` i `PUT` serii wymagają `expectedUpdatedAt`; `app` musi go skądś wziąć (propozycja: dodać do elementów listy).
+- **Luka w specyfikacji E02:** "Zakończ od miesiąca" wymaga `fromMonth > seriesStartMonth` (400), a "Zmień kwotę" miesiąca z ogona serii (400); lista miesięcy do wyboru musi więc przyjść z danych serii (`seriesStartMonth`, `seriesEndMonth`), których `EntryRowData` nie niesie. Komponent przyjmuje gotowe listy miesięcy.
+- Po usunięciu fokus ginie razem z wierszem; potrzebna reguła na ekranie (PR T).
+- Okno zmiany kwoty nie podpowiada skutku dla flag "Zapłacone" (spec: wiersze od miesiąca X są przenoszone na nową definicję).
+- Ciemny motyw: czeka na L3.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: domyślny fokus na "Anuluj" w potwierdzeniach, błąd serwera zostaje w oknie, zablokowana pozycja z powodem (`aria-disabled`, tekst, brak okna), powrót fokusu na przycisk menu po zamknięciu okna, polskie nazwy miesięcy i klucz RRRR-MM, nowa kwota "12,50" jako 1250 groszy, walidacja przed wywołaniem serwera, blokada podwójnego potwierdzenia, 320 px.

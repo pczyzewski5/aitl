@@ -18,7 +18,7 @@ Tabela wpisów (wpływów i wydatków) jednego konta bankowego w jednym miesiąc
 - **Wpływ nie ma kontrolki "Zapłacone"** (flaga tylko dla wydatków, E02-Q6): komórka jest pusta, z tekstem "Nie dotyczy wpływów" tylko dla czytnika.
 - **Kwoty** przez `formatMoneyMinor(kwota, { sign: 'always' })`: plus dla wpływu w kolorze `--income`, minus U+2212 dla wydatku w kolorze `--expense`; znak niesie znaczenie, kolor je wzmacnia. Kolumna kwoty wyrównana do prawej z cyframi tabelarycznymi.
 - **Cykliczność:** neutralna plakietka z tekstem "Co miesiąc" przy wpisie z serii; przy wpisie jednorazowym nic.
-- **Kolumny:** Opis, Kwota, Data, Zapłacone, Akcje (miejsce na `Menu` przekazywane przez wołającego; budowa menu serii to PR S). Typ wpisu niesie znak kwoty i tekst dla czytnika, nie osobna kolumna.
+- **Kolumny:** Opis, Kwota, Data, Zapłacone, Akcje (miejsce na `SeriesActions` albo `Menu` przekazywane przez wołającego). Typ wpisu niesie znak kwoty i tekst dla czytnika, nie osobna kolumna.
 - **Limit 500 wpisów** (E02-Q13): ostrzeżenie nad tabelą, nic nie jest po cichu ucinane.
 - Teksty domyślne po polsku w jednym pliku `entry-table.messages.ts`, nadpisywane propem `messages`.
 
@@ -38,8 +38,8 @@ Pokazuje wszystkie wpisy jednego konta w wybranym miesiącu i pozwala jednym kli
 | Lista kont bankowych | BankAccountList |
 | Wynik miesiąca ("ile zostanie") | AccountRemainderCard |
 | Lista wpisów wielu kont naraz, wpisy "łącznie" | nie istnieje: R03 zakazuje listy łącznej |
-| Dodawanie i edycja wpisu | EntryForm (PR S) |
-| Menu akcji serii (zakończ, zmień kwotę, usuń) | `Menu` składane przez wołającego w slocie `actions` (SeriesActions, PR S) |
+| Dodawanie i edycja wpisu | EntryForm |
+| Menu akcji wpisu (edytuj, usuń, zakończ, zmień kwotę) | `SeriesActions` w slocie `actions` |
 | Dane inne niż wpisy (np. raporty) | osobny komponent; tabela wpisów zna pola wpisu |
 
 ## 4. Anatomia
@@ -113,7 +113,7 @@ Natywnie zablokowane pole traci fokus, więc osoba na klawiaturze po spacji zost
 - Domyślne teksty są po polsku w jednej stałej: `entry-table.messages.ts`; nadpisz propem `messages` (np. dla innego języka). W JSX nie ma polskich literałów.
 - Podpis tabeli (`caption`) podaje wołający, np. "Wpisy: Konto wspólne, listopad 2026". Jest wymagany: to nazwa tabeli i kontenera dla czytnika.
 - **Kwoty**: wyłącznie `formatMoneyMinor` (PLN, grosze jako liczba całkowita), `sign: 'always'`. Tabela nie sumuje niczego i nie pokazuje sumy.
-- **Data**: wpis jednorazowy pokazuje `occurredOn` jako `DD.MM.RRRR` w elemencie `<time dateTime="RRRR-MM-DD">`, bez `Date` i bez zegara przeglądarki. Wpis cykliczny pokazuje tylko informację "Dzień miesiąca: N" (dzień jest informacyjny, E02-Q4); data początku serii nie jest pokazywana.
+- **Data**: wpis jednorazowy pokazuje `occurredOn` jako `DD.MM.RRRR` w elemencie `<time dateTime="RRRR-MM-DD">`, bez `Date` i bez zegara przeglądarki. Wpis cykliczny pokazuje tylko informację "Dzień miesiąca: N", gdzie `N` to **dzień efektywny z API** (przycięty do długości wyświetlanego miesiąca, np. 28 w lutym zamiast 31; zatwierdzone przez właściciela produktu, 2026-11-18); tabela niczego nie przycina, pokazuje to, co dostała. Data początku serii nie jest pokazywana.
 - Opis wpisu to tekst wolny do 200 znaków; zawija się (`wrap-anywhere`).
 - Tekst ostrzeżenia o limicie mówi, co się stało i co zrobić; liczbę 500 podaje `limit` (domyślnie `ENTRY_LIST_LIMIT`).
 - Nie pisz "Razem" ani "Suma" w żadnej postaci (R03).
@@ -163,7 +163,7 @@ Podpowiedź i próg to zapytanie kontenerowe (`@xl`, 36 rem), a nie ekranowe: ta
 | `amountMinor` | `number` | kwota w groszach, liczba dodatnia (znak wynika z typu) |
 | `occurredOn` | `string` | `RRRR-MM-DD` |
 | `recurrence` | `'none' \| 'monthly'` | `monthly` wymaga `dayOfMonth` |
-| `dayOfMonth` | `number` | tylko seria; informacyjny |
+| `dayOfMonth` | `number` | tylko seria; **dzień efektywny** w wyświetlanym miesiącu (zwracany przez API, przycięty do długości miesiąca); informacyjny |
 | `paid` | `boolean \| null` | dla wydatku stan **w wyświetlanym miesiącu** (dla serii flaga jest per miesiąc, `entry_paid_months`), `null` dla wpływu |
 
 Stan "zapłacone" wpisu cyklicznego to po prostu `paid` w danych wiersza dla wyświetlanego miesiąca: po zmianie miesiąca aplikacja dostaje nową listę z nowymi wartościami. Tabela nie zna "miesięcy".
@@ -201,12 +201,12 @@ Kolumna akcji pojawia się tylko, gdy przekażesz `actions`. Przykład z pozycj�
 
 ## Czego brakuje
 
-- Data wpisu cyklicznego: kontrakt API zwraca surowy `dayOfMonth`, a kolejność wierszy na serwerze opiera się na dniu przyciętym do długości miesiąca (31 w lutym to 28/29). Tabela pokazuje dzień z API ("Dzień miesiąca: 31"); jeśli właściciel woli dzień efektywny, API musi go zwracać.
+- Data wpisu cyklicznego: rozstrzygnięte (zatwierdzone przez właściciela produktu, 2026-11-18): tabela pokazuje dzień efektywny, który zwraca API; specyfikacja E02 została uzupełniona o to zdanie.
 - Sortowanie i filtrowanie po stronie klienta: nie istnieje (spec: bez filtrów, miesiąc zamiast filtrów).
 - Zaznaczanie wielu wierszy, masowe akcje: poza zakresem.
 - Wirtualizacja: niepotrzebna przy limicie 500; do rozważenia, jeśli limit wzrośnie.
 - Ostrzeżenie o limicie nie podpowiada zawężenia: miesiąc jest już najwęższym filtrem (spec E02-Q10), więc komunikat każe wybrać inny miesiąc.
-- Cyfry tabelarycznie (`tabular-nums`, klasa Tailwind bez nowego tokenu) w kolumnie kwoty: pierwszy raz w systemie; propozycja do zatwierdzenia przez właściciela.
+- Cyfry tabelarycznie (`tabular-nums`, klasa Tailwind bez nowego tokenu) w kolumnie kwoty: zatwierdzone przez właściciela produktu, 2026-11-18.
 - Ciemny motyw: czeka na L3.
 
 ## Testy interakcji w tej dokumentacji
