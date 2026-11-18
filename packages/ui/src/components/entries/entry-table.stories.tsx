@@ -461,6 +461,20 @@ export const RecurringBadgeIsText: Story = {
   },
 };
 
+export const EffectiveDayInAShortMonth: Story = {
+  name: 'Test: wpis cykliczny z dniem 31 w lutym pokazuje dzień efektywny z API (28)',
+  args: {
+    caption: 'Wpisy konta wspólnego, luty 2027 (przykład)',
+    entries: [{ ...INTERNET, id: 'late', description: 'Opłata na koniec miesiąca (przykład)', occurredOn: '2026-01-31', dayOfMonth: 28 }],
+  },
+  play: async ({ canvasElement }) => {
+    const row = rowOf(canvasElement, 'Opłata na koniec miesiąca');
+
+    await expect(within(row).getByText('Dzień miesiąca: 28')).toBeVisible();
+    await expect(within(row).queryByText('Dzień miesiąca: 31')).toBeNull();
+  },
+};
+
 export const ScrollContainerIsFocusableAtNarrowWidth: Story = {
   ...NarrowScreen,
   name: 'Test: przy 320 px kontener tabeli przewija się, ma fokus, nazwę i widoczną podpowiedź, strona nie',

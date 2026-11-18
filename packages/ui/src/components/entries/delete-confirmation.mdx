@@ -1,0 +1,70 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import * as SeriesStories from './series-actions.stories';
+import * as ListStories from './entry-list.stories';
+
+<Meta title="Wzorce/Potwierdzenie usunięcia" />
+
+# Wzorzec: potwierdzenie usunięcia
+
+Reguły dla każdej akcji, której nie da się cofnąć: usunięcie wpisu, usunięcie serii całkowicie, zakończenie serii od miesiąca i zmiana kwoty serii od miesiąca. Wzorzec składa `ConfirmDialog` (usunięcia) i `Dialog` z formularzem (akcje z wyborem miesiąca) w komponencie `SeriesActions`; ta strona opisuje reguły, a stories pokazują gotowe okna. Źródło reguł: specyfikacja E02 (Q8 twarde usuwanie, Q15 usuwanie serii, kontrakty `DELETE`, `end`, `revisions`, 409 `conflict`), ConfirmDialog (PR L), Menu (PR M), WCAG 2.2 (3.3.4 zapobieganie błędom, 2.4.3, 4.1.3) i decyzje właściciela z 2026-11-18 (bez "Cofnij": usuwanie jest twarde i chronione potwierdzeniem).
+
+<Canvas of={SeriesStories.DeleteOneOffConfirmation} />
+
+## 1. Do czego służy
+
+Zapewnia, że nieodwracalna operacja wykona się dopiero po świadomej decyzji, a po błędzie serwera użytkownik wie, że **nic się nie zmieniło**.
+
+## 2. Kiedy używać
+
+- Każda operacja, której wynik nie da się cofnąć w aplikacji (twarde usunięcie, skrócenie serii, zmiana kwoty od miesiąca).
+- Nie używać dla odwracalnych zmian (przełączenie "Zapłacone", edycja opisu): tam nie ma potwierdzenia.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Zmiana, którą da się poprawić tą samą akcją | zwykły formularz lub pole, bez potwierdzenia |
+| Błąd po akcji | Alert w oknie, Toast tylko dla potwierdzeń (nigdy dla błędu wymagającego działania) |
+| "Cofnij" w Toaście | nie istnieje: usuwanie jest twarde (decyzja właściciela) |
+
+## 4. Reguły wzorca
+
+1. **Tytuł jest pytaniem z nazwą wpisu:** "Usunąć wpis „Zakupy spożywcze (przykład)”?".
+2. **Opis mówi, co się stanie i czego nie da się cofnąć:** "Wpis zniknie z listy i z wyniku konta w tym miesiącu. Tej operacji nie można cofnąć."
+3. **Przycisk potwierdzenia to czasownik zgodny z akcją** ("Usuń wpis", "Usuń całkowicie", "Zakończ od miesiąca", "Zmień kwotę"), nigdy "OK" ani "Tak". Przycisk usunięcia ma wariant `destructive`.
+4. **Domyślny fokus na "Anuluj"** (ConfirmDialog). Okna z formularzem (miesiąc, kwota) startują na pierwszym polu.
+5. **Stan operacji na przycisku:** w trakcie przycisk jest zajęty (`aria-busy`), okno nie zamyka się (Escape, "Anuluj", tło), drugie kliknięcie nic nie robi.
+6. **Błąd w oknie, okno zostaje otwarte:** komunikat w Alercie wewnątrz okna ("co się stało i co zrobić"), wpis na liście bez zmian, ponowna próba możliwa. Konflikt (409): "Wpis zmienił się w międzyczasie. Odśwież listę i spróbuj ponownie."
+7. **Sukces zamyka okno, potem Toast** (`onCompleted`), np. "Wpis usunięty." Bez akcji w Toaście.
+8. **Pozycja zablokowana z powodem:** gdy akcja jest niedostępna ("Usuń całkowicie" dla serii z przeszłością), pozycja menu jest widoczna, `aria-disabled`, a powód stoi obok w tekście, razem z wskazaniem właściwej akcji ("Użyj „Zakończ od miesiąca”.").
+9. **Fokus po zamknięciu:** po anulowaniu wraca na przycisk menu; po udanym usunięciu wiersz znika, więc wołający przenosi fokus na sensowny element (np. podpis tabeli).
+
+## 5. Stany
+
+<Canvas of={SeriesStories.DeleteOneOffConfirmation} />
+<Canvas of={SeriesStories.DeleteSeriesConfirmation} />
+<Canvas of={SeriesStories.DeleteConfirmationLoading} />
+<Canvas of={SeriesStories.DeleteConfirmationConflict} />
+<Canvas of={SeriesStories.DeleteConfirmationNetworkError} />
+<Canvas of={SeriesStories.DeleteDisabledWithReason} />
+<Canvas of={SeriesStories.EndSeriesDialog} />
+<Canvas of={SeriesStories.ChangeAmountDialog} />
+
+## 6. Zachowanie i dostępność
+
+Patrz strony "Elementy produktu / SeriesActions" i "Elementy bazowe / ConfirmDialog". Najważniejsze: nazwa okna z tytułu, opis skutków przez `aria-describedby`, pułapka fokusu, powrót fokusu na przycisk menu, błąd w `role="alert"`.
+
+## 7. Treść
+
+Teksty domyślne są po polsku w `series-actions.messages.ts` i nadpisywane propem `messages`. Teksty Toastów po sukcesie ("Wpis usunięty.", "Seria zakończona.", "Kwota zmieniona.") są w tej chwili tekstami stories i **propozycją**: aplikacja przekazuje własne w `onCompleted`.
+
+<Canvas of={ListStories.DeleteOneOffFlow} />
+
+## 8. Dobrze i źle
+
+- Dobrze: czasownik na przycisku, skutki w opisie, błąd w oknie, fokus na "Anuluj".
+- Źle: "Czy na pewno?" z przyciskami "Tak"/"Nie"; zamknięcie okna przed odpowiedzią serwera; Toast z "Cofnij" po twardym usunięciu; błąd pokazany tylko Toastem po zniknięciu okna.
+
+## 9. Powiązane
+
+`SeriesActions`, `ConfirmDialog`, `Dialog`, `Menu`, `Alert`, Toast; wzorzec "Lista wpisów konta".
