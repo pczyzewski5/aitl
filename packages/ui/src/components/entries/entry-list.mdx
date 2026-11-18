@@ -1,0 +1,123 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './entry-list.stories';
+
+<Meta of={Stories} />
+
+# Wzorzec: lista wpisów konta
+
+Układ widoku konta: przełącznik miesiąca, karty wyniku kont i pod nimi tabela wpisów wybranego konta. To wzorzec złożony z istniejących komponentów (`MonthSwitcher`, `AccountRemainderCard`, `EntryTable`, `Menu`, Toast); pełny ekran `/bank-accounts/{id}` powstanie w PR T, formularz i akcje serii w PR S. Źródło reguł: R01.4, R01.5, R01.8, A3, A4 (referencje), specyfikacja E02 (`.ai/specs/2026-11-17-entries-income-expenses.md`: lista miesiąca, limit 500, flaga "zapłacone", UI/UX), E03 (R02, R03), decyzje właściciela z 2026-11-18, WCAG 2.2. Reguła bez źródła jest oznaczona jako **propozycja**.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Odpowiada na pytanie "co jest zapisane na tym koncie w tym miesiącu" i pozwala oznaczyć wydatek jako zapłacony, a przy tym nie zmienia wyniku konta (R02).
+
+## 2. Kiedy używać
+
+- Widok konta (E02): pod przełącznikiem miesiąca, dla konta wybranego kartą.
+- Wszędzie, gdzie lista wpisów jednego konta i jednego miesiąca ma stać obok jego wyniku.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Sam wynik miesiąca per konto, bez listy | wzorzec "Przegląd miesiąca per konto" |
+| Lista wpisów wielu kont naraz | nie istnieje (R03) |
+| Dodawanie i edycja wpisu | EntryForm (PR S) |
+
+## 4. Anatomia
+
+1. Nagłówek widoku i `MonthSwitcher` (miesiąc w adresie, bieżący miesiąc z serwera).
+2. Karty wyniku kont (`AccountRemainderCard`): wybrana karta wskazuje konto listy; wynik liczy serwer, osobno dla każdego konta, bez sumy łącznej.
+3. `EntryTable` z podpisem "Wpisy: nazwa konta, miesiąc" i kolumną akcji (`Menu` z serwisu wołającego).
+4. Stany listy zamiast tabeli: ładowanie, błąd, pusto, limit.
+
+<Canvas of={Stories.Ready} />
+<Canvas of={Stories.PersonalAccount} />
+
+## 5. Stany
+
+| Scenariusz | Co widać |
+|---|---|
+| Wczytane | tabela wpisów wybranego konta; karty z wynikami |
+| Pusty miesiąc | EmptyState "W tym miesiącu nie ma jeszcze żadnych wpisów" z akcją "Dodaj wpis" (akcja jest propozycją: spec jej nie opisuje, ale lista nie może kończyć się ślepo) |
+| Ładowanie | szkielety wierszy w `aria-busy`, karty w ładowaniu |
+| Błąd | ErrorState z ponowieniem |
+| Limit (422 `result_limit_exceeded`) | ostrzeżenie zamiast listy; nic nie jest ucinane po cichu |
+| Zapis flagi w toku | pole "Zapłacone" zajęte (`aria-busy`), reszta wiersza bez zmian |
+| Błąd zapisu flagi | Toast z komunikatem, pole zostaje w poprzednim stanie |
+
+<Canvas of={Stories.EmptyMonth} />
+<Canvas of={Stories.Loading} />
+<Canvas of={Stories.FailedToLoad} />
+<Canvas of={Stories.LimitExceeded} />
+<Canvas of={Stories.PaidSaveFails} />
+
+## 6. Flaga "Zapłacone" nigdy nie zmienia sum (R02)
+
+Flaga jest informacją; wynik konta liczy serwer z samych kwot. W stories wynik jest liczony ze wszystkich wpisów, niezależnie od flagi, a test sprawdza, że po przełączeniu flagi dwóch wydatków wartość "Ile zostanie" jest taka sama (wymaga to także, żeby API listy nie filtrowało wpisów po fladze).
+
+Reguła zapisu flagi w tej kompozycji (**propozycja**: spec nie opisuje zachowania UI w trakcie zapisu):
+
+1. Kliknięcie wywołuje `onPaidChange(entryId, paid)`; wołający dodaje `entryId` do `savingEntryIds`.
+2. Pole zachowuje poprzednią wartość, dopóki serwer nie potwierdzi (bez aktualizacji optymistycznej), więc błąd nigdy nie zostawia pola w fałszywym stanie.
+3. Po sukcesie wołający podmienia `paid` w danych wiersza (dla wpisu cyklicznego: tylko dla wyświetlanego miesiąca).
+4. Po błędzie wołający pokazuje Toast z komunikatem (nazwany stały tekst w `app`) i zdejmuje `entryId` z `savingEntryIds`. Tabela sama nie pokazuje Toastów.
+
+## 7. Zachowanie i dostępność
+
+- Zmiana miesiąca podmienia całą listę; podpis tabeli zawiera miesiąc, więc czytnik słyszy nową nazwę tabeli.
+- Wybór konta przenosi listę na to konto; wybór karty nie przenosi fokusu (zostaje na karcie).
+- Kontener tabeli przewija się z klawiatury (`tabindex="0"`), strona nie przewija się w poziomie przy 320 px.
+- Toast błędu zapisu jest ogłaszany asertywnie (to błąd po akcji użytkownika); sukces nie ma Toastu, bo sam stan pola jest potwierdzeniem.
+
+<Canvas of={Stories.NarrowScreen} />
+
+## 8. Treść
+
+- Komunikat błędu zapisu flagi mówi, co się stało i co zrobić: "Nie udało się zapisać zmiany. Flaga „Zapłacone” została taka, jak była. Spróbuj ponownie." (**propozycja** do zatwierdzenia w PR S wraz z resztą komunikatów).
+- Podpis tabeli buduje aplikacja z nazwy konta i etykiety miesiąca.
+
+## 9. Responsywność
+
+Karty wyniku zawijają się (`flex-wrap`, `min-w-64`), tabela przewija się w kontenerze poniżej 576 px szerokości. Zero przewijania strony.
+
+## 10. Kod
+
+```tsx
+import { AccountRemainderCard, EntryTable, MonthSwitcher, useToast } from '@aitl/ui';
+
+const { toast } = useToast();
+
+const handlePaidChange = async (entryId: string, paid: boolean) => {
+  setSavingIds((ids) => [...ids, entryId]);
+  const saved = await savePaid(account.id, entryId, paid, month);
+  setSavingIds((ids) => ids.filter((id) => id !== entryId));
+  if (saved) {
+    refetch();
+  } else {
+    toast({ message: SAVE_FAILED_MESSAGE, announce: 'assertive' });
+  }
+};
+```
+
+## 11. Dobrze i źle
+
+- Dobrze: wynik konta osobno dla każdego konta; flaga zapisana, wynik bez zmian.
+- Źle: lista "wszystkich wpisów obu kont"; wynik przeliczany po fladze "zapłacone"; Toast z błędem pokazywany przez samą tabelę.
+
+## 12. Powiązane
+
+`EntryTable`, `MonthSwitcher`, `AccountRemainderCard`, `Menu`, Toast; wzorzec "Przegląd miesiąca per konto".
+
+## Czego brakuje
+
+- Dodawanie wpisu i akcje serii (PR S); pełny ekran z nawigacją i `AppShell` (PR T).
+- Zachowanie listy przy zmianie miesiąca w trakcie wczytywania (stare dane czy szkielety): brak decyzji.
+- Aktualizacja optymistyczna flagi: świadomie bez niej (propozycja wyżej).
+
+## Testy interakcji w tej dokumentacji
+
+Zapis flagi pokazuje zajęcie i potwierdza stan, wyniki kont nie zmieniają się, nieudany zapis pokazuje Toast i zostawia pole, zmiana miesiąca i konta podmienia wiersze, scenariusze limitu, błędu i ładowania, 320 px bez przewijania strony, brak sumy łącznej.

@@ -68,3 +68,13 @@ export { type AccountRemainderCardMessages } from './components/bank-accounts/ac
 export { addMonths, compareMonths, formatMonthLabel, isMonthKey, parseMonthKey, type MonthKey, type MonthParts } from './components/months/month';
 export { MonthSwitcher, type MonthSwitcherProps } from './components/months/month-switcher';
 export { type MonthSwitcherMessages } from './components/months/month-switcher.messages';
+export {
+  EntryRow,
+  type EntryRowData,
+  type EntryRowProps,
+  type EntryType,
+  type OneOffEntry,
+  type RecurringEntry,
+} from './components/entries/entry-row';
+export { EntryTable, type EntryTableProps, type EntryTableStatus } from './components/entries/entry-table';
+export { DEFAULT_ENTRY_TABLE_MESSAGES, ENTRY_LIST_LIMIT, type EntryTableMessages } from './components/entries/entry-table.messages';
