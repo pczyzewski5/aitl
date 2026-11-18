@@ -29,6 +29,14 @@ describe('Button', () => {
     expect(actual.className).toContain(expectedClass);
   });
 
+  it('darkens the destructive variant on hover only when it is enabled', () => {
+    render(<Button variant="destructive">Usuń wpis</Button>);
+
+    const actual = screen.getByRole('button', { name: 'Usuń wpis' }).className;
+
+    expect(actual).toContain('enabled:not-aria-disabled:hover:bg-destructive-hover');
+  });
+
   it('applies the icon size', () => {
     render(
       <Button size="icon" aria-label="Poprzedni miesiąc">

@@ -62,6 +62,12 @@ Kolor jest dodatkiem do podkreślenia, nigdy jedynym nośnikiem znaczenia (A3, W
 
 <Canvas of={Stories.OnCardSurface} />
 
+### Link na pasku nagłówka (tło `--primary`)
+
+Decyzja właściciela produktu, 2026-11-18: link na tle `--primary` ma kolor `--primary-foreground` (5,17:1 na `--primary`; najechanie zostaje w tym samym kolorze, bo `--primary-hover` byłby tu nieczytelny) i podkreślenie, jak każdy link (A3). Realizacja przez `className`: `text-primary-foreground hover:text-primary-foreground`.
+
+<Canvas of={Stories.OnPrimaryBar} />
+
 ## 7. Zachowanie i dostępność
 
 - Klawiatura: `Tab` wchodzi na link, `Enter` go aktywuje. Spacja nie aktywuje linku (zachowanie przeglądarki).
@@ -69,7 +75,9 @@ Kolor jest dodatkiem do podkreślenia, nigdy jedynym nośnikiem znaczenia (A3, W
 - Czytnik ekranu ogłasza "link" i nazwę z tekstu: nazwa musi mówić, dokąd link prowadzi, także bez zdania obok (WCAG 2.4.4). "Kliknij tutaj" i "Więcej" to błąd.
 - Kontrast: `--primary` na `--card` 5,17:1 (tekst, próg 4,5:1), na `--background` 4,70:1, `--primary-hover` na `--card` 6,70:1.
 - Obrys fokusu: `--ring` na `--card` 5,17:1 i na tle strony 4,70:1 (element UI, próg 3:1) (WCAG 2.4.7).
-- Cel kliknięcia: link w zdaniu jest wyjątkiem WCAG 2.5.8 (cel w tekście ciągłym). **Propozycja:** link samodzielny w osobnym wierszu (np. "Wyloguj" w nagłówku) powinien mieć co najmniej 24 px wysokości: osadź go w kontenerze o wysokości `--control-height` albo użyj Button `ghost`.
+- Cel kliknięcia: link w zdaniu jest wyjątkiem WCAG 2.5.8 (cel w tekście ciągłym). **Reguła (zatwierdzona przez właściciela produktu, 2026-11-18):** link samodzielny w osobnym wierszu (np. "Wyloguj" w nagłówku) ma cel co najmniej 24 px wysokości; w praktyce `className="inline-flex min-h-control items-center"` (36 px, `--control-height`) albo Button `ghost`.
+
+<Canvas of={Stories.StandaloneLinkHasLargeTarget} />
 - Link zewnętrzny otwiera się w tej samej karcie, bez atrybutu `target` i bez ikony (decyzja właściciela, 2026-11-18). `rel` nie jest dodawany.
 - Akcja, która nie jest nawigacją, to `button`. Gdy wygląd linku ma zostać, użyj `asChild` na `button`: dostaje wygląd linku, ale zachowuje rolę przycisku (spacja i `Enter`).
 
@@ -140,9 +148,7 @@ import { Card, CardContent, TextLink } from '@aitl/ui';
 
 - Ikona linku zewnętrznego i otwieranie w nowej karcie: decyzja właściciela 2026-11-18 mówi: bez ikony i w tej samej karcie w tej partii; do ponownej oceny, gdy pojawi się realny link zewnętrzny w produkcie.
 - Kolor linku odwiedzonego: brak tokenu i decyzji.
-- Wariant linku na ciemnym tle (pasek nagłówka `--primary`): brak ekranu i tokenu; dziś `--primary` na `--primary` jest nieczytelny, więc link w nagłówku potrzebuje decyzji o kolorze (propozycja: `--primary-foreground` z podkreśleniem).
 - Link do konkretnego elementu strony (kotwica) i odsyłacz "Przejdź do treści": poza zakresem, brak ekranu.
-- Cel 24 px dla samodzielnego linku: wymaga potwierdzenia wzorca (patrz sekcja 7, propozycja).
 
 ## Testy interakcji w tej dokumentacji
 

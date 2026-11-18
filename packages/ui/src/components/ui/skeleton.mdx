@@ -70,7 +70,7 @@ Szkielet jest **statyczny**: bez pulsowania i bez przesuwającego się połysku 
 
 - Klawiatura: szkielet nie przyjmuje fokusu i nie przenosi go.
 - `aria-hidden="true"` na każdym bloku: czytnik ekranu nie czyta pustych prostokątów blok po bloku.
-- Cały kontener ładowania ma `aria-busy="true"` (WAI-ARIA): technologia asystująca wie, że region jeszcze się zmienia, i nie ogłasza go w częściach. Gdy treść jest gotowa, zmień atrybut na `false` albo usuń go razem ze szkieletem.
+- Cały kontener ładowania ma `aria-busy="true"` (WAI-ARIA): technologia asystująca wie, że region jeszcze się zmienia, i nie ogłasza go w częściach. Gdy treść jest gotowa, zmień atrybut na `false` albo usuń go razem ze szkieletem. Ładowanie jest ogłaszane wyłącznie przez `aria-busy` na kontenerze, bez osobnego komunikatu `role="status"` (zatwierdzone przez właściciela produktu, 2026-11-18).
 - Nagłówek sekcji ("Ile zostanie w tym miesiącu", "Wpisy") jest widoczny od początku, więc użytkownik czytnika wie, gdzie jest.
 - Kontrast: `--muted` na `--card` ma 1,24:1, na `--background` 1,13:1. To dekoracja bez informacji (WCAG 1.4.11 dotyczy elementów niosących informację), a każdy blok jest ukryty przed czytnikiem. Informację o ładowaniu niesie kontener, nie kolor.
 - Brak ruchu: WCAG 2.3.3 i R01.6 spełnione bez wyjątku.

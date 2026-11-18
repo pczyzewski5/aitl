@@ -19,6 +19,10 @@ Karta ma ramkę i białe tło na szarym tle strony. Plakietka jest jedynym eleme
 
 <Canvas of={Stories.Surfaces} />
 
+## Przesłona za oknem
+
+Dialog i ConfirmDialog przyciemniają stronę tokenem `--overlay`: `--raw-gray-900` z krytością 60% (`color-mix`, bez nowego surowego koloru; krycie jest zapisane tylko w `tokens.css`). Okno leży na `--card` z ramką `--border`, bez cienia (A2). Kontrast okna (`--card`) z przyciemnionym tłem: 4,33:1 nad `--background`, 4,04:1 nad `--card` i 9,98:1 nad paskiem `--primary` (próg 3:1 dla elementów interfejsu); granicę okna wyznacza także ramka. Tekst w oknie ma kontrast jak na `--card` (14,68:1 `--foreground`, 7,56:1 `--muted-foreground`). Źródło: decyzja właściciela produktu, 2026-11-18 (token `--overlay`); wartość 60% to propozycja z PR L, czeka na akceptację właściciela.
+
 ## Czego brakuje
 
 Zatwierdzone tokeny nie definiują obramowań poza kolorami `--border` i `--input` oraz nie definiują cieni innych niż brak cienia.
