@@ -1,0 +1,184 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './select.stories';
+
+<Meta of={Stories} />
+
+# Select
+
+Lista rozwijana do wyboru jednej wartości z dłuższej listy: miesiąc i typ wpisu w formularzu wpisu (E02) oraz przy przeglądzie miesiąca (E03). Źródło reguł: R01.x (referencje), A1-A5 (antyreferencje), tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-17 i 2026-11-18, WCAG 2.2 i WAI-ARIA. Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+Select to **natywny element `<select>`** (decyzja właściciela produktu, 2026-11-18), a nie komponent Radix. Stylujemy tylko samo pole; listę opcji rysuje system operacyjny (patrz "Czego brakuje"). Dzięki temu klawiatura, czytnik ekranu, wybór na telefonie i wyszukiwanie przez wpisanie początku nazwy działają tak, jak użytkownik zna z całego systemu.
+
+Select nie ma własnej etykiety ani komunikatu błędu: nazwę, podpowiedź, błąd i znacznik "(opcjonalne)" dodaje [Field](?path=/docs/elementy-bazowe-label-i-field--docs), dokładnie jak przy Input. Samego `Select` używaj tylko wewnątrz `Field` albo z `aria-label`.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Pozwala użytkownikowi wybrać jedną wartość z listy znanych opcji (miesiąc, typ wpisu) bez wpisywania jej ręcznie i pokazuje, czy pole jest gotowe, zablokowane albo błędne.
+
+## 2. Kiedy używać
+
+- Wybór miesiąca w formularzu wpisu i w przeglądzie miesiąca: 12 opcji z domyślnym bieżącym miesiącem. Źródło: E02, E03.
+- Wybór typu wpisu (wpływ albo wydatek), gdy formularz ma mało miejsca. Źródło: E02. Układ typu wpisu jako RadioGroup rozstrzyga PR J.
+- Lista, której długość lub zawartość się zmienia i nie mieści się sensownie jako grupa przycisków radio.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Dwie lub trzy opcje, które użytkownik ma widzieć naraz | RadioGroup (PR J) |
+| Włączenie lub wyłączenie ustawienia | Checkbox |
+| Wybór wielu wartości naraz | grupa Checkbox |
+| Wartość wpisywana swobodnie (nazwa, kwota) | Input |
+| Lista z wyszukiwaniem lub bardzo długa lista | pole z wyszukiwaniem (poza zakresem, patrz "Czego brakuje") |
+| Pole bez etykiety, nazwane tylko pustą opcją | zawsze dodaj etykietę przez Field (AUDYT, R01.5) |
+| Wygląd listy opcji ma być dopasowany do systemu projektowego | nie da się z natywnym `select`; do decyzji właściciela |
+
+## 4. Anatomia
+
+1. Pole: element `select` o wysokości 36 px (`--control-height`), ramce 1 px `--input`, promieniu `rounded-control` (6 px), tle `--card`, wcięciu 8 px z lewej (`--space-2`) i 32 px z prawej (miejsce na strzałkę), bez cienia.
+2. Wartość: tekst 16 px poniżej 768 px i 14 px od 768 px (`text-base md:text-sm`), waga 400; zbyt długi tekst jest obcinany wielokropkiem.
+3. Strzałka: ikona `ChevronDown` z `lucide-react` (import z podścieżki `lucide-react/icons/chevron-down`), 16 px, `aria-hidden`, nie przechwytuje kliknięć, leży w 32-pikselowym marginesie z prawej, więc nigdy nie nachodzi na tekst.
+4. Pusta opcja "Wybierz…": opcjonalna (prop `placeholder`), pierwsza na liście, wartość `""`.
+5. Lista opcji: rysowana przez system operacyjny, bez stylowania.
+6. Etykieta, podpowiedź i błąd: poza komponentem, w Field.
+
+## 5. Warianty
+
+Pole ma jeden wygląd i dwie postaci:
+
+| Postać | Kiedy wybrać | Źródło |
+|---|---|---|
+| bez `placeholder` (domyślna) | pole ma sensowną wartość domyślną: miesiąc (bieżący), typ wpisu | decyzja właściciela, 2026-11-18 |
+| z `placeholder` (pusta opcja "Wybierz…") | użytkownik musi świadomie wybrać, a domyślna wartość byłaby zgadywaniem | decyzja właściciela, 2026-11-18; w pierwszych ekranach nieużywana |
+
+Opcje to dane przekazane w propie `options` (`{ value, label }`): nazwy miesięcy i typów wpisu nie są zapisane w komponencie.
+
+<Canvas of={Stories.EntryType} />
+<Canvas of={Stories.Month} />
+<Canvas of={Stories.WithPlaceholderOption} />
+
+## 6. Stany
+
+| Stan | Wygląd | Źródło |
+|---|---|---|
+| Domyślny | tło `--card`, ramka `--input`, strzałka `--foreground` | tokeny, A2 |
+| Najechanie (hover) | brak zmiany pola: hover tylko przy przyciskach | R01.6, decyzja właściciela 2026-11-18 |
+| Fokus (`:focus-visible`) | globalny obrys 2 px `--ring`, odstęp 2 px, ze `styles.css`; komponent nie dodaje własnego | tokeny (fokus widoczny, 2 px), WCAG 2.4.7 |
+| Zablokowany (`disabled`) | tło `--muted`, tekst i strzałka `--muted-foreground`, kursor `not-allowed`; wypada z kolejności fokusu | jak Input |
+| Błąd (`aria-invalid`) | ramka `--destructive`; komunikat tekstowy pod polem dodaje Field (kolor nie jest jedynym nośnikiem) | R01.5, A3 |
+| Długa opcja | tekst obcięty wielokropkiem w polu; pełny tekst widać na liście opcji | decyzja właściciela, 2026-11-18 |
+| Ładowanie, wciśnięty, wybrany | nie dotyczy (wybraną wartość pokazuje samo pole) | |
+
+Zablokowane pole: użytkownik dowiaduje się dlaczego z podpowiedzi w Field (np. "Miesiąc jest ustalony przez serię wpisów."), powiązanej przez `aria-describedby`. Wygląd samym kolorem to za mało (A3).
+
+Fokus w macierzy jest zamrożonym podglądem: te same deklaracje co `:focus-visible`, podpięte pod atrybut `data-preview-state` w `.storybook/preview-states.css` (tylko do dokumentacji).
+
+<Canvas of={Stories.StatesMatrix} />
+<Canvas of={Stories.InvalidInField} />
+
+### Reguła powierzchni: pole tylko na karcie lub białej powierzchni
+
+Jak przy Input: ramka `--input` ma 3,18:1 na `--card` i 3,04:1 na `--form-surface`, ale tylko 2,89:1 na tle strony `--background` (poniżej 3:1, WCAG 1.4.11). Pole leży na `--card` albo `--form-surface`. Źródło: tokeny, decyzja właściciela 2026-11-17.
+
+## 7. Zachowanie i dostępność
+
+- Klawiatura (natywna, WAI-ARIA APG "Select-Only Combobox" realizowany przez przeglądarkę): `Tab` ustawia fokus; strzałki góra/dół zmieniają wartość lub poruszają się po otwartej liście; `Spacja`, `Enter` lub `Alt+Strzałka w dół` otwierają listę; wpisanie początku nazwy ("gr") wybiera pasującą opcję; `Esc` zamyka listę. Dokładne klawisze zależą od systemu i przeglądarki.
+- Rola i nazwa: `combobox` (natywny `select`), nazwa wyłącznie z widocznej etykiety (`label` z `htmlFor` i `id`, robi to Field). Pusta opcja nie jest etykietą (AUDYT, WCAG 3.3.2, 1.3.1).
+- Błąd: `aria-invalid="true"` oraz `aria-describedby` wskazujący na komunikat pod polem (Field). Czytnik ekranu przy fokusie czyta nazwę, wybraną wartość, "nieprawidłowe" i treść błędu (WCAG 3.3.1).
+- Strzałka jest dekoracją: `aria-hidden`, nie ma roli ani nazwy i nie przechwytuje kliknięć (`pointer-events-none`), więc kliknięcie w nią otwiera listę.
+- Cel kliknięcia: 36 px wysokości i pełna szerokość kontenera, więc spełnia 24 x 24 px (WCAG 2.5.8).
+- Kontrast: tekst `--foreground` na `--card` 14,68:1; ramka `--input` na `--card` 3,18:1; obrys fokusu `--ring` na `--card` 5,17:1; strzałka `--foreground` na `--card` 14,68:1.
+- Kolor nigdy nie jest jedynym nośnikiem: błąd ma komunikat tekstowy, zablokowanie ma `disabled` czytane przez czytnik.
+- Tekst 16 px poniżej 768 px zapobiega przybliżaniu strony przy fokusie w przeglądarkach iOS (znane zachowanie, nie weryfikowane w tym repo).
+- Walidację natywną przeglądarki wyłącz na formularzu (`noValidate`): błędy pokazuje Field pod polem.
+
+Testy w Storybooku sprawdzają fokus przez `Tab`, wybór opcji i zdarzenie `change`. Strzałki i wpisywanie nazwy to zachowania wbudowane w przeglądarkę, których symulowane zdarzenia (`user-event`) nie uruchamiają, więc nie są sprawdzane automatycznie (patrz "Czego brakuje").
+
+## 8. Treść
+
+- Etykieta pola: rzeczownik ("Miesiąc", "Typ wpisu"), bez dwukropka.
+- Opcje: krótkie, jednoznaczne, bez wspólnego prefiksu; kolejność naturalna (miesiące chronologicznie, typy: Wpływ, Wydatek). Dane przykładowe oznaczaj "(przykład)" (A5).
+- Pusta opcja: "Wybierz…" (nie pełni roli etykiety).
+- Długa opcja: pole obcina tekst wielokropkiem, więc najważniejsze słowa umieszczaj na początku.
+- Liczby i daty w opcjach: format polski ("listopad 2026"), wartość techniczna (`2026-11`) w `value`.
+- Tłumaczenie: pole nie ma stałej szerokości; dłuższy język skraca się wielokropkiem.
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | pole na pełną szerokość kontenera, tekst 16 px, długa opcja obcięta wielokropkiem |
+| 768 px | tekst 14 px (od 768 px, `md:text-sm`), te same wymiary |
+| 1440 px | bez zmian; szerokość treści ogranicza układ strony (R01.4) |
+
+Na telefonach lista opcji jest natywnym wyborem systemu (np. koło lub arkusz), co jest zachowaniem pożądanym.
+
+<Canvas of={Stories.LongOptionNarrowScreen} />
+
+## 10. API
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `options` | `readonly { value: string; label: string }[]` | wymagane | opcje listy; nazwy pochodzą z danych |
+| `placeholder` | `string` | brak | gdy podany, pierwsza opcja o wartości `""` i tym tekście |
+| `disabled` | `boolean` | `false` | natywne zablokowanie |
+| `aria-invalid` | `boolean` | brak | stan błędu; ustawia go Field, gdy podano `error` |
+| `aria-describedby` | `string` | brak | powiązanie z podpowiedzią i błędem; Field dopisuje swoje identyfikatory |
+| `value`, `defaultValue`, `onChange` | natywne | | sterowanie wartością jak w `select` |
+| `className` | `string` | brak | dodatkowe klasy na polu; konflikty rozwiązuje `cn` (tailwind-merge) |
+| inne | atrybuty `select` | | `id`, `name`, `autoComplete` itd. trafiają na element `select` |
+
+Typy `SelectOption` i `SelectProps` są eksportowane z pakietu.
+
+## 11. Kod
+
+Minimalny przykład (pole zawsze w Field, który dodaje etykietę):
+
+```tsx
+import { Field, Select } from '@aitl/ui';
+
+const ENTRY_TYPES = [
+  { value: 'income', label: 'Wpływ' },
+  { value: 'expense', label: 'Wydatek' },
+];
+
+<Field label="Typ wpisu">
+  <Select options={ENTRY_TYPES} defaultValue="expense" />
+</Field>;
+```
+
+Typowy przykład z produktu, wybór miesiąca z błędem:
+
+```tsx
+<Field label="Miesiąc" error={monthError}>
+  <Select options={months} value={month} onChange={(event) => setMonth(event.target.value)} />
+</Field>
+```
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: RadioGroup (kilka opcji widocznych naraz, PR J), Input (swobodny tekst), pole z wyszukiwaniem (długa lista).
+- Występuje we wzorcach: formularz wpisu (typ wpisu, miesiąc), przegląd miesiąca (wybór miesiąca).
+- Z komponentami: zawsze w [Field](?path=/docs/elementy-bazowe-label-i-field--docs); wygląd pola i błędu jak [Input](?path=/docs/elementy-bazowe-input--docs).
+- Dalsze zasady wyboru komponentu pojawią się na stronie "Jak wybrać komponent" w etapie 4.
+
+## Czego brakuje
+
+- **Lista opcji rysowana przez system operacyjny**: tło, ramka, cień, czcionka i podświetlenie opcji listy rozwijanej nie zależą od naszych tokenów i różnią się między systemami i przeglądarkami. To świadoma cena wyboru natywnego `select` (decyzja właściciela, 2026-11-18); nie stylujemy listy. Jeśli kiedyś będzie wymagany własny wygląd listy, trzeba osobnej decyzji (np. Radix Select).
+- Strzałki i wpisywanie nazwy w teście automatycznym: zachowania natywne, niedostępne dla symulowanych zdarzeń; sprawdzone tylko przez to, że element jest natywnym `select`. Wymagałoby testu w prawdziwej przeglądarce z klawiaturą na poziomie systemu.
+- Pusta opcja "Wybierz…" ma ten sam kolor tekstu co wartości (brak stylu "podpowiedzi"); do decyzji, jeśli opcja trafi na ekran.
+- Grupy opcji (`optgroup`), wyłączone pojedyncze opcje i wielokrotny wybór: brak ekranu, który ich potrzebuje.
+- Hover pola: brak (R01.6), do decyzji, jeśli użytkownicy nie rozpoznają pola po samej ramce.
+- Kolor hover wariantu `destructive` przycisku bez zmian (luka z PR E, nie dotyczy pola).
+- Przybliżanie strony na iOS przy tekście 14 px: reguła 16 px poniżej 768 px nie była sprawdzona na urządzeniu.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: fokus przez `Tab` i wybór opcji, zdarzenie `change`, wartość sterowana ze stanu Reacta, etykieta nazywająca pole z opisem i `aria-required`, obrys fokusu 2 px, zablokowane bez fokusu i zmiany, błąd z `aria-invalid`, `aria-describedby` i czerwoną ramką, strzałka `aria-hidden` bez nachodzenia na tekst, wysokość 36 px (cel co najmniej 24 px), rozmiar tekstu zależny od szerokości, ramka, tło, kolor i promień z tokenów, brak cienia.
