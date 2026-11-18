@@ -22,6 +22,7 @@ export { ErrorState, type ErrorStateProps } from './components/ui/error-state';
 export { Field,type FieldProps } from './components/ui/field';
 export { Input, type InputProps, type InputType } from './components/ui/input';
 export { Label } from './components/ui/label';
+export { Menu, type MenuItem, type MenuProps } from './components/ui/menu';
 export { RadioGroup, type RadioGroupOption, type RadioGroupProps } from './components/ui/radio-group';
 export { Select, type SelectOption, type SelectProps } from './components/ui/select';
 export { Skeleton } from './components/ui/skeleton';

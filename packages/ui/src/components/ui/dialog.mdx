@@ -103,7 +103,7 @@ Obok wyzwalacza stoi tekst z powodem i przyczyną odblokowania, powiązany przez
 - Rola `dialog`, nazwa z `DialogTitle` (`aria-labelledby`), opis z `DialogDescription` (`aria-describedby`). Tytuł jest wymagany; opis wymagany, jeśli okno wyjaśnia skutek. Bez opisu ustaw `aria-describedby={undefined}`, inaczej Radix zgłosi ostrzeżenie w konsoli.
 - Klawiatura: `Enter` lub spacja na wyzwalaczu otwiera okno; `Tab` i `Shift+Tab` krążą po elementach okna i nie wychodzą poza nie (pułapka fokusu jest zamierzona w oknie modalnym, WAI-ARIA APG; wyjście zapewnia `Escape`, WCAG 2.1.2); `Escape` zamyka okno.
 - Fokus po otwarciu trafia na pierwszy element interaktywny (zwykle pierwsze pole). Przycisk zamknięcia jest ostatni w kolejności, bo leży w DOM za treścią.
-- Po zamknięciu fokus wraca na wyzwalacz (WCAG 2.4.3). Gdy okno otwierasz bez `DialogTrigger`, wróć fokusem na element otwierający sam (w ConfirmDialog robi to komponent).
+- Po zamknięciu fokus wraca na wyzwalacz (WCAG 2.4.3). Gdy okno otwierasz bez `DialogTrigger` (np. z pozycji Menu), `DialogContent` oddaje fokus elementowi, który miał fokus w chwili otwarcia (PR M); zdarzenie `onCloseAutoFocus` z `preventDefault()` wyłącza ten powrót.
 - Reszta strony dostaje `aria-hidden` i nie przyjmuje kliknięć; czytnik ekranu czyta tylko okno. Rola `dialog` w czytnikach ogłasza nazwę (tytuł) przy otwarciu.
 - Kliknięcie przesłony zamyka Dialog (nie zamyka ConfirmDialog). Kliknięcie wewnątrz okna nie zamyka go.
 - Przycisk zamknięcia: nazwa dostępna z propsa `closeLabel` (komponent nie ma własnego tekstu, bo teksty przekazuje aplikacja), ikona `aria-hidden`, cel 36 x 36 px (WCAG 2.5.8 wymaga 24 x 24).
@@ -225,8 +225,7 @@ import {
 - Komunikat o błędzie zapisu w oknie (Alert w treści okna): wzorzec dojdzie w etapie 3 razem z formularzem.
 - Zachowanie fokusu na Safari: przycisk kliknięty myszą nie dostaje fokusu, więc po zamknięciu okna otwartego bez `DialogTrigger` fokus może trafić na `body`; sprawdzone tylko w Chromium.
 - Ciemny motyw: czeka na L3; przesłona i okno nie mają wartości dla ciemnego motywu.
-- Krycie przesłony 60%: propozycja z PR L, czeka na akceptację właściciela.
-- Maksymalna szerokość okna 448 px (`max-w-md`): propozycja z PR L, czeka na akceptację właściciela.
+- Krycie przesłony 60% i maksymalna szerokość okna 448 px (`max-w-md`): zatwierdzone przez właściciela produktu, 2026-11-18.
 
 ## Testy interakcji w tej dokumentacji
 

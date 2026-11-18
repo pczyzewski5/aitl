@@ -1,6 +1,6 @@
 'use client';
 
-import type { ComponentProps } from 'react';
+import { type ComponentProps, useRef } from 'react';
 import { Dialog as DialogPrimitive } from 'radix-ui';
 import X from 'lucide-react/icons/x';
 import { cn } from '../../lib/utils';
@@ -29,8 +29,25 @@ function DialogContent({
   closeLabel,
   dismissOnOverlayClick = true,
   onPointerDownOutside,
+  onOpenAutoFocus,
+  onCloseAutoFocus,
   ...props
 }: DialogContentProps) {
+  const openerRef = useRef<HTMLElement | null>(null);
+
+  const handleOpenAutoFocus: DialogContentProps['onOpenAutoFocus'] = (event) => {
+    openerRef.current = document.activeElement as HTMLElement | null;
+    onOpenAutoFocus?.(event);
+  };
+
+  const handleCloseAutoFocus: DialogContentProps['onCloseAutoFocus'] = (event) => {
+    onCloseAutoFocus?.(event);
+    const opener = openerRef.current;
+    if (!event.defaultPrevented && opener && opener !== document.body) {
+      event.preventDefault();
+      opener.focus();
+    }
+  };
   const handlePointerDownOutside: DialogContentProps['onPointerDownOutside'] = (event) => {
     onPointerDownOutside?.(event);
     if (!dismissOnOverlayClick) {
@@ -52,6 +69,8 @@ function DialogContent({
             className,
           )}
           onPointerDownOutside={handlePointerDownOutside}
+          onOpenAutoFocus={handleOpenAutoFocus}
+          onCloseAutoFocus={handleCloseAutoFocus}
           {...props}
         >
           <div

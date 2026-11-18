@@ -65,7 +65,7 @@ Przycisk potwierdzenia jest zawsze `destructive`; przesłona nigdy nie zamyka ok
 |---|---|
 | Zamknięty | nic nie jest renderowane; okno otwiera aplikacja (prop `open`) |
 | Otwarty | fokus na "Anuluj"; "Usuń wpis" ma tło `--destructive` i tekst `--destructive-foreground` (6,47:1) |
-| Najechanie | przycisk potwierdzenia ciemnieje do `--destructive-hover` (8,31:1 z białym tekstem; propozycja z PR L, czeka na akceptację właściciela); "Anuluj" przechodzi na `--muted-hover` |
+| Najechanie | przycisk potwierdzenia ciemnieje do `--destructive-hover` (8,31:1 z białym tekstem; zatwierdzone przez właściciela produktu, 2026-11-18); "Anuluj" przechodzi na `--muted-hover` |
 | Fokus | globalny obrys 2 px; zaczyna na "Anuluj" |
 | Ładowanie (`confirming`) | przycisk potwierdzenia: `aria-busy`, `aria-disabled`, kliknięcia ignorowane; etykietę zmienia aplikacja ("Usuwanie…"); okno zostaje otwarte do końca operacji |
 | Zablokowany | okno nie ma stanu zablokowanego; zablokowany bywa wyzwalacz (patrz niżej) |
@@ -88,7 +88,7 @@ Gdy usunięcie jest niedostępne (seria ma miesiące z przeszłości, E02-Q15), 
 
 ## 7. Zachowanie i dostępność
 
-- Rola `dialog` z nazwą z tytułu i opisem z opisu skutków. Zgodnie z APG okno potwierdzenia zasługuje na `alertdialog`, ale Radix Dialog nadaje rolę `dialog`; zachowanie (fokus na bezpiecznej akcji, brak zamykania przesłoną) jest to samo. **Propozycja:** zostać przy roli `dialog`; do decyzji, jeśli czytniki ekranu w testach z użytkownikami będą ogłaszać go słabo.
+- Rola `dialog` z nazwą z tytułu i opisem z opisu skutków. Zgodnie z APG okno potwierdzenia mogłoby mieć rolę `alertdialog`, ale właściciel zatwierdził rolę `dialog` (2026-11-18); zachowanie (fokus na bezpiecznej akcji, brak zamykania przesłoną) jest to samo.
 - **Fokus domyślny na "Anuluj"**, nie na przycisku usuwającym (decyzja właściciela, 2026-11-18): przypadkowe `Enter` zaraz po otwarciu rezygnuje, zamiast usuwać.
 - Klawiatura: `Tab` krąży między "Anuluj" i przyciskiem potwierdzenia (`Shift+Tab` w odwrotną stronę), fokus nie wychodzi z okna; `Escape` zamyka okno (rezygnacja); `Enter` i spacja aktywują przycisk z fokusem.
 - Kliknięcie przesłony **nie** zamyka okna (decyzja właściciela, 2026-11-18): przypadkowe kliknięcie obok nie powinno zamykać okna z decyzją ani sprawiać wrażenia, że akcja została wykonana.
@@ -206,11 +206,9 @@ Zakończenie serii z listą skutków:
 
 - **Błąd operacji w oknie** (np. serwer odrzucił usunięcie): komponent nie pokazuje błędu. Wzorzec (ErrorState lub Alert w treści okna, fokus na komunikacie, okno zostaje otwarte) dojdzie w etapie 3; do tego czasu aplikacja przekazuje komunikat jako `children`.
 - Zamykanie w trakcie operacji: w trakcie `confirming` "Anuluj" i `Escape` nadal działają, a zamknięcie nie przerywa żądania; decyzja przy pierwszej integracji (zablokować czy przerywać).
-- Rola `alertdialog` zamiast `dialog`: patrz sekcja 7 (propozycja).
-- Szerokość okna 448 px: propozycja z PR L, czeka na akceptację właściciela.
 - Zachowanie fokusu na Safari: przycisk kliknięty myszą nie dostaje tam fokusu, więc fokus po zamknięciu może trafić na `body`; sprawdzone tylko w Chromium.
 - Ciemny motyw: czeka na L3.
-- Kolor `--destructive-hover`: propozycja z PR L, czeka na akceptację właściciela (luka z PR E zamknięta propozycją).
+- Rola `dialog` (zamiast `alertdialog`), szerokość okna 448 px i kolor `--destructive-hover` są zatwierdzone przez właściciela produktu, 2026-11-18.
 
 ## Testy interakcji w tej dokumentacji
 

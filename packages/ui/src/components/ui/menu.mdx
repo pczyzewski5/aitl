@@ -1,0 +1,218 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './menu.stories';
+
+<Meta of={Stories} />
+
+# Menu
+
+Menu rozwijane z akcjami jednego obiektu, otwierane przyciskiem z trzema kropkami: akcje serii wpisu (E02-S03). To jeden komponent `Menu` na Radix DropdownMenu z zainstalowanego `radix-ui` (bez nowej zależności); pozycje są danymi (`items`), więc nie ma części do składania. Źródło reguł: E02-S03 i E02-Q15 (specyfikacja wpisów), R01.4-R01.7, A1-A3 (referencje), tokeny (`.ai/specs/design/2026-11-17-tokeny.md`), decyzje właściciela z 2026-11-18, WCAG 2.2 (1.4.3, 1.4.11, 2.1.1, 2.4.3, 2.4.7, 2.5.8, 4.1.2) i WAI-ARIA APG (wzorzec Menu Button). Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+Menu w dokumentacji jest pokazane w ramce (iframe). Otwórz je przyciskiem z trzema kropkami albo klawiaturą.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Mieści kilka akcji jednego obiektu w jednym małym przycisku, żeby wiersz listy nie był zapełniony przyciskami, a użytkownik widział także akcje, które są chwilowo niedostępne, wraz z powodem.
+
+## 2. Kiedy używać
+
+- Akcje serii wpisu cyklicznego (E02-S03): "Zakończ od miesiąca", "Zmień kwotę od miesiąca", "Usuń całkowicie". Każda z nich otwiera Dialog albo ConfirmDialog.
+- Wiersz tabeli lub karta z dwiema lub więcej akcjami drugorzędnymi, których nie warto pokazywać stale.
+- Gdy akcja jest niedostępna i użytkownik ma się dowiedzieć dlaczego (E02-Q15: "Usuń całkowicie" tylko dla serii bez miesięcy z przeszłości).
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Jedna akcja | przycisk (Button) z czasownikiem |
+| Główna akcja widoku ("Dodaj wpis") | Button `default`, widoczny, nie w menu |
+| Wybór wartości (miesiąc, typ konta) | Select |
+| Nawigacja między stronami | TextLink albo nawigacja strony |
+| Wybór jednej z kilku opcji formularza | RadioGroup |
+| Informacja albo opis, który ma być widoczny od razu | tekst na stronie; Tooltip i Popover nie są zbudowane (patrz "Czego brakuje") |
+| Akcja, bez której użytkownik nie skończy zadania | widoczny przycisk; menu ukrywa akcje |
+
+## 4. Anatomia
+
+1. Wyzwalacz (wymagany): Button `ghost` o rozmiarze `icon` (36 × 36 px) z ikoną trzech kropek (`lucide-react/icons/ellipsis`, `aria-hidden`); nazwę dostępną przekazuje aplikacja w `triggerLabel`.
+2. Zawartość menu (wymagana): `--card`, ramka `--border`, `rounded-card`, bez cienia (A2), wewnętrzny odstęp `--space-1`.
+3. Pozycje (co najmniej jedna): wysokość co najmniej 36 px, etykieta 14 px; zablokowana pozycja ma pod etykietą widoczny powód (opcjonalny, tylko dla `disabled`).
+4. Separator (opcjonalny, automatyczny): ramka `--border` 1 px przed pierwszą pozycją destrukcyjną, gdy poprzedza ją zwykła.
+
+<Canvas of={Stories.Open} />
+
+## 5. Warianty
+
+Jedna postać; różnią się pozycje przekazane w `items`:
+
+| Pozycja | Kiedy wybrać |
+|---|---|
+| zwykła | akcja bezpieczna albo odwracalna ("Zmień kwotę od miesiąca") |
+| destrukcyjna (`destructive`) | akcja nieodwracalna ("Usuń całkowicie"); kolor `--destructive` i separator; po wyborze zwykle ConfirmDialog |
+| zablokowana (`disabled` z `disabledReason`) | akcja istnieje, ale jest teraz niedostępna; powód jest tekstem pod etykietą |
+
+Pozycje destrukcyjne ustaw na końcu listy: separator pojawia się przed pierwszą z nich. Wyrównanie zawartości względem przycisku (`align`): `end` domyślnie (przycisk na prawym brzegu wiersza), `start` dla przycisku przy lewej krawędzi. Źródło: decyzje właściciela, 2026-11-18; separator i wyrównanie to **propozycje**.
+
+## 6. Stany
+
+| Stan | Wygląd |
+|---|---|
+| Zamknięte | tylko przycisk z trzema kropkami (`aria-expanded="false"`) |
+| Otwarte | zawartość pod przyciskiem, odsunięta o 4 px; `aria-expanded="true"` |
+| Najechanie pozycji | tło `--muted` (`--muted-hover` nie jest używany w menu) |
+| Fokus pozycji | to samo tło `--muted` (Radix przenosi prawdziwy fokus na pozycję) oraz globalny obrys 2 px, przesunięty do wnętrza pozycji (ujemny odstęp), żeby nie wychodził poza ramkę menu |
+| Wciśnięty | brak osobnego wyglądu: pozycja wykonuje akcję i menu się zamyka |
+| Zablokowany | tekst `--muted-foreground` (7,56:1 na `--card`), kursor `not-allowed`, pod etykietą widoczny powód |
+| Destrukcyjny | tekst `--destructive` na `--card` 6,47:1 (na zaznaczeniu `--muted` 5,23:1) |
+| Ładowanie, błąd, wybrany | nie dotyczą: menu nie ładuje się, a wynik akcji pokazuje okno albo komunikat aplikacji |
+
+Najechanie i fokus pozycji są pokazane jako zamrożony podgląd (`data-preview-state`, tylko w dokumentacji).
+
+<Canvas of={Stories.ItemStates} />
+
+### Jak użytkownik dowie się, dlaczego pozycja jest niedostępna
+
+Pozycja zablokowana jest **widoczna** i ma pod etykietą powód zapisany tekstem, np. "Seria ma miesiące w przeszłości, użyj „Zakończ od miesiąca”." (E02-Q15). Powód nie jest tylko kolorem ani podpowiedzią po najechaniu (Tooltip nie istnieje, A3). Wymaga go typ: `disabled: true` bez `disabledReason` się nie skompiluje.
+
+<Canvas of={Stories.DisabledItemWithReason} />
+
+Wybór świadomy, **propozycja** (do zatwierdzenia): pozycja zablokowana nie używa atrybutu `disabled` z Radixa, tylko `aria-disabled="true"` i `data-disabled`. Radix z `disabled` pomija pozycję przy strzałkach, więc czytnik ekranu użytkownika klawiatury nigdy by do niej nie dotarł i nie przeczytał powodu. Z `aria-disabled` pozycja dostaje fokus, czytnik ogłasza ją jako niedostępną razem z powodem (tekst powodu jest częścią nazwy dostępnej), a wybór (kliknięcie, Enter, spacja) jest ignorowany i menu zostaje otwarte. Zgodne z APG (pozycje wyłączone mogą być fokusowalne).
+
+## 7. Zachowanie i dostępność
+
+- Otwarcie: kliknięcie lub dotknięcie przycisku, `Enter`, spacja albo strzałka w dół (fokus na pierwszej pozycji); strzałka w górę otwiera z fokusem na ostatniej.
+- W otwartym menu: strzałki w górę i w dół przenoszą fokus (bez zawijania z ostatniej na pierwszą, domyślne zachowanie Radixa), `Home` i `End` skaczą na pierwszą i ostatnią pozycję, wpisanie litery przenosi na pozycję zaczynającą się od niej (wyszukiwanie po pierwszych literach, wbudowane w Radix). `Enter` i spacja wybierają pozycję. `Tab` nie przenosi fokusu poza menu (Radix go blokuje); wyjściem jest `Escape`.
+- `Escape` zamyka menu bez wykonania akcji; kliknięcie poza menu też je zamyka.
+- Role: przycisk ma `aria-haspopup="menu"` i `aria-expanded`; zawartość ma rolę `menu` nazwaną przez przycisk (`aria-labelledby`); pozycje to `menuitem`; separator to `separator`.
+- Fokus wraca na przycisk po zamknięciu (Escape, wybór, kliknięcie poza menu). Gdy pozycja otwiera Dialog albo ConfirmDialog, akcja pozycji jest uruchamiana dopiero po zamknięciu menu i powrocie fokusu na przycisk, dzięki czemu okno zapamiętuje przycisk jako element, na który wróci po zamknięciu. Bez tego fokus po oknie trafiał na `body`.
+- Menu jest niemodalne (`modal={false}`): strona za nim nie jest wygaszana dla czytnika ekranu ani blokowana, a menu zamyka się przy kliknięciu poza nim. **Propozycja:** wybór z powodu testów dostępności (modalne menu ukrywa przycisk przez `aria-hidden`, który zostaje fokusowalny, i narzędzie axe zgłasza to jako błąd) oraz współpracy z oknami otwieranymi z pozycji.
+- Obrys fokusu: obowiązuje globalna reguła 2 px (`--ring`) ze `styles.css`; w menu odstęp obrysu jest ujemny (`-outline-offset-2`), bo domyślny odstęp +2 px wychodziłby poza ramkę menu i na sąsiednie pozycje. Obrys pojawia się tylko przy fokusie klawiaturą (`:focus-visible`); przy myszy widać samo tło `--muted`. **Propozycja:** odstęp ujemny w pozycjach menu.
+- Czytnik ekranu: przycisk niesie nazwę z `triggerLabel` oraz `aria-haspopup="menu"` i `aria-expanded`; pozycja zablokowana ma `aria-disabled="true"`, a powód jest częścią jej nazwy dostępnej. Ogłoszenia konkretnego czytnika ekranu nie były sprawdzane.
+- Cele: przycisk 36 × 36 px, pozycje co najmniej 36 px wysokości (WCAG 2.5.8 wymaga 24 px; 36 px jak kontrolki systemu, na dotyk wygodniej).
+- Kontrast: `--card-foreground` na `--card` 14,68:1, `--destructive` na `--card` 6,47:1, `--muted-foreground` na `--card` 7,56:1; ramka `--border` 1,47:1 jest dekoracją (jak ramka karty), więc zawartość menu odróżnia od strony także kolor tła `--card` i układ.
+- Ruch: bez animacji otwierania (R01.6).
+
+## 8. Treść
+
+- **Przycisk (`triggerLabel`)**: nazwa dostępna wskazuje obiekt: "Akcje serii „Czynsz (przykład)”", "Akcje wpisu Internet (przykład)". Nie "Menu" ani "Więcej" (czytnik ekranu w liście kilku wierszy nie odróżni przycisków).
+- **Pozycje**: czasownik i obiekt albo okoliczność: "Zakończ od miesiąca", "Zmień kwotę od miesiąca", "Usuń całkowicie". Do 3-4 słów, bez kropki. Pozycja, która otwiera okno potwierdzenia, nie ma "…" ani "?".
+- **Powód zablokowania (`disabledReason`)**: co jest przyczyną i co zrobić zamiast: "Seria ma miesiące w przeszłości, użyj „Zakończ od miesiąca”." Jedno zdanie.
+- Długa etykieta zawija się (`wrap-anywhere`), menu nie przekracza szerokości ekranu minus margines 16 px. W dłuższym języku menu rośnie szerzej do tego limitu, potem zawija tekst.
+- Teksty przekazuje aplikacja (komponent nie ma żadnego własnego tekstu). Dane w przykładach oznaczaj "(przykład)" (A5).
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | menu ma margines 16 px od krawędzi ekranu (`collisionPadding`), długie etykiety i powody zawijają się; Radix przesuwa menu, gdy brakuje miejsca pod przyciskiem |
+| 768 px | menu pod przyciskiem, szerokość według najdłuższej pozycji |
+| 1440 px | bez zmian |
+
+<Canvas of={Stories.LongLabelsNarrowScreen} />
+
+Menu w wierszu tabeli wpisów:
+
+<Canvas of={Stories.InTableRow} />
+
+## 10. API
+
+`Menu`:
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `triggerLabel` | `string` | | nazwa dostępna przycisku z trzema kropkami; wskazuje obiekt (wymagany) |
+| `items` | `MenuItem[]` | | pozycje w kolejności wyświetlania (wymagane) |
+| `align` | `'start' \| 'end'` | `'end'` | wyrównanie menu względem przycisku |
+| `defaultOpen` | `boolean` | `false` | otwarte od początku; tylko do dokumentacji i testów, w aplikacji menu otwiera użytkownik |
+
+`MenuItem` (unia dwóch postaci):
+
+| Pole | Typ | Opis |
+|---|---|---|
+| `id` | `string` | stały identyfikator pozycji (klucz) |
+| `label` | `string` | etykieta pozycji |
+| `destructive` | `boolean` | pozycja nieodwracalna: kolor `--destructive`, separator przed pierwszą taką pozycją |
+| `onSelect` | `() => void` | akcja po wyborze (wymagana, gdy pozycja nie jest zablokowana); wywoływana po zamknięciu menu i powrocie fokusu na przycisk |
+| `disabled` | `true` | pozycja zablokowana (wtedy `disabledReason` jest wymagany, a `onSelect` niedozwolony) |
+| `disabledReason` | `string` | widoczny powód zablokowania |
+
+Komponent nie przyjmuje `className` ani innych atrybutów: wygląd jest jeden (patrz "Czego brakuje").
+
+## 11. Kod
+
+Minimalny przykład:
+
+```tsx
+import { Menu } from '@aitl/ui';
+
+<Menu
+  triggerLabel="Akcje wpisu Internet"
+  items={[{ id: 'change', label: 'Zmień kwotę od miesiąca', onSelect: openChangeAmount }]}
+/>;
+```
+
+Typowy przykład z produktu, akcje serii (E02-S03) z oknem potwierdzenia dla pozycji nieodwracalnych i powodem przy niedostępnym usunięciu (E02-Q15):
+
+```tsx
+import { ConfirmDialog, Menu, type MenuItem } from '@aitl/ui';
+
+const [dialog, setDialog] = useState<'end' | 'delete' | null>(null);
+
+const deleteItem: MenuItem = series.hasPastMonths
+  ? {
+      id: 'delete',
+      label: 'Usuń całkowicie',
+      destructive: true,
+      disabled: true,
+      disabledReason: 'Seria ma miesiące w przeszłości, użyj „Zakończ od miesiąca”.',
+    }
+  : { id: 'delete', label: 'Usuń całkowicie', destructive: true, onSelect: () => setDialog('delete') };
+
+<Menu
+  triggerLabel={`Akcje serii ${series.name}`}
+  items={[
+    { id: 'end', label: 'Zakończ od miesiąca', onSelect: () => setDialog('end') },
+    { id: 'change', label: 'Zmień kwotę od miesiąca', onSelect: openChangeAmount },
+    deleteItem,
+  ]}
+/>
+<ConfirmDialog
+  open={dialog === 'delete'}
+  onOpenChange={() => setDialog(null)}
+  title={`Usunąć całkowicie serię „${series.name}”?`}
+  description="Seria zacznie się dopiero w przyszłości, więc żaden dotychczasowy wynik się nie zmieni. Tej operacji nie można cofnąć."
+  confirmLabel="Usuń serię"
+  cancelLabel="Anuluj"
+  onConfirm={deleteSeries}
+/>;
+```
+
+Pełna kompozycja z oknami (Dialog, dwa ConfirmDialog) i testem powrotu fokusu:
+
+<Canvas of={Stories.SeriesActionsComposition} />
+
+## 12. Dobrze i źle
+
+<Canvas of={Stories.GoodAndBad} />
+
+## 13. Powiązane
+
+- Z czym się go myli: Select (wybór wartości do pola formularza, nie akcja), Dialog i ConfirmDialog (okna otwierane z pozycji menu), Button (pojedyncza akcja), TextLink (przejście), Popover i Tooltip (niezbudowane).
+- Występuje we wzorcach: akcje serii wpisu (E02-S03), wiersz tabeli wpisów z akcjami, potwierdzenie usunięcia (etap 3).
+
+## Czego brakuje
+
+- **Tooltip i Popover**: nie istnieją, dlatego powód zablokowania jest tekstem w pozycji.
+- **Pozycje z ikonami, skrótami klawiszowymi, pola wyboru i podmenu**: nie są zbudowane; ekrany ich nie potrzebują.
+- **Dostosowanie wyglądu** (`className`, wariant wyzwalacza `secondary`): brak; jedyny wyzwalacz to ikona na tle strony. Przycisk `ghost` nie ma ramki, więc na dużym ekranie jego rozpoznawalność zależy od ikony; sprawdzić z użytkownikami.
+- **Zawijanie fokusu strzałkami** z ostatniej pozycji na pierwszą: domyślnie wyłączone (zachowanie Radixa), bez decyzji.
+- **Ciemny motyw**: czeka na L3.
+- **Najechanie na pozycję zablokowaną**: tło `--muted` jak dla zwykłej; bez osobnej decyzji.
+- Zachowanie na dotyk sprawdzone tylko w Chromium (kliknięcie); rzeczywiste urządzenia dotykowe i Safari nie były sprawdzane.
+- Wszystkie oznaczone wyżej **propozycje** (separator, niemodalność, ujemny odstęp obrysu, `aria-disabled` zamiast `disabled`, szerokość powodu) czekają na akceptację właściciela.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: otwarcie kliknięciem, `Enter`, spacją i strzałką w dół (fokus na pierwszej pozycji); role `menu` i `menuitem` z nazwą z przycisku; strzałki, `Home`, `End` i wpisanie litery; `Escape` zamyka bez akcji i oddaje fokus przyciskowi; wybór wywołuje akcję raz (mysz i klawiatura); pozycja zablokowana ma powód w tekście i nazwie, nie daje się aktywować, a menu zostaje otwarte; kolory z tokenów (`--card`, `--border`, `--destructive`, `--muted`), brak cienia, przycisk i pozycje co najmniej 36 px; przy 320 px menu mieści się w ekranie z marginesem; pozycje otwierające ConfirmDialog i Dialog oddają fokus przyciskowi po zamknięciu okna; "Usuń całkowicie" prowadzi do potwierdzenia i wywołuje akcję raz.
