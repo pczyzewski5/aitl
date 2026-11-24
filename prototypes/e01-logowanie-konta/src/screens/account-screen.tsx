@@ -1,5 +1,5 @@
 import { Alert, AlertDescription, AlertTitle, TextLink } from '@aitl/ui';
-import { DEMO_USERS } from '../fixtures';
+import { DEMO_USERS, accountsOf } from '../fixtures';
 import { navigateTo } from '../navigation';
 import { SessionShell } from '../session-shell';
 import { logOut, useScenario } from '../store';
@@ -10,9 +10,9 @@ function logOutAndRedirect(): void {
 }
 
 function AccountScreen() {
-  const { sessionUserId, openedAccountId } = useScenario();
+  const { sessionUserId, openedAccountId, accountOptions } = useScenario();
   const user = sessionUserId === null ? null : DEMO_USERS[sessionUserId];
-  const account = user?.accounts.find((candidate) => candidate.id === openedAccountId);
+  const account = (user === null ? [] : accountsOf(user, accountOptions)).find((candidate) => candidate.id === openedAccountId);
 
   return (
     <SessionShell displayName={user?.displayName ?? ''} onLogout={logOutAndRedirect}>

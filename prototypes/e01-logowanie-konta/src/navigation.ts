@@ -18,7 +18,7 @@ export function isScreenId(value: unknown): value is ScreenId {
 
 export function resolveScreen(requested: ScreenId, state: ScenarioState): ScreenId {
   if (state.sessionUserId === null) {
-    return 's01';
+    return state.twoSessions && requested === 's02' ? 's02' : 's01';
   }
   if (requested === 's01') {
     return 's02';

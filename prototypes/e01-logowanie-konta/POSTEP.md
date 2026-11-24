@@ -6,7 +6,7 @@ Prompt i plan etapu 0 są poza repozytorium (scratchpad sesji); najważniejsze d
 
 - [x] Etap 0: plan (zatwierdzony przez właściciela wg rekomendacji).
 - [x] Etap 1: szkielet i ścieżka bez błędów (s01 -> s02 -> s03 -> wylogowanie).
-- [ ] Etap 2: wszystkie stany z mapy, konta demo z przełączaniem, bramki, scenariusze (błędy logowania, blokada, brak sieci, 500, sesja wygasła, lista: ładowanie/pusta/błąd, długa nazwa, dwa konta wspólne, dwie sesje obok siebie na s02, wskaźnik żądania konta po id).
+- [x] Etap 2: wszystkie stany z mapy, konta demo z przełączaniem, bramki, scenariusze (błędy logowania, blokada, brak sieci, 500, sesja wygasła, lista: ładowanie/pusta/błąd, długa nazwa, dwa konta wspólne, dwie sesje obok siebie na s02, wskaźnik żądania konta po id).
 - [ ] Etap 3: notatki przy ekranach, README (konta demo, scenariusze, "Ograniczenia symulacji"), rozszerzone testy, sprawdzenie 320/768/1440, ciemny motyw, klawiatura, każda kontrolka; jednorazowy skan tokenów na `src/`.
 
 ## Decyzje właściciela (obowiązują)
@@ -28,6 +28,20 @@ Prompt i plan etapu 0 są poza repozytorium (scratchpad sesji); najważniejsze d
 - Bramki (P5): bez sesji s02/s03 przekierowują na s01; zalogowany na s01 trafia na s02. Bramka przechwytuje kliknięcia w linki i pasek (przed silnikiem) oraz zmianę ekranu (hash, Back).
 - Testy: `src/navigation.test.tsx` (4 testy). Sprawdzono typecheck, build, testy, lint, `check:tokens` i ręczne przejście w Chrome (patrz opis PR).
 
+## Etap 2: co zbudowano
+
+- Panel "Scenariusze (symulacja)" (osobno od nawigacji produktu, pod paskiem przeglądu): kto się loguje, wynik logowania (poprawne / złe hasło / nieznany e-mail / blokada / brak sieci / 500), lista kont (wczytane / ładowanie zatrzymane / pusta / błąd), nazwa konta (krótka / bardzo długa), liczba kont wspólnych (1 / 2), dwie sesje naraz, wygaszanie sesji (30 dni nieaktywności / 90 dni od logowania), żądanie konta po id (własne 200 / cudze 403 / bez sesji 401, tylko wskaźnik tekstowy), linia statusu (zalogowany, sesja, próby 0 z 5).
+- Logika: `store.ts` (stan scenariuszy, `attemptLogin`), `api-probe.ts`, `account-list-view.tsx` (lista dla s02 i dla ramek), `fixtures.ts` (`accountsOf`). Blokada: 5. nieudana próba zwraca blokadę, kolejne próby też (nawet z poprawnymi danymi) do wylogowania lub Resetu; wynik "Zbyt wiele prób" zwraca blokadę wprost, bez licznika. Czas statyczny 900 s (LDS5).
+- Błąd logowania przenosi fokus na pole e-mail (ZAŁOŻENIE A-P6 z szarego prototypu, `LoginForm` tego nie robi); tekst 500 to ZAŁOŻENIE A-P1 (LDS4), wstawiony jako komunikat "brak sieci".
+- Wygaśnięcie sesji i wylogowanie: zwykłe s01 bez komunikatu (P4). Bramki bez zmian (+ s02 dostępne bez sesji tylko w widoku dwóch sesji).
+- "Dwie sesje naraz": dwie ramki obok siebie na s02 (Paweł, Żona), niezależne wylogowania; linki kont w tym widoku prowadzą w to samo miejsce (opisane na ekranie).
+- "Ponów" na liście kończy się powodzeniem po 0,6 s (scenariusz wraca na "wczytane", jak w szarym prototypie).
+- Testy: `src/states.test.tsx` (27 testów) + 4 z etapu 1.
+
+## Do zrobienia w etapie 3
+
+Notatki przy ekranach (historie, symulacje, czego nie rozstrzyga), README z kontami demo i "Ograniczenia symulacji" (częściowo już jest), sprawdzenie 320/768/1440 (panel scenariuszy nie był oglądany w wąskim oknie), ciemny motyw, klawiatura, każda kontrolka, skan tokenów na `src/`. Nie sprawdzono jeszcze: widok stosu bez prezentacji, tryb komentarzy z panelem scenariuszy.
+
 ## Znane ograniczenia i pułapki
 
 - Przycisk "Back" silnika po bramce może krążyć między s01 a s02 (silnik zapisuje historię i nie wolno go edytować).
@@ -36,4 +50,4 @@ Prompt i plan etapu 0 są poza repozytorium (scratchpad sesji); najważniejsze d
 
 ## Luki DS (z mapy i nowe)
 
-LDS1/LDS2 (pasek sesji lokalny: `SessionShell`), LDS4 (500, etap 2), LDS6 (ciemny motyw bez wartości: przełącznik działa, wygląd taki sam), N1 (dwie sesje obok siebie, etap 2), N2 (`AppShell` zakłada pełną stronę: nadpisano `min-height` przez CSS), N3 (brak kontrolek paska przeglądu w DS: klasy `.btn`, `.segmented`, `.toast` w `src/chrome.css`; brak tokenu ostrzeżenia dla `--status-warning-*` w moście).
+LDS1/LDS2 (pasek sesji lokalny: `SessionShell`), LDS4 (500: tekst z szarego prototypu przez nadpisanie komunikatu sieci, założenie), LDS6 (ciemny motyw bez wartości: przełącznik działa, wygląd taki sam), N1 (dwie sesje obok siebie: siatka z tokenów w `home-screen.tsx`), N2 (`AppShell` zakłada pełną stronę: nadpisano `min-height` przez CSS), N3 (brak kontrolek paska przeglądu w DS: klasy `.btn`, `.segmented`, `.toast` w `src/chrome.css`; brak tokenu ostrzeżenia dla `--status-warning-*` w moście).
