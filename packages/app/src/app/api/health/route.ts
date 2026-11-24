@@ -1,5 +1,7 @@
+import { createApiHandler } from '@aitl/core';
+
 export const dynamic = 'force-dynamic';
 
-export function GET() {
-  return Response.json({ ok: true, data: { status: 'up' } });
-}
+const apiHandler = createApiHandler(() => ({}));
+
+export const GET = apiHandler(() => ({ status: 'up' }));

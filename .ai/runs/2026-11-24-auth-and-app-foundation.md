@@ -36,6 +36,15 @@ Do zrobienia: PR i uzupełnienie wiersza PR-1 w track.md po merge.
 PR #64; wiersz PR-1 w track.md (in-progress, wynik SB), lekcja o `register()` w Next 16 z wpisem w indeksie.
 Do zrobienia: zielone checki, merge, uzupełnienie SHA w track.md.
 
+## 2026-11-24 (PR-2, krok 1.2, commit 1)
+Dodane `core/http/apiHandler.ts` (`createApiHandler(createScope, log)` mapuje `AppError` na kopertę, nieznany błąd na 500 `internal` bez szczegółów z wpisem w logu); `GET /api/health` przepięte na handler z tymczasowym pustym scope (do czasu kontenera z 1.3). Unity 100%, koperta health bez zmian.
+Decyzje: kod `internal` jako stałe w `apiHandler.ts` (bez `InternalError`), `Retry-After` poza zakresem (pole `retryAfterSeconds` wejdzie z `TooManyRequestsError` w 2.1).
+Do zrobienia: SB-I (integracyjne, audit), PR, wiersz w track.md.
+
+## 2026-11-24 (PR-2, krok 1.2, commit 2)
+PR #67; wiersz PR-2 w track.md (in-progress, wynik SB). Brak nowej pulapki, lekcji nie dodano.
+Do zrobienia: zielone checki, merge, uzupelnienie SHA w track.md.
+
 ## 2026-11-24 (track.md po merge PR-1 i instalatora)
 Wiersze PR-1 (#64, c05b1bc) i PR-#2 (#65, a4f4a6f) oznaczone jako done.
 Decyzja właściciela: `process.exit(1)` w `register()` nie dodajemy (serwer bez konfiguracji zwraca 500).
