@@ -26,3 +26,7 @@ Do zrobienia: test integracyjny startu bez DATABASE_URL, siatka SB-I, PR.
 Test integracyjny `startup-env.test.ts` i pomocnik `startAppWithInvalidEnv` w `app-server.ts`: start bez DATABASE_URL loguje czytelny błąd, health zwraca 500. Siatka SB-I zielona lokalnie.
 Pułapka: Next 16 nie kończy procesu po błędzie w `register()` (patrz poprzedni wpis); test sprawdza komunikat i 500, nie kod wyjścia.
 Do zrobienia: PR i uzupełnienie wiersza PR-1 w track.md po merge.
+
+## 2026-11-24 (PR-1, krok 1.1, commit 3)
+PR #64; wiersz PR-1 w track.md (in-progress, wynik SB), lekcja o `register()` w Next 16 z wpisem w indeksie.
+Do zrobienia: zielone checki, merge, uzupełnienie SHA w track.md.
