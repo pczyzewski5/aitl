@@ -251,3 +251,7 @@ Do zrobienia: checkboxy monorepo-migration, track.md, PR.
 ## 2026-11-24 (PR-12, close-out, commit 4)
 `2026-11-02-monorepo-migration.md`: odhaczone tylko to, co istnieje w kodzie: Faza 4 (kontener Awilix, rejestracje `core`/`db`, test `container.test.ts`), w 4b `apiHandler`, `auth`, `env`, `logger` oraz w Fazie 5 Tailwind w `app` (#71, jeszcze niezmergowany). Linie rozdzielone, bo `makeCrudRoute`, `ui/backend/{tables}` i shadcn dla panelu admina nie powstały i zostają niezaznaczone.
 Do zrobienia: track.md, PR.
+
+## 2026-11-24 (PR-12, close-out, commit 5)
+track.md: numery PR-10a (#74) i PR-10b (#71), nowy wiersz PR-3b (#73, poprawki po review Fazy 1, nieujęty wcześniej w tabeli) i wiersz PR-12 (in-progress, bez SHA). Statusy wszystkich PR-ów z `gh pr list`: zmergowane tylko PR-1, PR-2, PR-3 i instalator #2; reszta otwarta. SB-A zielone lokalnie (typecheck, lint, coverage 100%, build, audit 0 podatności).
+Status dziennika zostaje `in-progress`: `done` dopiero po merge wszystkich PR-ów. Do zrobienia: PR, numer PR-12 w track.md, po merge stosu SHA i status done.
