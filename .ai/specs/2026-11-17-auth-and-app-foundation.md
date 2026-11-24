@@ -130,6 +130,7 @@ Koperta wg `BACKWARD_COMPATIBILITY.md` §2; body parsowane Zodem z `core/validat
 
 - `POST /api/auth/login` (publiczna): `{ email, password }` -> 200 `{ ok:true, data:{ user:{ id, email, displayName } } }` + cookie. Błędy: 400 `validation_error`, 401 `invalid_credentials` (ten sam komunikat dla nieznanego e-maila i złego hasła), 429 `too_many_attempts` z `error.retryAfterSeconds` (nowe pole koperty błędu, zmiana kontraktu zapisywana w `BACKWARD_COMPATIBILITY.md` w Step 2.4b) i nagłówkiem `Retry-After`.
 - `POST /api/auth/logout` (publiczna, tylko CSRF): usuwa sesję po tokenie, jeśli istnieje; zawsze czyści cookie i zwraca 200.
+- `GET /api/auth/me` (sesja): `{ ok:true, data:{ user:{ id, email, displayName } } }`; 401 bez sesji (dodane w Step 2.6c: nazwa w pasku, Q25, musi przetrwać odświeżenie strony).
 - `GET /api/bank-accounts` (sesja): `{ ok:true, data:{ bankAccounts:[{ id, type, name }] } }` tylko z członkostwa, w kolejności: konta wspólne przed osobistymi, potem alfabetycznie po nazwie (Q26).
 - `GET /api/bank-accounts/{id}` (sesja): `{ ok:true, data:{ id, type, name } }`; cudze konto -> 403 przez `assertMemberOfBankAccount` (wzorzec dla E02/E03).
 - Mutujące route wymagają nagłówka CSRF, inaczej 403. Strony chronione czytają `await cookies()` (to czyni je dynamicznymi, bez dodatkowej konfiguracji) i przekierowują na `/login`.

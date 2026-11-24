@@ -48,6 +48,10 @@ export class InMemoryUserRepository implements UserRepository {
     return this.store.users.find((user) => user.email === email) ?? null;
   }
 
+  async findById(id: string): Promise<UserRecord | null> {
+    return this.store.users.find((user) => user.id === id) ?? null;
+  }
+
   async create(user: NewUser): Promise<UserRecord> {
     const record = { id: randomUUID(), ...user };
     this.store.users.push(record);

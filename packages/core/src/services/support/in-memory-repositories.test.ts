@@ -37,6 +37,8 @@ describe('in-memory repositories', () => {
 
     expect(await users.findByEmail(email)).toEqual(created);
     expect(await users.findByEmail(`${randomText()}@example.test`)).toBeNull();
+    expect(await users.findById(created.id)).toEqual(created);
+    expect(await users.findById(randomText())).toBeNull();
   });
 
   it('finds bank accounts by id, shared name and personal owner', async () => {

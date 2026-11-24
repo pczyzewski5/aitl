@@ -202,3 +202,7 @@ Do zrobienia: zielone checki, po merge #70 przestawić bazę na `main`, merge, S
 `app`: `postcss.config.mjs` (`@tailwindcss/postcss`), `src/app/globals.css` (import `@aitl/ui/src/styles.css` + `@source` na `ui/src`), import w root layout, pinowane `tailwindcss`/`@tailwindcss/postcss` 4.3.5; test integracyjny: strona linkuje CSS z tokenami i klasami `ui`.
 Pułapka: bez `@source` Tailwind nie widzi klas z `packages/ui` (poza bazą skanowania `app`); lekcja dodana. `packages/ui` bez zmian.
 Do zrobienia: PR, wiersz PR-10b w track.md.
+
+## 2026-11-24 (PR-10c, krok 2.6c, commit 1)
+Strony `/login` i `/` w `app` (redirecty po stronie serwera przez `loadCurrentUser`, ekrany klienckie z `apiCall`, adapter wyniku na `LoginResult`, fokus na h1 w odroczonym efekcie). Dodana route `GET /api/auth/me` i `AuthService.getCurrentUser` (nazwa w pasku musi przetrwać odświeżenie; opis w `BACKWARD_COMPATIBILITY.md`). Testy jednostkowe 100% i integracyjne (redirecty, nazwa, dwie sesje, Q33).
+Do zrobienia: weryfikacja w przeglądarce, SB-U, PR, wiersz PR-10c w track.md.

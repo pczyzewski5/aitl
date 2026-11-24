@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { InvalidCredentialsError, TooManyRequestsError } from '../../http/errors';
+import { InvalidCredentialsError, TooManyRequestsError, UnauthorizedError } from '../../http/errors';
 import {
   FakePasswordHasher,
   InMemoryLoginThrottleRepository,
@@ -8,7 +8,7 @@ import {
   InMemoryStore,
   InMemoryUserRepository,
 } from '../support/in-memory-repositories';
-import { AuthService, INVALID_CREDENTIALS_MESSAGE } from './auth.service';
+import { AuthService, INVALID_CREDENTIALS_MESSAGE, UNAUTHENTICATED_USER_MESSAGE } from './auth.service';
 import { LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL, LoginThrottleService } from './login-throttle.service';
 import { SessionService } from './session.service';
 import { SessionTokens } from './session-tokens';
@@ -137,6 +137,22 @@ describe('AuthService', () => {
       await sut.logout(null);
 
       expect(store.sessions).toHaveLength(1);
+    });
+  });
+
+  describe('getCurrentUser', () => {
+    it('returns the user without the hash', async () => {
+      const { user } = await sut.login({ email, password }, clientIp);
+
+      const actual = await sut.getCurrentUser(user.id);
+
+      expect(actual).toEqual({ id: user.id, email, displayName: user.displayName });
+    });
+
+    it('rejects an id of no user as unauthenticated', async () => {
+      const actual = sut.getCurrentUser(randomText());
+
+      await expect(actual).rejects.toThrow(new UnauthorizedError(UNAUTHENTICATED_USER_MESSAGE));
     });
   });
 });

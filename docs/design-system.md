@@ -158,4 +158,5 @@ npm run typecheck && npm run lint && npm run test:coverage && npm run build
 | E03 Ile zostanie w miesiącu | "Ekrany / E03": przegląd miesiąca (ta sama strona co E02) | `AccountRemainderCard`, `MonthSwitcher` |
 
 - **[REGUŁA]** Stan ekranu E02 i E03 jest w adresie (`?account=...&month=RRRR-MM`); błędne wartości wracają do domyślnych.
-- **[LUKA]** Strony w `packages/app` korzystające z tych ekranów powstaną w etapie 5; do tego czasu ekrany istnieją tylko w Storybooku.
+- **[REGUŁA]** E01 jest podpięty w `packages/app`: `/login` (`LoginForm`, wynik `apiCall` mapowany na `LoginResult`) i `/` (`AppShell` z `displayName`, `BankAccountList` z `headingLevel="h1"`, link konta `buildAccountHref`). Fokus na h1 po zalogowaniu i wylogowaniu ustawia `app` w odroczonym efekcie.
+- **[LUKA]** Strony E02 i E03 w `packages/app` powstaną w etapie 5; do tego czasu ekrany E02 i E03 istnieją tylko w Storybooku.
