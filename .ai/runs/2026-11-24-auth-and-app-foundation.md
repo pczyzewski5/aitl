@@ -152,3 +152,7 @@ Do zrobienia: PR, wiersz PR-7 w track.md, zielone checki.
 ## 2026-11-24 (PR-7, krok 2.4a, commit 5)
 PR #77 (base `main`, leży na stosie #73, #70, #72, #75); wiersz PR-7 w track.md (in-progress, wynik SB-I).
 Do zrobienia: zielone checki, merge po #73/#70/#72/#75, SHA w track.md.
+
+## 2026-11-24 (PR-7, sprzątanie snapshotu migracji)
+Usunięty przypadkowo wersjonowany `.snapshot-migrations_<hash>.json` (artefakt testów integracyjnych) i dodany wzorzec do `.gitignore`; `.snapshot-aitl.json` zostaje.
+Do zrobienia: nic w tym zakresie.
