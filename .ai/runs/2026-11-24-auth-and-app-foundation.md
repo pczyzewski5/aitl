@@ -117,3 +117,8 @@ Do zrobienia: zielone checki, merge, SHA w track.md.
 ## 2026-11-24 (PR-6, krok 2.3, commit 1)
 Baza: stos #73 + #70 + #72 (merge'e; konflikty tylko w dzienniku i track.md, a w testach `apiHandler` #70 dostosowane do `(request, context)` z #73). Port `PasswordHasher` (`hash`, `verify`, `verifyAgainstDecoy`), adapter `Argon2PasswordHasher` w `app/src/adapters` (parametry z konstruktora, produkcyjne 19456 KiB / 2 / 1, wabik liczony raz), porty repozytoriów i `ProvisioningUnitOfWork`, `BankAccountService` (`listForUser`, `addMember`), `UserProvisioningService`, regula `assertCanBeMember` (niezmiennik konta osobistego).
 Do zrobienia: adaptery MikroORM w `db`, rejestracje w kontenerze, test integracyjny.
+
+## 2026-11-24 (PR-6, krok 2.3, commit 2)
+Adaptery MikroORM w `db/src/repositories/{users,bank-accounts}` (user, konto, członkostwo) oraz `MikroOrmProvisioningUnitOfWork`: transakcja przez `em.transactional`, repozytoria związane z transakcyjnym EM (fork nie dziedziczy kontekstu transakcji, więc nie wolno użyć repozytoriów spoza callbacka).
+Testy: unity z fałszywym EntityManager i integracyjne na Postgresie (`tests/integration/repositories.test.ts`: unikalność konta osobistego, idempotencja, rollback całego provisioningu).
+Do zrobienia: rejestracje w kontenerze i test integracyjny z prawdziwym argon2.

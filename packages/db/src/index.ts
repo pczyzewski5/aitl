@@ -8,3 +8,7 @@ export * from './entities';
 export * from './entities/base.entity';
 export * from './orm-config';
 export * from './orm-provider';
+export * from './repositories/bank-accounts/mikro-orm-bank-account.repository';
+export * from './repositories/bank-accounts/mikro-orm-bank-account-membership.repository';
+export * from './repositories/users/mikro-orm-provisioning-unit-of-work';
+export * from './repositories/users/mikro-orm-user.repository';
