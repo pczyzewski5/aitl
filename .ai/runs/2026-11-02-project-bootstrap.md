@@ -179,3 +179,7 @@ Gaps found between the E02 spec and the UI contract: `POST` has no `paid`, the l
 
 ## 2026-11-18 (E02 spec: effective day of a recurring entry)
 The entries list response now documents `dayOfMonth` as the effective day in the requested month (clamped to the month length, the same day the list sorts by), in the API contract, the Step 3.1 scope and tests, and the UI/UX note; the entries table shows that day unchanged. Wording of GitHub issue #14 is left for the owner to update.
+
+## 2026-11-24 (E02 spec: paid at creation, updatedAt in the list)
+Spec gaps found by the entry form: `POST .../entries` now accepts `paid` (expenses only, applies to the `occurredOn` month) and list items carry `updatedAt` for `expectedUpdatedAt`; `seriesStartMonth`/`seriesEndMonth` were already in the list contract.
+Left: issue #14/#15 text updated on GitHub (not part of this commit); implementation in Steps 3.1 and 4.1.
