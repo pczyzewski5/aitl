@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { HOME_PATH } from '../../routes';
 import { LoginScreen } from './login-screen';
-import LoginPage from './page';
+import LoginPage, { metadata } from './page';
 
 const mocks = vi.hoisted(() => ({
   loadCurrentUser: vi.fn(),
@@ -20,6 +20,10 @@ describe('LoginPage', () => {
   beforeEach(() => {
     mocks.loadCurrentUser.mockReset();
     mocks.redirect.mockClear();
+  });
+
+  it('declares a page title that tells it apart from other pages', () => {
+    expect(metadata.title).toBe('Logowanie - AITL');
   });
 
   it('renders the login screen without a signed-in user', async () => {

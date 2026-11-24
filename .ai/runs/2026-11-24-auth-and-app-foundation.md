@@ -267,3 +267,7 @@ Do zrobienia: m3, nity.
 ## 2026-11-24 (poprawki po przegladzie Fazy 2, m3)
 Ryzyko `TRUSTED_PROXY_HOPS=0` dopisane do BC §3 i do edge cases specu: przy 0 kazdy znajacy e-mail blokuje konto pieciem blednych prob na 15 minut; zaakceptowane w Q15, do rozwazenia przed produkcja.
 Do zrobienia: nity.
+
+## 2026-11-24 (poprawki po przegladzie Fazy 2, nity)
+Haslo logowania `.max(1024)`, tytuly stron `/login` ("Logowanie - AITL") i `/` ("Konta - AITL"), nowa migracja `login_throttles_failures_check` (`CHECK (failures >= 0)`, up/down, test odrzucenia -1; test cofania migracji cofa teraz dwie). Pominiete: jawne `algorithm: Algorithm.Argon2id` (ambient `const enum` w `@node-rs/argon2` psuje typecheck przy `isolatedModules`, a domyslny algorytm to argon2id i pilnuje go test prefiksu `$argon2id$`).
+Do zrobienia: PR, checki.

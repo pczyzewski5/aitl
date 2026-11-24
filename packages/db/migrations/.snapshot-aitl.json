@@ -479,7 +479,14 @@
           "unique": false
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "login_throttles_failures_check",
+          "expression": "failures >= 0",
+          "definition": "CHECK ((failures >= 0))",
+          "columnName": "failures"
+        }
+      ],
       "triggers": [],
       "foreignKeys": {},
       "comment": null

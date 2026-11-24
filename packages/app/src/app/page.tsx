@@ -5,6 +5,8 @@ import { AccountsScreen } from './accounts-screen';
 
 export const dynamic = 'force-dynamic';
 
+export const metadata = { title: 'Konta - AITL' };
+
 export default async function HomePage() {
   const user = await loadCurrentUser();
   if (user === null) {
