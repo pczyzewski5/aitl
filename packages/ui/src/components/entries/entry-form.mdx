@@ -1,0 +1,192 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './entry-form.stories';
+
+<Meta of={Stories} />
+
+# EntryForm
+
+Formularz dodawania i edycji wpisu (wpływu albo wydatku) jednego konta bankowego, pokazywany w oknie modalnym (`Dialog`). Ten sam komponent obsługuje trzy postaci: **dodawanie**, **edycję wpisu jednorazowego** i **edycję opisu wpisu cyklicznego**. Komponent nie zna API: dostaje funkcję `onSubmit`, która zwraca wynik, a `app` zamienia kopertę błędu API na ten wynik. Źródło reguł: wzorzec formularza (PR O, "Wzorce / Formularz"), specyfikacja E02 (`.ai/specs/2026-11-17-entries-income-expenses.md`: walidacja, kontrakty `POST`, `PUT`, współbieżność `expectedUpdatedAt`, UI/UX, dostępność), R01 (kwoty), R02 (flaga "zapłacone"), makieta `ekran-bez-ds.html` (pola: Typ, Opis, Kwota, Data, Powtarzanie, Zapłacone), WCAG 2.2 (3.3.1, 3.3.2, 3.3.3, 2.4.3, 4.1.3) i decyzje właściciela z 2026-11-18 (PR S).
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## Decyzje (zatwierdzone przez właściciela produktu, 2026-11-18, oraz propozycje agenta)
+
+Zatwierdzone: po zapisie formularz **się zamyka**, lista się odświeża i pokazuje się Toast "Wpis zapisany."; pusty miesiąc ma jedną akcję "Dodaj wpis" (`emptyAction` tabeli); **bez "Cofnij"** i bez akcji w Toaście, bo usuwanie jest twarde i chronione potwierdzeniem; dzień miesiąca wpisu cyklicznego to dzień efektywny z API.
+
+Propozycje agenta (do decyzji właściciela, patrz plik tokenów, "Wpisy: formularz i akcje serii (PR S)"):
+
+| Propozycja | Wartość |
+|---|---|
+| Miejsce formularza | `Dialog` (okno modalne), nie panel nad tabelą: jedna postać na każdym ekranie, bez przeskoków układu i bez dwóch wariantów dla wąskiego i szerokiego ekranu; fokus wraca na przycisk, który otworzył okno |
+| Pole "Zapłacone" | tylko przy dodawaniu wydatku; przy wpływie **ukryte** (nie zablokowane z wyjaśnieniem), bo tabela też nie pokazuje kontrolki dla wpływu; przy edycji nieobecne (flagę zmienia się w tabeli) |
+| Edycja: typ i powtarzanie | tylko do odczytu jako tekst (spec: `type` i `recurrence` są niezmienne), nie jako wyłączone pola |
+| Wpis cykliczny | edycja tylko opisu; typ, powtarzanie, dzień miesiąca i kwota są pokazane jako tekst z podpowiedzią o akcji "Zmień kwotę od miesiąca" |
+| Kolejność przycisków | "Anuluj", potem "Zapisz" (jak w ConfirmDialog; makieta miała odwrotnie) |
+| Zamknięcie w trakcie zapisu | Escape i "Anuluj" są zablokowane do końca zapisu, kliknięcie tła nie zamyka okna nigdy (nie gubimy wpisanych danych) |
+| Błąd ogólny | jako Alert nad przyciskami (a nie na górze okna), bo przy 320 px górę okna może zasłaniać przewinięcie |
+
+## 1. Do czego służy
+
+Pozwala dodać wpis albo poprawić istniejący, bez zgadywania formatu: kwota jako zwykły tekst "12,50", data jako RRRR-MM-DD, waluta zawsze PLN i nie jest polem.
+
+## 2. Kiedy używać
+
+- Przycisk "Dodaj wpis" nad tabelą i akcja w pustym miesiącu (tryb `create`).
+- Pozycja "Edytuj" w menu wiersza wpisu jednorazowego i "Edytuj opis" wpisu cyklicznego (tryb `edit`).
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Zmiana kwoty wpisu cyklicznego od miesiąca | SeriesActions: "Zmień kwotę od miesiąca…" |
+| Zakończenie serii | SeriesActions: "Zakończ od miesiąca…" |
+| Przełączenie "Zapłacone" istniejącego wpisu | pole w EntryTable |
+| Logowanie i inne formularze | wzorzec "Formularz" + `useFormValidation` |
+
+## 4. Anatomia
+
+1. Okno z tytułem ("Dodaj wpis", "Edytuj wpis", "Edytuj opis wpisu cyklicznego") i opisem.
+2. Podsumowanie błędów (tylko przy więcej niż jednym błędzie).
+3. Tryb edycji: lista tekstowa "Typ", "Powtarzanie" (i dla serii "Dzień miesiąca", "Kwota") oraz podpowiedź.
+4. Pola: Typ (RadioGroup Wpływ/Wydatek, poziomo od 384 px kontenera), Opis, Kwota (+ tekst "PLN"), Data, Powtarzanie (Select), "Zapłacone" (Checkbox tylko dla wydatku).
+5. Alert błędu ogólnego, przyciski "Anuluj" i "Zapisz".
+
+<Canvas of={Stories.CreateEntry} />
+<Canvas of={Stories.EditOneOff} />
+<Canvas of={Stories.EditRecurring} />
+
+## 5. Warianty
+
+| Tryb | Edytowalne pola | Tylko do odczytu |
+|---|---|---|
+| `create` | wszystkie (Typ, Opis, Kwota, Data, Powtarzanie, Zapłacone dla wydatku) | nic |
+| `edit`, wpis jednorazowy | Opis, Kwota, Data | Typ, Powtarzanie |
+| `edit`, wpis cykliczny | Opis | Typ, Powtarzanie, Dzień miesiąca, Kwota |
+
+Dla wpisu **cyklicznego** pole "Data" oznacza **początek serii**: dzień miesiąca jest z niej wyprowadzany (31 stycznia daje dzień 31, a w krótszych miesiącach wpis wypada ostatniego dnia: dzień efektywny z API). Podpowiedź pod polem zmienia treść po wybraniu "Co miesiąc".
+
+<Canvas of={Stories.CreateIncome} />
+<Canvas of={Stories.RecurringCreate} />
+
+## 6. Stany
+
+| Stan | Zachowanie |
+|---|---|
+| Czysty | pola puste (data podpowiedziana przez wołającego), brak błędów |
+| Pole dotknięte | błąd po opuszczeniu pola |
+| Jeden błąd | komunikat przy polu, bez podsumowania |
+| Kilka błędów | podsumowanie z odnośnikami; fokus na pierwszym błędnym polu |
+| Zapisywanie | przycisk "Zapisywanie…" z `aria-busy`; kolejne kliknięcia ignorowane; "Anuluj" zablokowany; Escape nie zamyka |
+| Błąd pola z serwera | komunikat przy polu, fokus na polu, dane zostają |
+| Błąd walidacji serwera bez pola | komunikat ogólny |
+| Konflikt (409) | komunikat ogólny "Wpis zmienił się w międzyczasie. Odśwież listę i spróbuj ponownie." |
+| Brak sieci / wyjątek | komunikat ogólny, dane zostają w formularzu |
+| Limit | komunikat ogólny o zbyt wielu wpisach |
+| Sukces | okno się zamyka, wołane jest `onSaved` (lista, Toast) |
+
+<Canvas of={Stories.OneError} />
+<Canvas of={Stories.SeveralErrors} />
+<Canvas of={Stories.Saving} />
+<Canvas of={Stories.ServerFieldError} />
+<Canvas of={Stories.ServerValidationWithoutField} />
+<Canvas of={Stories.Conflict} />
+<Canvas of={Stories.NetworkError} />
+<Canvas of={Stories.LimitError} />
+
+## 7. Zachowanie i dostępność
+
+- Okno modalne (`Dialog`): `role="dialog"` nazwane tytułem, opis przez `aria-describedby`, pułapka fokusu, Escape zamyka (poza zapisem), kliknięcie tła nie zamyka. Fokus wraca na element, który otworzył okno (przycisk "Dodaj wpis" albo przycisk menu wiersza).
+- Pola mają widoczne etykiety (`Field`, `RadioGroup` z `legend`), `noValidate` i `aria-required`; błąd jest powiązany z polem (`aria-invalid`, `aria-describedby`, `role="alert"`).
+- Walidacja: po opuszczeniu dotkniętego pola i przy wysłaniu (wzorzec formularza). Wysłanie z błędami ustawia fokus na pierwszym błędnym polu; podsumowanie (od dwóch błędów) ma odnośniki przenoszące fokus.
+- Kwota to zwykłe pole tekstowe z `inputMode="decimal"`; "12,50" i "12.50" daje 1250 groszy w `onSubmit`; odrzucane: ujemna, zero, więcej niż dwa miejsca, separator tysięcy, powyżej 8 cyfr przed przecinkiem.
+- Waluta (PLN) to stały tekst obok pola, nie kontrolka; `onSubmit` dostaje tylko `amountMinor`, `app` dokleja `currency: "PLN"`.
+- Data to tekst RRRR-MM-DD (zatwierdzony wzorzec; bez natywnego `type="date"`, który zależy od przeglądarki i języka); sprawdzane: format, istnienie w kalendarzu, zakres 2000-01-01..2100-12-31.
+- Toast "Wpis zapisany." pokazuje wołający w `onSaved`, po zamknięciu okna; Toast nie przejmuje fokusu (fokus zostaje na przycisku otwierającym).
+- Kontrast i rozmiary celów: z komponentów bazowych (pola 36 px, cele co najmniej 36 px, błąd `--destructive` na `--card` z tekstem, nie samym kolorem).
+
+<Canvas of={Stories.SavedWithToast} />
+
+## 8. Treść
+
+- Wszystkie teksty to nazwane stałe w `entry-form.messages.ts` (`DEFAULT_ENTRY_FORM_MESSAGES`), nadpisywane propem `messages`; w JSX nie ma polskich literałów. Komunikat sukcesu: `messages.saved` ("Wpis zapisany.").
+- Komunikaty błędów mówią, co się stało i co zrobić ("Podaj kwotę, np. 12,50.", "Data wpisu jest poza zakresem. Wybierz rok od 2000 do 2100.").
+- Komunikaty błędów pól z serwera przychodzą w wyniku jako gotowy tekst (po polsku, przygotowany przez `app`); komponent ich nie tłumaczy.
+- Etykieta przycisku zmienia się na "Zapisywanie…" w trakcie zapisu (wzorzec formularza).
+
+## 9. Responsywność
+
+Okno ma szerokość do 28 rem i marginesy 16 px; zawartość przewija się wewnątrz okna (`overflow-y-auto`), strona nigdy w poziomie. Przy 320 px długie komunikaty i opis bez spacji zawijają się (`wrap-anywhere`), przyciski zawijają się do dwóch wierszy. Poziomy układ opcji "Wpływ"/"Wydatek" włącza się od szerokości kontenera 384 px (24 rem).
+
+<Canvas of={Stories.NarrowScreen} />
+<Canvas of={Stories.LongDescriptionNarrowScreen} />
+
+## 10. API
+
+`EntryFormProps`:
+
+| Prop | Typ | Opis |
+|---|---|---|
+| `open`, `onOpenChange` | `boolean`, `(open: boolean) => void` | stan okna (sterowany); w trakcie zapisu zamknięcie jest ignorowane |
+| `mode` | `{ kind: 'create'; defaultDate?: string } \| { kind: 'edit'; entry: EntryRowData }` | tryb; `defaultDate` w RRRR-MM-DD (np. pierwszy dzień wyświetlanego miesiąca) |
+| `onSubmit` | `(submission: EntrySubmission) => Promise<EntryActionResult<EntryFormField>>` | zapis; zwraca wynik, nie rzuca (rzucony wyjątek traktowany jak błąd sieci) |
+| `onSaved` | `() => void` | wołane po udanym zapisie, **po** zamknięciu okna: odświeżenie listy i Toast |
+| `messages` | `Partial<EntryFormMessages>` | teksty |
+
+`EntrySubmission` (jedno wywołanie API na wariant):
+
+| `kind` | Dane | Odpowiada |
+|---|---|---|
+| `create` | `draft: { type, description, amountMinor, occurredOn, recurrence }`, `paid: boolean` | `POST .../entries` (+ `PATCH .../paid`, gdy `paid`) |
+| `update-one-off` | `entryId`, `draft` | `PUT .../entries/{id}` |
+| `update-series-description` | `entryId`, `description` | `PUT .../entries/{id}` (tylko opis, `expectedUpdatedAt` dokłada `app`) |
+
+`EntryActionResult<Field>` to `{ ok: true }` albo `{ ok: false, kind: 'validation' | 'conflict' | 'network' | 'limit', fieldErrors? }`. Mapowanie, które robi `app` (adapter do `apiCall`):
+
+| Odpowiedź API | Wynik |
+|---|---|
+| 2xx | `{ ok: true }` |
+| 400 `validation_error` z `fieldErrors` | `{ ok: false, kind: 'validation', fieldErrors: { pole: komunikat } }` (pola: `type`, `description`, `amount`, `date`, `recurrence`; `amountMinor` mapowane na `amount`, `occurredOn` na `date`) |
+| 409 `conflict` | `{ ok: false, kind: 'conflict' }` |
+| 422 `result_limit_exceeded` | `{ ok: false, kind: 'limit' }` |
+| brak odpowiedzi, 5xx | `{ ok: false, kind: 'network' }` (albo wyjątek) |
+
+## 11. Kod
+
+```tsx
+import { EntryForm, DEFAULT_ENTRY_FORM_MESSAGES, useToast } from '@aitl/ui';
+
+const { toast } = useToast();
+
+<EntryForm
+  open={formMode !== undefined}
+  onOpenChange={(open) => !open && setFormMode(undefined)}
+  mode={formMode ?? { kind: 'create' }}
+  onSubmit={(submission) => saveEntry(account.id, submission)}
+  onSaved={() => {
+    refetch();
+    toast({ message: DEFAULT_ENTRY_FORM_MESSAGES.saved });
+  }}
+/>;
+```
+
+## 12. Dobrze i źle
+
+- Dobrze: jedna operacja zapisu na `onSubmit`, wynik jako dane; dane zostają w formularzu po błędzie; Toast po zamknięciu okna.
+- Źle: wołanie API wewnątrz komponentu; zamykanie okna przed odpowiedzią serwera; Toast z akcją "Cofnij" (usuwanie jest twarde); waluta jako pole; formularz bez komunikatu przy błędzie sieci.
+
+## 13. Powiązane
+
+`useFormValidation`, `ErrorSummary`, `parseAmountToMinor`, `Field`, `Input`, `RadioGroup`, `Select`, `Checkbox`, `Dialog`, `Alert`, `Toast`; wzorzec "Lista wpisów konta"; `SeriesActions`.
+
+## Czego brakuje
+
+- **Luka w specyfikacji E02:** `POST .../entries` nie przyjmuje flagi `paid`, a formularz ma pole "Zapłacone" przy dodawaniu wydatku. `app` musi albo wykonać `POST`, a potem `PATCH .../paid`, albo spec powinien dodać `paid` do `POST` (propozycja do decyzji właściciela). `PATCH .../paid` istnieje dopiero w Fazie 4, więc przed nią pole nie ma celu.
+- **Luka w specyfikacji E02:** `PUT` wpisu cyklicznego wymaga `expectedUpdatedAt`, ale odpowiedź listy nie zawiera `updatedAt`. `EntryRowData` go nie niesie; `app` musi go dostać z API (propozycja: dodać `updatedAt` do elementów listy).
+- Edycja `occurredOn` jednorazowego wpisu na inny miesiąc przenosi go poza wyświetlany miesiąc; komponent tego nie ostrzega (spec Faza 4 przenosi flagę).
+- Brak kopiowania wpisu i dodawania wielu wpisów pod rząd: poza zakresem (po zapisie okno się zamyka).
+- Ciemny motyw: czeka na L3.
+
+## Testy interakcji w tej dokumentacji
+
+Strony `Test:` w menu uruchamiają się w `npm run test:storybook`: moment walidacji (po opuszczeniu pola, znika po poprawie), fokus na pierwszym błędnym polu i odnośniki podsumowania, parsowanie "12,50" na 1250, pole "Zapłacone" tylko dla wydatku, blokada podwójnego wysłania i zamknięcia w trakcie zapisu, powrót fokusu na przycisk otwierający (Anuluj i Escape), zamknięcie okna po zapisie z Toastem "Wpis zapisany." bez kradzieży fokusu, błąd serwera zostawia okno otwarte, edycja wpisu cyklicznego tylko z opisem, 320 px bez przewijania strony.

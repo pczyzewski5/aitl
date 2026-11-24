@@ -5,7 +5,7 @@ import * as Stories from './entry-list.stories';
 
 # Wzorzec: lista wpisów konta
 
-Układ widoku konta: przełącznik miesiąca, karty wyniku kont i pod nimi tabela wpisów wybranego konta. To wzorzec złożony z istniejących komponentów (`MonthSwitcher`, `AccountRemainderCard`, `EntryTable`, `Menu`, Toast); pełny ekran `/bank-accounts/{id}` powstanie w PR T, formularz i akcje serii w PR S. Źródło reguł: R01.4, R01.5, R01.8, A3, A4 (referencje), specyfikacja E02 (`.ai/specs/2026-11-17-entries-income-expenses.md`: lista miesiąca, limit 500, flaga "zapłacone", UI/UX), E03 (R02, R03), decyzje właściciela z 2026-11-18, WCAG 2.2. Reguła bez źródła jest oznaczona jako **propozycja**.
+Układ widoku konta: przełącznik miesiąca, karty wyniku kont i pod nimi tabela wpisów wybranego konta. To wzorzec złożony z istniejących komponentów (`MonthSwitcher`, `AccountRemainderCard`, `EntryTable`, `Menu`, Toast); formularz (`EntryForm`) i akcje wiersza (`SeriesActions`) pochodzą z PR S, a pełny ekran `/bank-accounts/{id}` powstanie w PR T. Źródło reguł: R01.4, R01.5, R01.8, A3, A4 (referencje), specyfikacja E02 (`.ai/specs/2026-11-17-entries-income-expenses.md`: lista miesiąca, limit 500, flaga "zapłacone", UI/UX), E03 (R02, R03), decyzje właściciela z 2026-11-18, WCAG 2.2. Reguła bez źródła jest oznaczona jako **propozycja**.
 
 <Canvas of={Stories.Playground} />
 <Controls of={Stories.Playground} />
@@ -25,13 +25,14 @@ Odpowiada na pytanie "co jest zapisane na tym koncie w tym miesiącu" i pozwala 
 |---|---|
 | Sam wynik miesiąca per konto, bez listy | wzorzec "Przegląd miesiąca per konto" |
 | Lista wpisów wielu kont naraz | nie istnieje (R03) |
-| Dodawanie i edycja wpisu | EntryForm (PR S) |
+| Dodawanie i edycja wpisu (sam formularz) | EntryForm |
 
 ## 4. Anatomia
 
 1. Nagłówek widoku i `MonthSwitcher` (miesiąc w adresie, bieżący miesiąc z serwera).
 2. Karty wyniku kont (`AccountRemainderCard`): wybrana karta wskazuje konto listy; wynik liczy serwer, osobno dla każdego konta, bez sumy łącznej.
-3. `EntryTable` z podpisem "Wpisy: nazwa konta, miesiąc" i kolumną akcji (`Menu` z serwisu wołającego).
+3. Przycisk "Dodaj wpis" obok nagłówka (nie w pustym miesiącu: tam jest jedyna akcja stanu pustego) i `EntryTable` z podpisem "Wpisy: nazwa konta, miesiąc" i kolumną akcji (`SeriesActions`).
+5. `EntryForm` w oknie modalnym i Toast po zapisie.
 4. Stany listy zamiast tabeli: ładowanie, błąd, pusto, limit.
 
 <Canvas of={Stories.Ready} />
@@ -42,7 +43,7 @@ Odpowiada na pytanie "co jest zapisane na tym koncie w tym miesiącu" i pozwala 
 | Scenariusz | Co widać |
 |---|---|
 | Wczytane | tabela wpisów wybranego konta; karty z wynikami |
-| Pusty miesiąc | EmptyState "W tym miesiącu nie ma jeszcze żadnych wpisów" z akcją "Dodaj wpis" (akcja jest propozycją: spec jej nie opisuje, ale lista nie może kończyć się ślepo) |
+| Pusty miesiąc | EmptyState "W tym miesiącu nie ma jeszcze żadnych wpisów" z akcją "Dodaj wpis" (zatwierdzone przez właściciela produktu, 2026-11-18: jedna akcja w stanie pustym; spec jej nie opisuje) |
 | Ładowanie | szkielety wierszy w `aria-busy`, karty w ładowaniu |
 | Błąd | ErrorState z ponowieniem |
 | Limit (422 `result_limit_exceeded`) | ostrzeżenie zamiast listy; nic nie jest ucinane po cichu |
@@ -66,18 +67,31 @@ Reguła zapisu flagi w tej kompozycji (**propozycja**: spec nie opisuje zachowan
 3. Po sukcesie wołający podmienia `paid` w danych wiersza (dla wpisu cyklicznego: tylko dla wyświetlanego miesiąca).
 4. Po błędzie wołający pokazuje Toast z komunikatem (nazwany stały tekst w `app`) i zdejmuje `entryId` z `savingEntryIds`. Tabela sama nie pokazuje Toastów.
 
+## 6a. Dodawanie, edycja i usuwanie (PR S)
+
+Reguły tej kompozycji (zatwierdzone przez właściciela produktu, 2026-11-18, poza oznaczonymi jako propozycja):
+
+1. "Dodaj wpis" otwiera `EntryForm` (`mode: create`, data podpowiedziana pierwszym dniem wyświetlanego miesiąca). Po udanym zapisie formularz się zamyka, lista się odświeża (wynik konta też) i pokazuje się Toast "Wpis zapisany."; fokus zostaje na przycisku otwierającym.
+2. Pusty miesiąc ma jedną akcję "Dodaj wpis" (`emptyAction` tabeli); przycisk nad tabelą jest wtedy ukryty, żeby akcja nie była zdublowana.
+3. "Edytuj" i "Edytuj opis" w menu wiersza otwierają ten sam formularz w trybie edycji (wpis cykliczny: tylko opis).
+4. Usuwanie, zakończenie serii i zmiana kwoty serii idą przez `SeriesActions` i potwierdzenia (wzorzec "Potwierdzenie usunięcia"); błąd zostaje w oknie. **Bez "Cofnij"** w Toastach.
+5. Teksty Toastów "Wpis usunięty.", "Seria zakończona." i "Kwota zmieniona." to **propozycja** (stałe w stories; aplikacja podaje własne w `onCompleted`).
+
+<Canvas of={Stories.SaveFails} />
+<Canvas of={Stories.DeleteFails} />
+
 ## 7. Zachowanie i dostępność
 
 - Zmiana miesiąca podmienia całą listę; podpis tabeli zawiera miesiąc, więc czytnik słyszy nową nazwę tabeli.
 - Wybór konta przenosi listę na to konto; wybór karty nie przenosi fokusu (zostaje na karcie).
 - Kontener tabeli przewija się z klawiatury (`tabindex="0"`), strona nie przewija się w poziomie przy 320 px.
-- Toast błędu zapisu jest ogłaszany asertywnie (to błąd po akcji użytkownika); sukces nie ma Toastu, bo sam stan pola jest potwierdzeniem.
+- Toast błędu zapisu jest ogłaszany asertywnie (to błąd po akcji użytkownika); udany zapis flagi nie ma Toastu, bo sam stan pola jest potwierdzeniem; udany zapis wpisu ma Toast "Wpis zapisany." (po zamknięciu formularza, bez przejmowania fokusu).
 
 <Canvas of={Stories.NarrowScreen} />
 
 ## 8. Treść
 
-- Komunikat błędu zapisu flagi mówi, co się stało i co zrobić: "Nie udało się zapisać zmiany. Flaga „Zapłacone” została taka, jak była. Spróbuj ponownie." (**propozycja** do zatwierdzenia w PR S wraz z resztą komunikatów).
+- Komunikat błędu zapisu flagi mówi, co się stało i co zrobić: "Nie udało się zapisać zmiany. Flaga „Zapłacone” została taka, jak była. Spróbuj ponownie." (zatwierdzone przez właściciela produktu, 2026-11-18).
 - Podpis tabeli buduje aplikacja z nazwy konta i etykiety miesiąca.
 
 ## 9. Responsywność
@@ -114,10 +128,12 @@ const handlePaidChange = async (entryId: string, paid: boolean) => {
 
 ## Czego brakuje
 
-- Dodawanie wpisu i akcje serii (PR S); pełny ekran z nawigacją i `AppShell` (PR T).
+- Pełny ekran z nawigacją i `AppShell` (PR T).
+- Fokus po usunięciu wpisu (wiersz znika razem z przyciskiem menu): kompozycja go nie przenosi; do ustalenia na ekranie w PR T.
+- Wpis cykliczny dodany w stories trafia tylko do wyświetlanego miesiąca (serię liczy serwer); odświeżenie z API w aplikacji pokaże ją we wszystkich miesiącach.
 - Zachowanie listy przy zmianie miesiąca w trakcie wczytywania (stare dane czy szkielety): brak decyzji.
 - Aktualizacja optymistyczna flagi: świadomie bez niej (propozycja wyżej).
 
 ## Testy interakcji w tej dokumentacji
 
-Zapis flagi pokazuje zajęcie i potwierdza stan, wyniki kont nie zmieniają się, nieudany zapis pokazuje Toast i zostawia pole, zmiana miesiąca i konta podmienia wiersze, scenariusze limitu, błędu i ładowania, 320 px bez przewijania strony, brak sumy łącznej.
+Zapis flagi pokazuje zajęcie i potwierdza stan, wyniki kont nie zmieniają się, nieudany zapis pokazuje Toast i zostawia pole, zmiana miesiąca i konta podmienia wiersze, scenariusze limitu, błędu i ładowania, 320 px bez przewijania strony, brak sumy łącznej; dodanie wpisu (formularz, zapis, nowy wiersz, zmiana wyniku, Toast, fokus), edycja wpisu jednorazowego i cyklicznego, zablokowane "Usuń całkowicie" z powodem, usunięcie przez potwierdzenie (wiersz znika, Toast bez "Cofnij"), błąd usuwania w oknie, błąd zapisu zostawia formularz, pusty miesiąc z jedną akcją "Dodaj wpis".

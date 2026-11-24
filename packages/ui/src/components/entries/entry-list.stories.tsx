@@ -1,21 +1,34 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { type ReactNode, useState } from 'react';
+import { useState } from 'react';
 import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { AccountRemainderCard, type AccountType } from '../bank-accounts/account-remainder-card';
-import { type MonthKey } from '../months/month';
+import { type MonthKey, addMonths } from '../months/month';
 import { MonthSwitcher } from '../months/month-switcher';
-import { Menu } from '../ui/menu';
+import { Button } from '../ui/button';
 import { ToastProvider, useToast } from '../ui/toast';
+import type { EntryActionResult } from './entry-failure';
+import { EntryForm, type EntryFormField, type EntryFormMode, type EntrySubmission } from './entry-form';
+import { DEFAULT_ENTRY_FORM_MESSAGES } from './entry-form.messages';
 import type { EntryRowData } from './entry-row';
 import { EntryTable } from './entry-table';
+import { SeriesActions } from './series-actions';
 
 const SERVER_CURRENT_MONTH: MonthKey = '2026-11';
 const NARROW_WIDTH_PX = 320;
 const SAVE_DELAY_MS = 150;
 const NO_BREAK_SPACE = ' ';
 const SAVE_FAILED_MESSAGE = 'Nie udało się zapisać zmiany. Flaga „Zapłacone” została taka, jak była. Spróbuj ponownie.';
+const ENTRY_SAVED_MESSAGE = DEFAULT_ENTRY_FORM_MESSAGES.saved;
+const ENTRY_DELETED_MESSAGE = 'Wpis usunięty.';
+const SERIES_ENDED_MESSAGE = 'Seria zakończona.';
+const AMOUNT_CHANGED_MESSAGE = 'Kwota zmieniona.';
+const MONTHS_OFFERED = 3;
+const ADD_ENTRY_LABEL = 'Dodaj wpis';
+const MENU_TRIGGER = /^Akcje wpisu/;
+const MONTH_LENGTHS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+const LEAP_FEBRUARY_LENGTH = 29;
 
-type Scenario = 'ready' | 'loading' | 'error' | 'empty' | 'limit' | 'paidFails';
+type Scenario = 'ready' | 'loading' | 'error' | 'empty' | 'limit' | 'paidFails' | 'saveFails' | 'deleteFails';
 
 interface Account {
   readonly id: string;
@@ -128,14 +141,42 @@ function totals(entries: readonly EntryRowData[]) {
   return { incomeMinor, expensesMinor, remainderMinor: incomeMinor - expensesMinor };
 }
 
-function rowActions(entry: EntryRowData): ReactNode {
-  return (
-    <Menu
-      triggerLabel={`Akcje wpisu ${entry.description}`}
-      align="end"
-      items={[{ id: 'delete', label: entry.recurrence === 'monthly' ? 'Zakończ od miesiąca' : 'Usuń wpis', onSelect: fn() }]}
-    />
-  );
+function wait(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+}
+
+function monthLength(month: MonthKey): number {
+  const [year = 0, monthNumber = 1] = month.split('-').map(Number);
+  const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+
+  return monthNumber === 2 && isLeapYear ? LEAP_FEBRUARY_LENGTH : (MONTH_LENGTHS[monthNumber - 1] ?? 0);
+}
+
+function effectiveDay(occurredOn: string, month: MonthKey): number {
+  return Math.min(Number(occurredOn.slice(8, 10)), monthLength(month));
+}
+
+function applySubmission(list: readonly EntryRowData[], submission: EntrySubmission, month: MonthKey, newId: string): EntryRowData[] {
+  if (submission.kind === 'create') {
+    const { draft } = submission;
+    const paid = draft.type === 'expense' ? submission.paid : null;
+    const created: EntryRowData =
+      draft.recurrence === 'monthly'
+        ? { ...draft, id: newId, recurrence: 'monthly', dayOfMonth: effectiveDay(draft.occurredOn, month), paid }
+        : { ...draft, id: newId, recurrence: 'none', paid };
+
+    return [...list, created];
+  }
+
+  return list.map((entry) => {
+    if (entry.id !== submission.entryId) {
+      return entry;
+    }
+
+    return submission.kind === 'update-series-description'
+      ? { ...entry, description: submission.description }
+      : { ...entry, ...submission.draft, recurrence: 'none' };
+  });
 }
 
 interface EntryListProps {
@@ -156,9 +197,18 @@ function EntryListContent({
   const [selectedId, setSelectedId] = useState(initialSelectedId);
   const [paidOverrides, setPaidOverrides] = useState<Readonly<Record<string, boolean>>>({});
   const [savingIds, setSavingIds] = useState<readonly string[]>([]);
+  const [lists, setLists] = useState<Readonly<Record<string, readonly EntryRowData[]>>>({});
+  const [formMode, setFormMode] = useState<EntryFormMode>();
+  const [createdCount, setCreatedCount] = useState(0);
   const selected = selectedId === SHARED.id ? SHARED : PERSONAL;
+  const listKey = `${month}|${selected.id}`;
 
-  const entries = entriesFor(month, selected.id).map((entry) =>
+  const listFor = (listMonth: MonthKey, accountId: string): readonly EntryRowData[] =>
+    lists[`${listMonth}|${accountId}`] ?? entriesFor(listMonth, accountId);
+  const updateList = (change: (list: readonly EntryRowData[]) => readonly EntryRowData[]) =>
+    setLists((current) => ({ ...current, [listKey]: change(current[listKey] ?? entriesFor(month, selected.id)) }));
+
+  const entries = listFor(month, selected.id).map((entry) =>
     entry.id in paidOverrides ? { ...entry, paid: paidOverrides[entry.id] ?? entry.paid } : entry,
   );
 
@@ -174,13 +224,81 @@ function EntryListContent({
     }, SAVE_DELAY_MS);
   };
 
+  const handleSubmit = async (submission: EntrySubmission): Promise<EntryActionResult<EntryFormField>> => {
+    await wait(SAVE_DELAY_MS);
+    if (scenario === 'saveFails') {
+      return { ok: false, kind: 'network' };
+    }
+    const newId = `created-${createdCount}`;
+    setCreatedCount((current) => current + 1);
+    updateList((list) => applySubmission(list, submission, month, newId));
+
+    return { ok: true };
+  };
+
+  const handleDelete = async (entryId: string): Promise<EntryActionResult> => {
+    await wait(SAVE_DELAY_MS);
+    if (scenario === 'deleteFails') {
+      return { ok: false, kind: 'conflict' };
+    }
+    updateList((list) => list.filter((entry) => entry.id !== entryId));
+
+    return { ok: true };
+  };
+
+  const monthsFrom = (offset: number) => Array.from({ length: MONTHS_OFFERED }, (_, index) => addMonths(month, offset + index));
+  const completedMessages = { delete: ENTRY_DELETED_MESSAGE, end: SERIES_ENDED_MESSAGE, 'change-amount': AMOUNT_CHANGED_MESSAGE };
+
+  const renderActions = (entry: EntryRowData) => {
+    const common = {
+      onEdit: () => setFormMode({ kind: 'edit', entry }),
+      onDelete: handleDelete,
+      onCompleted: (action: keyof typeof completedMessages) => toast({ message: completedMessages[action] }),
+    };
+
+    if (entry.recurrence === 'none') {
+      return <SeriesActions entry={entry} {...common} />;
+    }
+
+    return (
+      <SeriesActions
+        entry={entry}
+        {...common}
+        series={{
+          deletable: entry.occurredOn.slice(0, 7) > SERVER_CURRENT_MONTH,
+          endMonthOptions: monthsFrom(1),
+          amountMonthOptions: monthsFrom(0),
+          onEnd: async () => {
+            await wait(SAVE_DELAY_MS);
+
+            return { ok: true };
+          },
+          onChangeAmount: async () => {
+            await wait(SAVE_DELAY_MS);
+
+            return { ok: true };
+          },
+        }}
+      />
+    );
+  };
+
   const status = scenario === 'loading' || scenario === 'error' ? scenario : scenario === 'limit' ? 'limit-exceeded' : 'loaded';
   const shownEntries = status === 'loaded' && scenario !== 'empty' ? entries : [];
   const cardsLoading = scenario === 'loading';
+  const openCreateForm = () => setFormMode({ kind: 'create', defaultDate: `${month}-01` });
+  const isEmptyMonth = status === 'loaded' && shownEntries.length === 0;
 
   return (
     <div className="flex max-w-3xl flex-col gap-(--space-between-groups)">
-      <h2 className="text-lg font-semibold leading-base">Wpisy konta</h2>
+      <div className="flex flex-wrap items-center justify-between gap-(--space-within-group)">
+        <h2 className="text-lg font-semibold leading-base">Wpisy konta</h2>
+        {!isEmptyMonth && (
+          <Button variant="secondary" onClick={openCreateForm}>
+            {ADD_ENTRY_LABEL}
+          </Button>
+        )}
+      </div>
       <MonthSwitcher month={month} onMonthChange={setMonth} min="2000-01" max="2100-12" />
       <div className="flex flex-wrap gap-(--space-between-groups)">
         {[SHARED, PERSONAL].map((account) =>
@@ -200,7 +318,7 @@ function EntryListContent({
               className="min-w-64 flex-1"
               name={account.name}
               accountType={account.accountType}
-              {...totals(entriesFor(month, account.id))}
+              {...totals(listFor(month, account.id))}
               selected={account.id === selectedId}
               onSelect={() => setSelectedId(account.id)}
             />
@@ -212,11 +330,18 @@ function EntryListContent({
         caption={`Wpisy: ${selected.name}, ${month}`}
         entries={shownEntries}
         savingEntryIds={savingIds}
-        actions={rowActions}
+        actions={renderActions}
         onPaidChange={handlePaidChange}
         onRetry={onRetry}
-        emptyAction={{ label: 'Dodaj wpis', onClick: fn() }}
+        emptyAction={{ label: ADD_ENTRY_LABEL, onClick: openCreateForm }}
         headingLevel="h3"
+      />
+      <EntryForm
+        open={formMode !== undefined}
+        onOpenChange={(open) => !open && setFormMode(undefined)}
+        mode={formMode ?? { kind: 'create' }}
+        onSubmit={handleSubmit}
+        onSaved={() => toast({ message: ENTRY_SAVED_MESSAGE })}
       />
     </div>
   );
@@ -235,7 +360,7 @@ const meta = {
   component: EntryList,
   parameters: { layout: 'padded', docs: { story: { inline: false, iframeHeight: 640 } } },
   argTypes: {
-    scenario: { control: 'inline-radio', options: ['ready', 'loading', 'error', 'empty', 'limit', 'paidFails'] },
+    scenario: { control: 'inline-radio', options: ['ready', 'loading', 'error', 'empty', 'limit', 'paidFails', 'saveFails', 'deleteFails'] },
     initialMonth: { control: 'text' },
     initialSelectedId: { control: 'inline-radio', options: [SHARED.id, PERSONAL.id] },
     onRetry: { control: false },
@@ -404,3 +529,149 @@ export const NoCombinedTotalAndOnlySelectedAccountRows: Story = {
   },
 };
 
+
+export const SaveFails: Story = {
+  name: 'Błąd zapisu wpisu: formularz zostaje otwarty z komunikatem',
+  args: { scenario: 'saveFails' },
+};
+
+export const DeleteFails: Story = {
+  name: 'Błąd usuwania: komunikat w oknie potwierdzenia, wpis zostaje na liście',
+  args: { scenario: 'deleteFails' },
+};
+
+async function fillNewEntry(description: string) {
+  const dialog = within(await screen.findByRole('dialog'));
+  await userEvent.type(dialog.getByLabelText('Opis'), description);
+  await userEvent.type(dialog.getByLabelText('Kwota'), '12,50');
+
+  return dialog;
+}
+
+async function chooseRowAction(canvasElement: HTMLElement, rowText: string, item: string | RegExp) {
+  const row = within(canvasElement).getByText(new RegExp(rowText)).closest('tr') as HTMLElement;
+  await userEvent.click(within(row).getByRole('button', { name: MENU_TRIGGER }));
+  await userEvent.click(await screen.findByRole('menuitem', { name: item }));
+}
+
+export const AddEntryFlow: Story = {
+  name: 'Test: dodanie wpisu: formularz z przycisku, zapis, lista się odświeża, Toast "Wpis zapisany.", fokus na przycisku',
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const opener = canvas.getByRole('button', { name: ADD_ENTRY_LABEL });
+    const rowsBefore = canvas.getAllByRole('row').length;
+    const remainderBefore = remainderText(canvasElement);
+
+    await userEvent.click(opener);
+    const dialog = await fillNewEntry('Bilety do kina (przykład)');
+    await userEvent.click(dialog.getByRole('button', { name: 'Zapisz' }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    await waitFor(() => expect(screen.getByText(ENTRY_SAVED_MESSAGE)).toBeInTheDocument());
+    await expect(canvas.getAllByRole('row')).toHaveLength(rowsBefore + 1);
+    await expect(canvas.getByText('Bilety do kina (przykład)')).toBeVisible();
+    await expect(remainderText(canvasElement)).not.toBe(remainderBefore);
+    await expect(opener).toHaveFocus();
+  },
+};
+
+export const EditOneOffFlow: Story = {
+  name: 'Test: edycja wpisu jednorazowego z menu wiersza: zmiana opisu widoczna na liście i Toast',
+  play: async ({ canvasElement }) => {
+    await chooseRowAction(canvasElement, 'Zakupy spożywcze', 'Edytuj');
+
+    const dialog = within(await screen.findByRole('dialog', { name: 'Edytuj wpis' }));
+    const description = dialog.getByLabelText('Opis');
+    await userEvent.clear(description);
+    await userEvent.type(description, 'Zakupy tygodniowe (przykład)');
+    await userEvent.click(dialog.getByRole('button', { name: 'Zapisz' }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    await expect(within(canvasElement).getByText('Zakupy tygodniowe (przykład)')).toBeVisible();
+    await waitFor(() => expect(screen.getByText(ENTRY_SAVED_MESSAGE)).toBeInTheDocument());
+  },
+};
+
+export const EditRecurringFlow: Story = {
+  name: 'Test: wpis cykliczny z menu wiersza: edycja tylko opisu, kwota tylko do odczytu',
+  play: async ({ canvasElement }) => {
+    await chooseRowAction(canvasElement, 'Czynsz', 'Edytuj opis');
+
+    const dialog = within(await screen.findByRole('dialog', { name: 'Edytuj opis wpisu cyklicznego' }));
+    await expect(dialog.queryByLabelText('Kwota')).toBeNull();
+    await expect(dialog.getByText(/Zmień kwotę od miesiąca/)).toBeVisible();
+  },
+};
+
+export const RecurringMenuHasSeriesActions: Story = {
+  name: 'Test: menu wpisu cyklicznego ma akcje serii, a "Usuń całkowicie" jest zablokowane z powodem (seria z przeszłością)',
+  play: async ({ canvasElement }) => {
+    const row = within(canvasElement).getByText(/Czynsz/).closest('tr') as HTMLElement;
+
+    await userEvent.click(within(row).getByRole('button', { name: MENU_TRIGGER }));
+
+    const items = (await screen.findAllByRole('menuitem')).map((item) => item.textContent);
+    await expect(items[0]).toBe('Edytuj opis');
+    await expect(items[1]).toBe('Zakończ od miesiąca…');
+    await expect(items[2]).toBe('Zmień kwotę od miesiąca…');
+    await expect(screen.getByRole('menuitem', { name: /Usuń całkowicie/ })).toHaveAttribute('aria-disabled', 'true');
+    await expect(screen.getByText('Seria ma miesiące w przeszłości. Użyj „Zakończ od miesiąca”.')).toBeVisible();
+  },
+};
+
+export const DeleteOneOffFlow: Story = {
+  name: 'Test: usunięcie wpisu przez potwierdzenie: wiersz znika, Toast bez "Cofnij"',
+  play: async ({ canvasElement }) => {
+    await chooseRowAction(canvasElement, 'Zakupy spożywcze', 'Usuń');
+
+    const dialog = within(await screen.findByRole('dialog'));
+    await userEvent.click(dialog.getByRole('button', { name: 'Usuń wpis' }));
+
+    await waitFor(() => expect(screen.queryByText('Zakupy spożywcze (przykład)')).toBeNull());
+    await waitFor(() => expect(screen.getByText(ENTRY_DELETED_MESSAGE)).toBeInTheDocument());
+    await expect(screen.queryByRole('button', { name: /Cofnij/ })).toBeNull();
+  },
+};
+
+export const DeleteFailureKeepsTheRow: Story = {
+  ...DeleteFails,
+  name: 'Test: błąd usuwania zostaje w oknie potwierdzenia, a wiersz nie znika',
+  play: async ({ canvasElement }) => {
+    await chooseRowAction(canvasElement, 'Zakupy spożywcze', 'Usuń');
+
+    const dialog = within(await screen.findByRole('dialog'));
+    await userEvent.click(dialog.getByRole('button', { name: 'Usuń wpis' }));
+
+    await expect(await dialog.findByRole('alert')).toHaveTextContent('Wpis zmienił się w międzyczasie');
+    await expect(within(canvasElement).getByText('Zakupy spożywcze (przykład)')).toBeInTheDocument();
+  },
+};
+
+export const SaveFailureKeepsTheFormOpen: Story = {
+  ...SaveFails,
+  name: 'Test: błąd zapisu zostawia formularz otwarty z danymi, bez Toastu "Wpis zapisany."',
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: ADD_ENTRY_LABEL }));
+    const dialog = await fillNewEntry('Bilety do kina (przykład)');
+
+    await userEvent.click(dialog.getByRole('button', { name: 'Zapisz' }));
+
+    await expect(await dialog.findByRole('alert')).toBeVisible();
+    await expect(dialog.getByLabelText('Opis')).toHaveValue('Bilety do kina (przykład)');
+    await expect(screen.queryByText(ENTRY_SAVED_MESSAGE)).toBeNull();
+  },
+};
+
+export const EmptyMonthHasASingleAddAction: Story = {
+  ...EmptyMonth,
+  name: 'Test: pusty miesiąc ma jedną akcję "Dodaj wpis" (w stanie pustym), która otwiera formularz',
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await expect(canvas.getAllByRole('button', { name: ADD_ENTRY_LABEL })).toHaveLength(1);
+    await userEvent.click(canvas.getByRole('button', { name: ADD_ENTRY_LABEL }));
+
+    await expect(await screen.findByRole('dialog', { name: 'Dodaj wpis' })).toBeVisible();
+    await expect(within(screen.getByRole('dialog')).getByLabelText('Data')).toHaveValue('2027-03-01');
+  },
+};
