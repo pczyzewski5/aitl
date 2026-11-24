@@ -180,6 +180,10 @@ Gaps found between the E02 spec and the UI contract: `POST` has no `paid`, the l
 ## 2026-11-18 (E02 spec: effective day of a recurring entry)
 The entries list response now documents `dayOfMonth` as the effective day in the requested month (clamped to the month length, the same day the list sorts by), in the API contract, the Step 3.1 scope and tests, and the UI/UX note; the entries table shows that day unchanged. Wording of GitHub issue #14 is left for the owner to update.
 
+## 2026-11-24 (E02 spec: paid at creation, updatedAt in the list)
+Spec gaps found by the entry form: `POST .../entries` now accepts `paid` (expenses only, applies to the `occurredOn` month) and list items carry `updatedAt` for `expectedUpdatedAt`; `seriesStartMonth`/`seriesEndMonth` were already in the list contract.
+Left: issue #14/#15 text updated on GitHub (not part of this commit); implementation in Steps 3.1 and 4.1.
+
 ## 2026-11-24 (design system, PR T: AppShell and full-page screens)
 Added `AppShell` (banner with "AITL" and an optional "Wyloguj" link, one shared `max-w-240` content column for header and main, texts in `app-shell.messages.ts`) and moved the E01 stories onto it; added the screen stories `screens/e02` (account with entries) and `screens/e03` (month overview) as one page with state in the URL (`?account=&month=`), a state map, and all list/save/delete/series failure states. After deleting an entry focus goes to the list heading.
 Pitfalls: Radix FocusScope overwrote a synchronous `focus()` after the row unmounted (deferred in an effect), money expectations must come from `formatMoneyMinor`, cards under `h1` needed a hidden `h2` for axe, a shared story harness needs `excludeStories`. Todo: owner review; stage 4 (teaching pages, agent file) and stage 5 (real pages in `packages/app`).
