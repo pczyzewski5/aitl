@@ -7,3 +7,4 @@ export * from './database-url';
 export * from './entities';
 export * from './entities/base.entity';
 export * from './orm-config';
+export * from './orm-provider';

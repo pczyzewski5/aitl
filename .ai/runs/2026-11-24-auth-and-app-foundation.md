@@ -35,3 +35,13 @@ Do zrobienia: PR i uzupełnienie wiersza PR-1 w track.md po merge.
 ## 2026-11-24 (PR-1, krok 1.1, commit 3)
 PR #64; wiersz PR-1 w track.md (in-progress, wynik SB), lekcja o `register()` w Next 16 z wpisem w indeksie.
 Do zrobienia: zielone checki, merge, uzupełnienie SHA w track.md.
+
+## 2026-11-24 (PR-3, krok 1.3, commit 1)
+`db`: `createOrmProvider` (leniwe `MikroORM.init`, jedna inicjalizacja na proces, ponowna próba po błędzie, współdzielenie przez `globalThis` tylko w dev) i `createEntityManagerProvider` (fork EM raz na scope); `migrationsPath` w `createOrmConfig` opcjonalne.
+MikroORM 7 nie łączy się z bazą przy `init`, więc start bez DB działa z definicji; testy jednostkowe 100%.
+Do zrobienia: kontener Awilix w `app`, `serverExternalPackages`, test integracyjny.
+
+## 2026-11-24 (PR-3, krok 1.3, commit 2)
+`app/src/container/{container,cradle}.ts` (Awilix PROXY, strict; `env` i `ormProvider` singletony, `entityManagerProvider` scoped), `serverExternalPackages` w `next.config.ts`, test integracyjny kontenera na Postgresie.
+Weryfikacja bundlingu tymczasową route (niezacommitowana): build i zapytanie przez EM działają pod `next start`, ale także BEZ `serverExternalPackages` (Next 16 sam externalizuje `@mikro-orm/*` i `pino` z transpilowanych pakietów); lista zostaje jawna wg specu.
+Do zrobienia: PR, uzupełnienie wiersza PR-3 w track.md.
