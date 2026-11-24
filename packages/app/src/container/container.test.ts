@@ -32,6 +32,7 @@ describe('createAppContainer', () => {
       SESSION_SECRET,
       NODE_ENV: 'test',
       SESSION_COOKIE_SECURE: false,
+      TRUSTED_PROXY_HOPS: 0,
     });
   });
 

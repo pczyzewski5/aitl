@@ -4,7 +4,9 @@ import {
   CSRF_HEADER_NAME,
   CSRF_HEADER_VALUE,
   InvalidCredentialsError,
+  TooManyRequestsError,
   UNEXPECTED_ERROR_LOG_MESSAGE,
+  UNKNOWN_CLIENT_IP,
 } from '@aitl/core';
 import { container } from '../../../../container/container';
 import { POST } from './route';
@@ -36,7 +38,7 @@ describe('POST /api/auth/login', () => {
     login.mockReset();
     sessionCookie.setSessionCookie.mockReset();
     vi.spyOn(container, 'createScope').mockReturnValue({
-      cradle: { authService: { login }, env: { SESSION_COOKIE_SECURE: true } },
+      cradle: { authService: { login }, env: { SESSION_COOKIE_SECURE: true, TRUSTED_PROXY_HOPS: 1 } },
     } as never);
   });
 
@@ -53,7 +55,7 @@ describe('POST /api/auth/login', () => {
 
     expect(actual.status).toBe(200);
     expect(await actual.json()).toEqual({ ok: true, data: { user } });
-    expect(login).toHaveBeenCalledWith({ email, password });
+    expect(login).toHaveBeenCalledWith({ email, password }, UNKNOWN_CLIENT_IP);
     expect(sessionCookie.setSessionCookie).toHaveBeenCalledWith(sessionToken, true);
   });
 
@@ -84,6 +86,31 @@ describe('POST /api/auth/login', () => {
 
     expect(actual.status).toBe(401);
     expect((await actual.json()).error.code).toBe('invalid_credentials');
+    expect(sessionCookie.setSessionCookie).not.toHaveBeenCalled();
+  });
+
+  it('passes the client address from the trusted proxy header to the service', async () => {
+    login.mockResolvedValue({ user: { id: randomText(), email, displayName: randomText() }, sessionToken: randomText() });
+    const clientIp = randomText();
+
+    await POST(createRequest({ email, password }, { ...csrfHeaders, 'X-Forwarded-For': `${randomText()}, ${clientIp}` }), undefined);
+
+    expect(login).toHaveBeenCalledWith({ email, password }, clientIp);
+  });
+
+  it('answers 429 with the retry time in the body and in the Retry-After header and sets no cookie', async () => {
+    const retryAfterSeconds = 321;
+    login.mockRejectedValue(new TooManyRequestsError('Too many login attempts', retryAfterSeconds));
+
+    const actual = await POST(createRequest({ email, password }, csrfHeaders), undefined);
+
+    expect(actual.status).toBe(429);
+    expect(actual.headers.get('Retry-After')).toBe(String(retryAfterSeconds));
+    expect((await actual.json()).error).toEqual({
+      code: 'too_many_attempts',
+      message: 'Too many login attempts',
+      retryAfterSeconds,
+    });
     expect(sessionCookie.setSessionCookie).not.toHaveBeenCalled();
   });
 

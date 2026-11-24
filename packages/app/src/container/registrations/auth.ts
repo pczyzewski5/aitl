@@ -1,15 +1,17 @@
 import { asFunction, asValue, type Resolver } from 'awilix';
 import {
   AuthService,
+  LoginThrottleService,
   SessionService,
   SessionTokens,
   systemClock,
   type Clock,
+  type LoginThrottleRepository,
   type PasswordHasher,
   type SessionRepository,
   type SessionResolver,
 } from '@aitl/core';
-import { MikroOrmSessionRepository } from '@aitl/db';
+import { MikroOrmLoginThrottleRepository, MikroOrmSessionRepository } from '@aitl/db';
 import { ARGON2_PRODUCTION_PARAMETERS, Argon2PasswordHasher } from '../../adapters/argon2-password-hasher';
 import type { CoreCradle } from './core';
 import type { DbCradle } from './db';
@@ -21,6 +23,8 @@ export type AuthCradle = {
   sessionTokens: SessionTokens;
   sessionRepository: SessionRepository;
   sessionService: SessionService;
+  loginThrottleRepository: LoginThrottleRepository;
+  loginThrottleService: LoginThrottleService;
   sessionResolver: SessionResolver;
   authService: AuthService;
 };
@@ -47,9 +51,17 @@ export function createAuthRegistrations() {
     sessionResolver: asFunction(
       ({ sessionService }: AuthDependencies): SessionResolver => sessionService,
     ).scoped(),
+    loginThrottleRepository: asFunction(
+      ({ entityManagerProvider }: AuthDependencies): LoginThrottleRepository =>
+        new MikroOrmLoginThrottleRepository(entityManagerProvider),
+    ).scoped(),
+    loginThrottleService: asFunction(
+      ({ loginThrottleRepository, sessionTokens, clock }: AuthDependencies) =>
+        new LoginThrottleService(loginThrottleRepository, sessionTokens, clock),
+    ).scoped(),
     authService: asFunction(
-      ({ userRepository, passwordHasher, sessionService }: AuthDependencies) =>
-        new AuthService(userRepository, passwordHasher, sessionService),
+      ({ userRepository, passwordHasher, sessionService, loginThrottleService }: AuthDependencies) =>
+        new AuthService(userRepository, passwordHasher, sessionService, loginThrottleService),
     ).scoped(),
   } satisfies { [Key in keyof AuthCradle]: Resolver<AuthCradle[Key]> };
 }

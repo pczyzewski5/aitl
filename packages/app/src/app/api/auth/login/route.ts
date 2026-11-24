@@ -1,4 +1,4 @@
-import { loginSchema, parseJsonBody, requireCsrfHeader } from '@aitl/core';
+import { loginSchema, parseJsonBody, requireCsrfHeader, resolveClientIp } from '@aitl/core';
 import { apiHandler } from '../../../../http/api-handler';
 import { setSessionCookie } from '../../../../http/session-cookie';
 
@@ -9,7 +9,9 @@ export const POST = apiHandler(async (request, scope) => {
   const input = await parseJsonBody(request, loginSchema);
   const { authService, env } = scope.cradle;
 
-  const { user, sessionToken } = await authService.login(input);
+  const clientIp = resolveClientIp(request.headers, env.TRUSTED_PROXY_HOPS);
+
+  const { user, sessionToken } = await authService.login(input, clientIp);
   await setSessionCookie(sessionToken, env.SESSION_COOKIE_SECURE);
 
   return { user };
