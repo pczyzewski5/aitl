@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { createLogger } from '../logger';
 import {
   createApiHandler,
+  type ApiRouteParams,
   INTERNAL_ERROR_CODE,
   INTERNAL_ERROR_MESSAGE,
   UNEXPECTED_ERROR_LOG_MESSAGE,
@@ -29,7 +30,7 @@ describe('createApiHandler', () => {
     const { log } = createCapturingLog();
     const apiHandler = createApiHandler(() => ({}), log);
 
-    const actual = await apiHandler(() => ({ status: 'up' }))(request);
+    const actual = await apiHandler(() => ({ status: 'up' }))(request, undefined);
 
     expect(actual.status).toBe(200);
     expect(await actual.json()).toEqual({ ok: true, data: { status: 'up' } });
@@ -39,7 +40,7 @@ describe('createApiHandler', () => {
     const { log } = createCapturingLog();
     const apiHandler = createApiHandler(() => ({}), log);
 
-    const actual = await apiHandler(async () => 'later')(request);
+    const actual = await apiHandler(async () => 'later')(request, undefined);
 
     expect(await actual.json()).toEqual({ ok: true, data: 'later' });
   });
@@ -50,11 +51,25 @@ describe('createApiHandler', () => {
     const apiHandler = createApiHandler(() => ({ id: ++scopeCounter }), log);
     const handler = apiHandler((receivedRequest, scope) => ({ same: receivedRequest === request, id: scope.id }));
 
-    const first = await (await handler(request)).json();
-    const second = await (await handler(request)).json();
+    const first = await (await handler(request, undefined)).json();
+    const second = await (await handler(request, undefined)).json();
 
     expect(first).toEqual({ ok: true, data: { same: true, id: 1 } });
     expect(second).toEqual({ ok: true, data: { same: true, id: 2 } });
+  });
+
+  it('passes the route context with typed params to the route function', async () => {
+    const { log } = createCapturingLog();
+    const apiHandler = createApiHandler(() => ({}), log);
+    const handler = apiHandler(async (_request, _scope, context: ApiRouteParams<{ id: string }>) => {
+      const { id } = await context.params;
+
+      return { id };
+    });
+
+    const actual = await handler(request, { params: Promise.resolve({ id: 'abc' }) });
+
+    expect(await actual.json()).toEqual({ ok: true, data: { id: 'abc' } });
   });
 
   it.each([
@@ -69,7 +84,7 @@ describe('createApiHandler', () => {
 
     const actual = await apiHandler(() => {
       throw error;
-    })(request);
+    })(request, undefined);
 
     expect(actual.status).toBe(status);
     expect(await actual.json()).toEqual({ ok: false, error: { code, message: error.message } });
@@ -83,7 +98,7 @@ describe('createApiHandler', () => {
 
     const actual = await apiHandler(() => {
       throw new ValidationError('invalid', fieldErrors);
-    })(request);
+    })(request, undefined);
 
     expect(await actual.json()).toEqual({
       ok: false,
@@ -98,7 +113,7 @@ describe('createApiHandler', () => {
 
     const actual = await apiHandler(() => {
       throw new Error(secretMessage);
-    })(request);
+    })(request, undefined);
 
     const rawBody = await actual.text();
     const logged = JSON.parse(lines[0] ?? '{}') as { msg: string; err: { message: string } };
@@ -119,7 +134,7 @@ describe('createApiHandler', () => {
       throw new Error('no scope');
     }, log);
 
-    const actual = await apiHandler(() => 'never')(request);
+    const actual = await apiHandler(() => 'never')(request, undefined);
 
     expect(actual.status).toBe(500);
     expect(lines).toHaveLength(1);
@@ -128,7 +143,7 @@ describe('createApiHandler', () => {
   it('uses the shared logger by default', async () => {
     const apiHandler = createApiHandler(() => ({}));
 
-    const actual = await apiHandler(() => 'ok')(request);
+    const actual = await apiHandler(() => 'ok')(request, undefined);
 
     expect(actual.status).toBe(200);
   });
