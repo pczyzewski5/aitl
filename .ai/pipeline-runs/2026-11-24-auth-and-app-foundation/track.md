@@ -1,6 +1,6 @@
 # Track: auth i fundamenty aplikacji
 
-Spec: [.ai/specs/2026-11-17-auth-and-app-foundation.md](../../specs/2026-11-17-auth-and-app-foundation.md)
+Spec: [.ai/specs/implemented/2026-11-17-auth-and-app-foundation.md](../../specs/implemented/2026-11-17-auth-and-app-foundation.md)
 Dziennik: [.ai/runs/2026-11-24-auth-and-app-foundation.md](../../runs/2026-11-24-auth-and-app-foundation.md)
 Plan zatwierdzony przez właściciela: 2026-11-24. Poziom ryzyka: risk-high (review drugiej osoby, `needs-qa` przy PR-ach UI i izolacji).
 

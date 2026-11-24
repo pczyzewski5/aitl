@@ -21,7 +21,7 @@ Następny krok: właściciel przegląda PR U (etap 4, patrz sekcja "Notatki z PR
 
 - Brief: `.ai/specs/product-brief.md`; badania: `.ai/specs/research/` (wywiady, decyzje).
 - Backlog: `.ai/specs/backlog.md` (E01 Dostęp i logowanie, E02 Zapis wpływów i wydatków, E03 Ile zostanie w miesiącu; E04 i E05 zaparkowane, bez historii).
-- Specyfikacje: `.ai/specs/2026-11-17-auth-and-app-foundation.md`, `.ai/specs/2026-11-17-entries-income-expenses.md`, `.ai/specs/2026-11-17-monthly-remainder.md`, standardy: `.ai/specs/2026-09-01-engineering-standards.md`.
+- Specyfikacje: `.ai/specs/implemented/2026-11-17-auth-and-app-foundation.md`, `.ai/specs/2026-11-17-entries-income-expenses.md`, `.ai/specs/2026-11-17-monthly-remainder.md`, standardy: `.ai/specs/2026-09-01-engineering-standards.md`.
 - Referencje: `.ai/specs/design/2026-11-17-referencje.md` (R01.1-R01.8, A1-A5, K1-K3, luki L1-L7).
 - Tokeny: `.ai/specs/design/2026-11-17-tokeny.md` (trzy warstwy, tabela kontrastu WCAG).
 - Audyt i makieta wyjściowa leżą poza repo (lokalnie u właściciela); ich wnioski są już w referencjach i tokenach.

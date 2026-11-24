@@ -6,7 +6,7 @@ Cele:
 - Izolacja i druga osoba: test własności przez route, niezależne sesje, E2E żony (#11)
 - Instalator `npm run setup` (#2) jako osobny PR równoległy do Fazy 1
 
-Spec: [.ai/specs/2026-11-17-auth-and-app-foundation.md](../specs/2026-11-17-auth-and-app-foundation.md)
+Spec: [.ai/specs/implemented/2026-11-17-auth-and-app-foundation.md](../specs/implemented/2026-11-17-auth-and-app-foundation.md)
 Postęp i plan PR-ów: [.ai/pipeline-runs/2026-11-24-auth-and-app-foundation/track.md](../pipeline-runs/2026-11-24-auth-and-app-foundation/track.md)
 Status: in-progress
 
@@ -235,3 +235,7 @@ SB-I: po merge #76 padły 2 testy `seed.test.ts` (brak `SESSION_SECRET` wymagane
 ## 2026-11-24 (PR-11, krok 2.7, commit 3)
 Dopisek do commitu 2 (wpis urwał się na znaku procentu): coverage 100 procent, build, audit 0 podatności, integracyjne 105/105. PR #80 (base main, etykieta needs-qa, stos #70, #72, #73, #75, #76, #77, #78, #74, #71, #79); wiersz PR-11 uzupełniony numerem.
 Do zrobienia: zielone checki, merge po stosie, SHA w track.md.
+
+## 2026-11-24 (PR-12, close-out, commit 1)
+Baza: `feature/e01-closeout` z `origin/feature/second-user-isolation` (#80, stos #70, #72, #73, #75, #76, #77, #78, #74, #71, #79). Spec auth-and-app-foundation przeniesiony `git mv` do `.ai/specs/implemented/` (bez zmiany nazwy); poprawione linki w track.md, nagłówku tego dziennika, specach E02 i E03, mapie ekranów, README prototypu, RAPORT.md, POSTEP.md i plikach `.mdx` w `packages/ui`. Stare wpisy w `.ai/runs/2026-11-02-project-bootstrap.md` zostawione bez zmian (historia).
+Do zrobienia: sekcja odchyleń w specu, backlog, checkboxy monorepo-migration, track.md.

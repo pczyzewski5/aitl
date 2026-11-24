@@ -4,7 +4,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Wzorzec: wywołania API
 
-`apiCall` to jedyne miejsce w aplikacji, które woła `fetch()` do `/api/*`. Strony i formularze nie piszą własnej obsługi żądań, nagłówków i kopert błędów: dostają jeden, przewidywalny wynik i zamieniają go na stan ekranu (Alert, `ErrorState`, `EmptyState`, `LoginResult`). Źródło reguł: specyfikacja `.ai/specs/2026-11-17-auth-and-app-foundation.md` (nagłówek CSRF, koperta, Q24, Q29), `BACKWARD_COMPATIBILITY.md` §2 (koperta jest kontraktem, klient deklaruje własne typy), `AGENTS.md` (warstwa API i UI wielokrotnego użytku).
+`apiCall` to jedyne miejsce w aplikacji, które woła `fetch()` do `/api/*`. Strony i formularze nie piszą własnej obsługi żądań, nagłówków i kopert błędów: dostają jeden, przewidywalny wynik i zamieniają go na stan ekranu (Alert, `ErrorState`, `EmptyState`, `LoginResult`). Źródło reguł: specyfikacja `.ai/specs/implemented/2026-11-17-auth-and-app-foundation.md` (nagłówek CSRF, koperta, Q24, Q29), `BACKWARD_COMPATIBILITY.md` §2 (koperta jest kontraktem, klient deklaruje własne typy), `AGENTS.md` (warstwa API i UI wielokrotnego użytku).
 
 ## 1. Do czego służy
 
