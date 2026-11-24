@@ -1,0 +1,87 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './month-overview-screen.stories';
+
+<Meta of={Stories} />
+
+# Ekran: Przegląd miesiąca per konto (`/?month=…`)
+
+Pełnoekranowa kompozycja "ile zostanie": pasek AppShell, przełącznik miesiąca i karta wyniku na każde konto (wpływy, wydatki, wynik), a pod kartami wpisy wybranego konta (E03-S01, E03-Q5...Q9). Źródło: specyfikacja `.ai/specs/2026-11-17-monthly-remainder.md` (kontrakt `GET /api/monthly-remainder`, UI/UX), R01.4, R02, R03, wzorzec "Przegląd miesiąca per konto", decyzje właściciela z 2026-11-24. Ten ekran to **ta sama strona** co "Ekrany / E02 / Konto z wpisami": story pokazują stany sekcji kart, a stany listy wpisów opisuje strona E02.
+
+<Canvas of={Stories.TwoAccounts} />
+
+## 1. Do czego służy
+
+Odpowiada na pytanie "ile zostanie w tym miesiącu" osobno dla każdego konta bankowego użytkownika i pozwala wybrać konto, którego wpisy użytkownik chce zobaczyć.
+
+## 2. Kiedy używać
+
+Wejście na `/` z aktywną sesją (też po zalogowaniu). Zmiana miesiąca dotyczy wszystkich kart i listy naraz.
+
+## 3. Kiedy nie używać
+
+- Brak sumy łącznej kont (R03): każde konto ma własny wynik.
+- Brak oznaczenia prognozy (E03-Q8, prognoza w E04).
+- Zadanie "lista kont bez wyników" (E01) to osobny, wcześniejszy ekran "Strona główna"; po wdrożeniu tego ekranu karty zastępują listę kont (**do decyzji właściciela**).
+
+## 4. Anatomia
+
+Jak w "Konto z wpisami": AppShell, `h1` "Ile zostanie w miesiącu", MonthSwitcher, sekcja kart, sekcja wpisów. Karta konta (nazwa, plakietka "Wspólne"/"Osobiste", wynik, wpływy, wydatki) jest przyciskiem wyboru konta z `aria-pressed`; **karta nie jest linkiem** do osobnej strony, bo osobna strona konta nie istnieje (decyzja właściciela: jedna strona, konto w adresie `?account=`).
+
+Stan w adresie: patrz "Konto z wpisami", sekcja 5. Wybór karty zmienia `account`, strzałki miesiąca zmieniają `month`.
+
+## 5. Mapa stanów (która story pokazuje który stan)
+
+| Stan ekranu | Story |
+|---|---|
+| Dwa konta, wspólne wybrane | Stan: dwa konta |
+| Dostęp tylko do konta wspólnego | Stan: dostęp tylko do konta wspólnego |
+| Wynik ujemny | Stan: wynik ujemny |
+| Miesiąc bez wpisów (zera na kartach, pusty stan listy) | Stan: miesiąc bez wpisów |
+| Ładowanie wyników | Stan: ładowanie wyników |
+| Błąd wczytania wyników (lista działa niezależnie) | Stan: błąd wczytania wyników |
+| Błąd wczytania listy kont | Stan: błąd wczytania listy kont |
+| Brak kont | Stan: brak kont |
+| 768 px, 320 px | Szerokość: 768 px, Szerokość: 320 px |
+| Testy: zmiana miesiąca, wybór konta w adresie, minus w tekście | stories "Test: ..." |
+
+Stany listy wpisów (ładowanie, błąd, limit 422, puste, konflikty) i operacji zapisu: strona "Ekrany / E02 / Konto z wpisami".
+
+<Canvas of={Stories.OneAccount} />
+<Canvas of={Stories.NegativeRemainder} />
+<Canvas of={Stories.MonthWithoutEntries} />
+<Canvas of={Stories.Loading} />
+<Canvas of={Stories.FailedToLoad} />
+<Canvas of={Stories.AccountsFailedToLoad} />
+<Canvas of={Stories.NoAccounts} />
+
+## 6. Zachowanie i dostępność
+
+- Karta wyniku w stanie błędu ma własny `role="alert"` i przycisk "Spróbuj ponownie"; lista wpisów pozostaje czynna dla konta z adresu albo pierwszego konta.
+- Gdy wynik konta jest ujemny, ma znak minus w tekście (kolor wzmacnia, nie niesie znaczenia).
+- Miesiąc bez wpisów to zera na kartach i pusty stan listy z akcją "Dodaj wpis", nie pusty ekran (E03-S01).
+- Użytkownik z jednym kontem widzi jedną kartę (wynika z danych, bez osobnej logiki UI).
+- Kolejność fokusu, landmarki i hierarchia nagłówków: jak w "Konto z wpisami".
+
+## 7. Treść
+
+Nazwy i teksty kart to stałe w `account-remainder-card.messages.ts`; teksty tej strony (tytuł "Ile zostanie w miesiącu", stan "brak kont", błąd listy kont) to **propozycja** w story.
+
+## 8. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | karty jedna pod drugą |
+| 768 px | karty obok siebie (zawijają się, gdy brakuje miejsca) |
+| 1440 px | kolumna do 960 px |
+
+<Canvas of={Stories.Tablet} />
+<Canvas of={Stories.NarrowScreen} />
+
+## 9. Kompozycja
+
+Patrz "Konto z wpisami", sekcja 10 (ta sama strona).
+
+## 10. Braki
+
+- Strona w `packages/app` (`GET /api/monthly-remainder`, adres) powstaje w etapie 5.
+- Gdy karty w stanie błędu, konto zmienia się tylko adresem (patrz "Konto z wpisami", "Braki").

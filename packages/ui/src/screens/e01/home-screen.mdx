@@ -24,7 +24,7 @@ Przegląd miesiąca ("ile zostanie") i wpisy konta to osobne ekrany (E03, E02); 
 
 ## 4. Anatomia
 
-1. Pasek nagłówka (`header`, landmark "banner") na tle `--primary`: tekst "AITL" po lewej, link "Wyloguj" (TextLink) po prawej.
+1. Pasek nagłówka z AppShell (`header`, landmark "banner") na tle `--primary`: tekst "AITL" po lewej, link "Wyloguj" (TextLink) po prawej.
 2. Treść (`main`) w kolumnie do 960 px (R01.4): BankAccountList z nagłówkiem `h1` "Twoje konta bankowe".
 3. Brak stopki, brak logo, brak nawigacji (jedyna akcja to wylogowanie).
 
@@ -74,23 +74,14 @@ Teksty listy: patrz strona BankAccountList. Nagłówek: tylko "AITL"; link: "Wyl
 ## 9. Kompozycja
 
 ```tsx
-<div className="flex min-h-screen flex-col bg-background text-foreground">
-  <header className="bg-primary text-primary-foreground">
-    <div className="mx-auto flex w-full max-w-240 items-center justify-between gap-(--space-within-group) p-(--space-panel)">
-      <p className="text-xl font-semibold leading-base">AITL</p>
-      <TextLink href="/logout" className="inline-flex min-h-control items-center text-primary-foreground hover:text-primary-foreground">
-        Wyloguj
-      </TextLink>
-    </div>
-  </header>
-  <main className="mx-auto w-full max-w-240 flex-1 px-(--space-panel) py-(--space-section)">
-    <BankAccountList status="loaded" accounts={accounts} onRetry={reload} headingLevel="h1" />
-  </main>
-</div>
+<AppShell logoutHref="/logout">
+  <BankAccountList status="loaded" accounts={accounts} onRetry={reload} headingLevel="h1" />
+</AppShell>
 ```
+
+Pasek i kolumna treści pochodzą z komponentu AppShell (strona "Elementy produktu / AppShell").
 
 ## 10. Braki
 
 - Strona w `packages/app` (widok na `/`, przekierowania, wylogowanie) powstaje w etapie 5.
-- Wspólny `AppShell` (pasek z nazwą i "Wyloguj") zostaje wyodrębniony, gdy powstanie drugi ekran z tym paskiem (ekran konta, E02).
-- Brak stanu aktywnego konta (należy do przeglądu miesiąca, E03).
+- Wybór aktywnego konta i miesiąc w adresie należą do ekranu przeglądu miesiąca (E03, strona "Ekrany / E03"); po jego wdrożeniu lista kont z tego ekranu przestaje być osobnym widokiem (**do decyzji właściciela**, patrz propozycje PR T).

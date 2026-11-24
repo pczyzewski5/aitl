@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { AppShell } from '../../components/layout/app-shell';
 import { LoginForm } from '../../components/auth/login-form';
 import type { LoginValues } from '../../components/auth/login-form';
 import type { LoginResult } from '../../components/auth/login-failure';
@@ -40,16 +41,9 @@ function LoginScreen({ scenario = 'invalid-credentials', retryAfterSeconds = DEF
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <header className="bg-primary text-primary-foreground">
-        <div className="mx-auto flex w-full max-w-240 items-center p-(--space-panel)">
-          <p className="min-w-0 text-xl font-semibold leading-base">{PRODUCT_NAME}</p>
-        </div>
-      </header>
-      <main className="mx-auto w-full max-w-240 flex-1 px-(--space-panel) py-(--space-section)">
-        <LoginForm onSubmit={respond} />
-      </main>
-    </div>
+    <AppShell>
+      <LoginForm onSubmit={respond} />
+    </AppShell>
   );
 }
 

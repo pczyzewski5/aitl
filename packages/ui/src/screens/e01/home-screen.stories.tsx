@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { MouseEvent } from 'react';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { BankAccountList } from '../../components/bank-accounts/bank-account-list';
 import type { BankAccountListItem, BankAccountListProps } from '../../components/bank-accounts/bank-account-list';
-import { TextLink } from '../../components/ui/text-link';
+import { AppShell } from '../../components/layout/app-shell';
 
 const NARROW_WIDTH_PX = 320;
 const MOBILE_VIEWPORT = { value: 'mobile1', isRotated: false };
 const TABLET_VIEWPORT = { value: 'tablet', isRotated: false };
 const PRODUCT_NAME = 'AITL';
 const LOGOUT_LABEL = 'Wyloguj';
-const HEADER_LINK_CLASS = 'inline-flex min-h-control items-center text-primary-foreground hover:text-primary-foreground';
 
 const SHARED_ACCOUNT: BankAccountListItem = { id: 'a1', name: 'Konto wspólne (przykład)', type: 'shared', href: '#konto-wspolne' };
 const PERSONAL_ACCOUNT: BankAccountListItem = { id: 'a2', name: 'Konto osobiste Pawła (przykład)', type: 'personal', href: '#konto-osobiste' };
@@ -24,35 +24,24 @@ interface HomeScreenProps extends Pick<BankAccountListProps, 'status' | 'account
   onRetry: () => void;
 }
 
+function preventNavigationOnLink(event: MouseEvent<HTMLElement>): void {
+  if ((event.target as HTMLElement).closest('a')) {
+    event.preventDefault();
+  }
+}
+
 function HomeScreen({ status, accounts, retrying, emptyAction, onRetry }: HomeScreenProps) {
   return (
-    <div
-      className="flex min-h-screen flex-col bg-background text-foreground"
-      onClickCapture={(event) => {
-        if ((event.target as HTMLElement).closest('a')) {
-          event.preventDefault();
-        }
-      }}
-    >
-      <header className="bg-primary text-primary-foreground">
-        <div className="mx-auto flex w-full max-w-240 items-center justify-between gap-(--space-within-group) p-(--space-panel)">
-          <p className="min-w-0 text-xl font-semibold leading-base">{PRODUCT_NAME}</p>
-          <TextLink href="#wyloguj" className={HEADER_LINK_CLASS}>
-            {LOGOUT_LABEL}
-          </TextLink>
-        </div>
-      </header>
-      <main className="mx-auto w-full max-w-240 flex-1 px-(--space-panel) py-(--space-section)">
-        <BankAccountList
-          status={status}
-          accounts={accounts}
-          retrying={retrying}
-          emptyAction={emptyAction}
-          onRetry={onRetry}
-          headingLevel="h1"
-        />
-      </main>
-    </div>
+    <AppShell logoutHref="#wyloguj" onClickCapture={preventNavigationOnLink}>
+      <BankAccountList
+        status={status}
+        accounts={accounts}
+        retrying={retrying}
+        emptyAction={emptyAction}
+        onRetry={onRetry}
+        headingLevel="h1"
+      />
+    </AppShell>
   );
 }
 

@@ -37,7 +37,7 @@ Zapewnia, że nieodwracalna operacja wykona się dopiero po świadomej decyzji, 
 6. **Błąd w oknie, okno zostaje otwarte:** komunikat w Alercie wewnątrz okna ("co się stało i co zrobić"), wpis na liście bez zmian, ponowna próba możliwa. Konflikt (409): "Wpis zmienił się w międzyczasie. Odśwież listę i spróbuj ponownie."
 7. **Sukces zamyka okno, potem Toast** (`onCompleted`), np. "Wpis usunięty." Bez akcji w Toaście.
 8. **Pozycja zablokowana z powodem:** gdy akcja jest niedostępna ("Usuń całkowicie" dla serii z przeszłością), pozycja menu jest widoczna, `aria-disabled`, a powód stoi obok w tekście, razem z wskazaniem właściwej akcji ("Użyj „Zakończ od miesiąca”.").
-9. **Fokus po zamknięciu:** po anulowaniu wraca na przycisk menu; po udanym usunięciu wiersz znika, więc wołający przenosi fokus na sensowny element (np. podpis tabeli).
+9. **Fokus po zamknięciu:** po anulowaniu wraca na przycisk menu; po udanym usunięciu wiersz znika, więc wołający przenosi fokus na **nagłówek listy** (zatwierdzone 2026-11-24, ekran "Konto z wpisami"): nagłówek ma `tabindex="-1"`, a przeniesienie następuje w `setTimeout(0)` po `onCompleted('delete')`, bo Radix oddaje fokus na `body` dopiero po odmontowaniu okna.
 
 ## 5. Stany
 

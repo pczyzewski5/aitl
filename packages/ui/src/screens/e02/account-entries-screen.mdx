@@ -1,0 +1,150 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './account-entries-screen.stories';
+
+<Meta of={Stories} />
+
+# Ekran: Konto z wpisami (`/?account=…&month=…`)
+
+Pełnoekranowa kompozycja wpisów wybranego konta: pasek AppShell, przełącznik miesiąca, karty wyniku obu kont, tabela wpisów, formularz wpisu, akcje wiersza i Toast (E02-S01...S05). Źródło: specyfikacja `.ai/specs/2026-11-17-entries-income-expenses.md` (kontrakty list, `POST`, `PUT`, `end`, `revisions`, `DELETE`, `paid`), wzorzec "Lista wpisów konta", wzorzec "Potwierdzenie usunięcia", decyzje właściciela z 2026-11-24 (jedna strona, stan w adresie). Strony w `packages/app` powstaną w etapie 5 (decyzja właściciela).
+
+<Canvas of={Stories.Ready} />
+
+## 1. Do czego służy
+
+Użytkownik widzi wpisy jednego konta w jednym miesiącu, dodaje, edytuje i usuwa wpisy, zmienia serie i zaznacza zapłacone wydatki. Wynik konta (karty) aktualizuje się razem z listą.
+
+## 2. Kiedy używać
+
+Wejście na `/` z aktywną sesją. To **jedna strona**: nie ma osobnej strony konta (`/bank-accounts/{id}`), a przegląd miesiąca (E03) i wpisy konta (E02) są dwiema sekcjami tego samego ekranu (patrz "Ekrany / E03").
+
+## 3. Kiedy nie używać
+
+Logowanie (E01) i wyniki bez wpisów (E03 bez wybranego konta nie istnieje: zawsze jest wybrane konto, o ile użytkownik ma jakiekolwiek).
+
+## 4. Anatomia
+
+1. AppShell: pasek "AITL" i "Wyloguj", kolumna 960 px.
+2. `h1` "Ile zostanie w miesiącu" (tytuł strony, wspólny dla E02 i E03).
+3. MonthSwitcher (jeden miesiąc dla wszystkich kart i listy).
+4. Sekcja kart (`section`, nazwa z ukrytego `h2` "Wyniki kont w wybranym miesiącu"): jedna AccountRemainderCard na konto, wybrana karta ma `aria-pressed="true"`.
+5. Sekcja wpisów (`section` z `h2` `Wpisy: <nazwa konta>`): przycisk "Dodaj wpis" (ukryty w pustym miesiącu, bo stan pusty ma tę akcję), EntryTable z `SeriesActions` w kolumnie "Akcje".
+6. Okno EntryForm i Toast (jeden `ToastProvider` na stronę).
+
+Hierarchia nagłówków: `h1` strona, `h2` wyniki kont (ukryty), `h3` karty konta (nazwy kart), `h2` wpisy konta, `h3` stany tabeli. Ukryty `h2` nad kartami jest potrzebny, żeby nazwy kart (`h3`) nie wskakiwały bezpośrednio pod `h1` (axe: kolejność nagłówków).
+
+## 5. Stan w adresie URL (decyzja właściciela)
+
+Stan ekranu mieszka w adresie: `/?account=<id>&month=RRRR-MM`.
+
+| Parametr | Znaczenie | Gdy brak lub błędny |
+|---|---|---|
+| `month` | oglądany miesiąc (2000-01 do 2100-12) | bieżący miesiąc według serwera (Europe/Warsaw) |
+| `account` | id wybranego konta (z członkostwa użytkownika) | pierwsze konto z listy (wspólne przed osobistymi); id konta bez dostępu nie jest odróżniane od nieznanego |
+
+- Zmiana miesiąca zachowuje konto, wybór karty zachowuje miesiąc; obie zmiany to nowy wpis w historii przeglądarki, a normalizacja błędnego adresu to `replace` (bez wpisu w historii); oba to **propozycja** do potwierdzenia przy budowie strony w etapie 5.
+- Story pokazują adres w małym podpisie "Adres strony (symulacja)": to tylko ilustracja, `app` czyta i zapisuje prawdziwy adres.
+- Dokładne reguły parsowania (zakres miesięcy, nieznane konto) zostają w `app` (etap 5); komponenty `ui` dostają `month` i `selected`.
+
+<Canvas of={Stories.FromUrl} />
+<Canvas of={Stories.InvalidUrl} />
+
+## 6. Mapa stanów (która story pokazuje który stan)
+
+| Stan ekranu | Story |
+|---|---|
+| Konto wspólne, listopad 2026, adres bez parametrów | Stan: konto wspólne, listopad 2026 |
+| Adres z kontem osobistym i miesiącem | Stan: adres z parametrami |
+| Błędny adres (nieznane konto, miesiąc spoza zakresu) | Stan: błędny adres |
+| Ładowanie listy (karty gotowe) | Stan: ładowanie listy wpisów |
+| Ładowanie kart i listy | Stan: ładowanie kart wyniku i listy naraz |
+| Miesiąc bez wpisów, jedna akcja "Dodaj wpis" | Stan: miesiąc bez wpisów |
+| Błąd wczytania listy z ponowieniem | Stan: błąd wczytania listy |
+| 422 limit listy (500 wpisów) | Stan: za dużo wpisów |
+| Błąd zapisu flagi "Zapłacone" | Stan: błąd zapisu flagi |
+| Błąd sieci przy zapisie wpisu | Stan: błąd sieci przy zapisie wpisu |
+| Walidacja serwera (400/422 z polami) | Stan: serwer odrzuca kwotę |
+| Limit wpisów przy zapisie (422) | Stan: limit wpisów przy zapisie |
+| Konflikt przy usuwaniu (409) | Stan: konflikt przy usuwaniu |
+| Konflikt przy zakończeniu serii (409) | Stan: konflikt przy zakończeniu serii |
+| Dostęp tylko do jednego konta | Stan: dostęp tylko do konta wspólnego |
+| 768 px, 320 px | Szerokość: 768 px, Szerokość: 320 px |
+| Testy: adres, brak sumy łącznej, dodanie, fokus po usunięciu, zakończenie serii, flaga a wynik, rama strony, kolejność fokusu | stories "Test: ..." |
+
+Błąd wczytania kart, brak kont i błąd listy kont to stany sekcji kart, opisane na stronie "Ekrany / E03". Sesja wygasła to przekierowanie na `/login` (nie stan tego ekranu).
+
+<Canvas of={Stories.Loading} />
+<Canvas of={Stories.EmptyMonth} />
+<Canvas of={Stories.FailedToLoad} />
+<Canvas of={Stories.LimitExceeded} />
+<Canvas of={Stories.PaidSaveFails} />
+<Canvas of={Stories.SaveFails} />
+<Canvas of={Stories.SaveValidationFails} />
+<Canvas of={Stories.SaveLimit} />
+<Canvas of={Stories.DeleteConflict} />
+<Canvas of={Stories.SeriesConflict} />
+
+### Niezależność sekcji
+
+Karty wyniku (`GET /api/monthly-remainder`) i lista wpisów (`GET .../entries`) to osobne żądania: każda sekcja ma własne ładowanie i własny błąd z ponowieniem, a awaria jednej nie ukrywa drugiej. Po zapisie wpisu `app` odświeża **obie** (wynik konta się zmienia).
+
+### Co dzieje się po operacji
+
+| Operacja | Wynik w UI |
+|---|---|
+| Dodanie, edycja | okno zamyka się, lista i karty się odświeżają, Toast "Wpis zapisany.", fokus wraca na przycisk, który otworzył okno |
+| Usunięcie wpisu | okno zamyka się, wiersz znika, Toast "Wpis usunięty.", **fokus trafia na nagłówek listy** `h2` `Wpisy: …` (decyzja właściciela) |
+| Zakończenie serii, zmiana kwoty | okno zamyka się, Toast, fokus wraca na menu wiersza (wiersz zostaje) |
+| Błąd w oknie | okno zostaje otwarte z komunikatem i danymi; Toast tylko dla flagi "Zapłacone" (nie ma okna) |
+
+Fokus po usunięciu: nagłówek jest programowo fokusowalny (`tabindex="-1"`), nie jest w kolejności `Tab`. Przywrócenie fokusu na wiersz sąsiada odrzucono (wiersz może zniknąć razem z całą listą, a nagłówek jest zawsze).
+
+**Pułapka (patrz lekcje):** fokus trzeba przenieść **po** tym, jak Radix zwolni okno (jego `FocusScope` oddaje fokus w `setTimeout(0)` po odmontowaniu, a po usuniętym wierszu oddaje go na `body`). Story robi to w efekcie z `setTimeout(0)` po `onCompleted('delete')`; `app` powinno zrobić tak samo.
+
+## 7. Zachowanie i dostępność
+
+- Landmarki: `banner`, `main`; jeden `h1`. Sekcje kart i wpisów mają nazwy z nagłówków; przewijany region tabeli ma nazwę z podpisu tabeli.
+- Kolejność fokusu: "Wyloguj", strzałki miesiąca, karty kont, "Dodaj wpis", elementy tabeli.
+- Kolor nigdy nie jest jedynym nośnikiem: wynik ujemny ma minus, wybrana karta ma tekst "Wybrane" i `aria-pressed`, kwoty mają znak, flaga to pole wyboru z nazwą.
+- Toast to jedyne powiadomienie o zapisie (`aria-live`, bez kradzieży fokusu); błędy w oknie to `role="alert"` w oknie.
+- Brak sumy łącznej kont (R03) i brak wpływu flagi "Zapłacone" na wyniki (R02): testy w story.
+
+## 8. Treść
+
+Teksty komponentów to stałe w `*.messages.ts` (nadpisywalne propem). Teksty strony tego ekranu (tytuł, nagłówek wpisów, komunikaty Toastów, stany "brak kont") są stałymi w story i **propozycją**: `app` dostarczy własne.
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | karty jedna pod drugą, strona nie przewija się w poziomie, tabela przewija się w kontenerze z podpowiedzią |
+| 768 px | karty obok siebie, tabela mieści się |
+| 1440 px | kolumna do 960 px |
+
+<Canvas of={Stories.Tablet} />
+<Canvas of={Stories.NarrowScreen} />
+
+## 10. Kompozycja
+
+```tsx
+<ToastProvider closeLabel="Zamknij" viewportLabel="Powiadomienia ({hotkey})" announcementLabel="Powiadomienie">
+  <AppShell logoutHref="/logout">
+    <h1>Ile zostanie w miesiącu</h1>
+    <MonthSwitcher month={month} onMonthChange={goToMonth} min="2000-01" max="2100-12" />
+    <section aria-labelledby={cardsHeadingId}>
+      <h2 id={cardsHeadingId} className="sr-only">Wyniki kont w wybranym miesiącu</h2>
+      {accounts.map((account) => <AccountRemainderCard ... selected={account.id === accountId} onSelect={() => goToAccount(account.id)} />)}
+    </section>
+    <section aria-labelledby={entriesHeadingId}>
+      <h2 id={entriesHeadingId} tabIndex={-1} ref={entriesHeadingRef}>Wpisy: {account.name}</h2>
+      <EntryTable status={status} caption={...} entries={entries} actions={(entry) => <SeriesActions ... />} ... />
+    </section>
+    <EntryForm ... />
+  </AppShell>
+</ToastProvider>
+```
+
+## 11. Braki
+
+- Strony w `packages/app` (odczyt i zapis adresu, `apiCall`, odświeżanie kart po zapisie) powstają w etapie 5.
+- Gdy błąd kart wyniku ukrywa wybór konta (karta w stanie błędu nie jest przyciskiem), konto można zmienić tylko przez adres; **do decyzji właściciela**, czy dodać zapasowy wybór konta.
+- Luki specyfikacji E02 z PR S (`paid` w `POST`, `updatedAt` w liście, `seriesStartMonth`/`seriesEndMonth`) pozostają do uzupełnienia przed etapem 5.
