@@ -263,3 +263,7 @@ Do zrobienia: m7, m8, nity.
 ## 2026-11-24 (poprawki po przeglądzie Fazy 2, m7)
 `SESSION_SECRET`: walidacja zostaje na min. 32 znaki (zaostrzenie byłoby zmianą łamiącą istniejących `.env` i testów), a zalecenie "losowy, np. `openssl rand -hex 32` (64 znaki hex)" trafiło do README, BC §3 i specu; sekcja "Algorytm" i "Stały koszt" w specu opisuje już rezerwację próby, `deleteStale` i wabik z M1, m1, m2, m4.
 Do zrobienia: m3, nity.
+
+## 2026-11-24 (poprawki po przegladzie Fazy 2, m3)
+Ryzyko `TRUSTED_PROXY_HOPS=0` dopisane do BC §3 i do edge cases specu: przy 0 kazdy znajacy e-mail blokuje konto pieciem blednych prob na 15 minut; zaakceptowane w Q15, do rozwazenia przed produkcja.
+Do zrobienia: nity.
