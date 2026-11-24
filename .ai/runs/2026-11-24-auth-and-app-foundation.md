@@ -231,3 +231,7 @@ Do zrobienia: E2E w przeglądarce dla żony, SB-I, PR, track.md.
 
 ## 2026-11-24 (PR-11, krok 2.7, commit 2)
 SB-I: po merge #76 padły 2 testy `seed.test.ts` (brak `SESSION_SECRET` wymaganego od #77); test ustawia teraz losowy sekret, README wymienia `SESSION_SECRET` przed `seed:user` (lekcja). Przeglądarka (Chrome, seedowana aplikacja z testu przejściowego, usunięty): żona loguje się, widzi tylko "Konto wspolne", wylogowanie wraca na `/login`, ponowne wejście na `/` też. Typecheck, lint, coverage 100
+
+## 2026-11-24 (PR-11, krok 2.7, commit 3)
+Dopisek do commitu 2 (wpis urwał się na znaku procentu): coverage 100 procent, build, audit 0 podatności, integracyjne 105/105. PR #80 (base main, etykieta needs-qa, stos #70, #72, #73, #75, #76, #77, #78, #74, #71, #79); wiersz PR-11 uzupełniony numerem.
+Do zrobienia: zielone checki, merge po stosie, SHA w track.md.
