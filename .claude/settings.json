@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.*.local)",
+      "Read(./.env.development)",
+      "Read(./.env.production)",
+      "Read(./.env.test)",
+      "Read(./**/.env)",
+      "Read(./**/.env.local)",
+      "Read(./**/*.pem)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "allowUnsandboxedCommands": false,
+    "excludedCommands": ["docker"],
+    "filesystem": {
+      "denyRead": ["~/.ssh", "~/.aws", "~/.config/gh", "~/.kube", "~/.npmrc", "~/.pypirc", "~/**/.env"]
+    },
+    "network": {
+      "allowLocalBinding": true,
+      "allowedDomains": ["github.com", "api.github.com", "registry.npmjs.org"],
+      "deniedDomains": ["169.254.169.254", "metadata.google.internal"]
+    }
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre-tool-use.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
