@@ -210,3 +210,7 @@ Do zrobienia: weryfikacja w przeglądarce, SB-U, PR, wiersz PR-10c w track.md.
 ## 2026-11-24 (PR-10c, krok 2.6c, commit 2)
 Weryfikacja w prawdziwym Chrome na seedowanej aplikacji: `/` -> `/login`, zły login (komunikat, dane zostają, fokus na e-mailu), poprawny (fokus na h1, nazwa w pasku, wspólne przed osobistymi, linki `/?account=<id>`), `/login` zalogowanego -> `/`, wylogowanie (fokus na h1 `/login`, `/` przekierowuje). Lekcja o seedowaniu aplikacji do testu przeglądarkowego i stabilnym mocku `useRouter`. SB-I zielone (typecheck, lint, coverage 100%, build, audit, test:integration 87/87); `packages/ui` bez zmian, więc SB-U nie dotyczy.
 Do zrobienia: PR, checki, wiersz PR-10c w track.md.
+
+## 2026-11-24 (PR-10c, krok 2.6c, commit 3)
+PR #79 otwarty (etykieta `needs-qa`), wiersz PR-10c w track.md uzupełniony.
+Do zrobienia: zielone checki, po merge stosu przestawić bazę na `main`, merge, SHA w track.md.
