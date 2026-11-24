@@ -196,3 +196,7 @@ Pitfall: `check:tokens` scans `.mdx`, so docs cannot quote forbidden values lite
 ## 2026-11-24 (design system, PR V: stage 5 verification and report)
 Ran the full gate (typecheck, lint, coverage 100%, Storybook build, 611 Storybook tests with axe, audit, `check:tokens`), swept all screen and pattern stories at 320/768/1440 px in both themes, and keyboard-checked Dialog, Menu and Toast in Chrome. Found and fixed a page-level horizontal overflow at 320 px (`sr-only` text escaping the unpositioned scroll region of `EntryTable`; regression story assertion plus unit assertion). Prepared, but did not run, the agent test (E04 forecast screen) and wrote the stage 5 report; added the "update `docs/design-system.md`" item to the review checklist in `AGENTS.md`.
 Pitfalls: Storybook tests run in a wide viewport and cannot see narrow overflow; rebuilding Storybook deletes the served directory. Todo: owner review, agent test in a fresh session, dark theme values (L3).
+
+## 2026-11-24 (lesson 7: E01 screen map)
+Added the approved screen map for E01 (`.ai/specs/design/2026-11-24-mapa-ekranow-e01.md`): two screens (login, account list), 11 criteria, 17 spec gaps all decided as recommended (empty list and lockout get criteria, logout as a button styled as a link, 403 everywhere, shared accounts before personal, display name in the app bar, account link `/?account=<id>`, same screens for the spouse).
+Left: apply the decisions to the E01 spec and issues #6, #10, #11 (separate step with owner consent), then the grey prototype (exercise 2a).
