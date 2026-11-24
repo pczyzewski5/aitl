@@ -13,6 +13,8 @@ const REPOSITORY_ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const SEED_COMMAND = ['--import', 'tsx', 'scripts/seed-user.ts'];
 const SEED_TIMEOUT_MS = 60_000;
 const RANDOM_BYTES = 12;
+const SESSION_SECRET_BYTES = 32;
+const SESSION_SECRET = randomBytes(SESSION_SECRET_BYTES).toString('hex');
 
 const randomText = (): string => randomBytes(RANDOM_BYTES).toString('hex');
 
@@ -23,7 +25,7 @@ const runSeedScript = (args: string[], password: string): SeedRun => {
     cwd: REPOSITORY_ROOT,
     encoding: 'utf8',
     timeout: SEED_TIMEOUT_MS,
-    env: { ...process.env, DATABASE_URL: inject('databaseUrl'), [SEED_PASSWORD_ENV]: password },
+    env: { ...process.env, DATABASE_URL: inject('databaseUrl'), SESSION_SECRET, [SEED_PASSWORD_ENV]: password },
   });
 
   return { status: result.status, stdout: result.stdout, stderr: result.stderr };
@@ -73,7 +75,7 @@ describe('seed:user against PostgreSQL', () => {
     const secondOwnerRun = runSeedScript(ownerArgs, ownerPassword);
     const differentPasswordRun = runSeedScript(ownerArgs, otherPassword);
 
-    const scope = createAppContainer({ DATABASE_URL: inject('databaseUrl') }, initTrackedOrm).createScope();
+    const scope = createAppContainer({ DATABASE_URL: inject('databaseUrl'), SESSION_SECRET }, initTrackedOrm).createScope();
     const owner = await scope.cradle.userRepository.findByEmail(ownerEmail);
     const spouse = await scope.cradle.userRepository.findByEmail(spouseEmail);
     const ownerAccounts = await scope.cradle.bankAccountService.listForUser(owner?.id ?? '');
@@ -111,7 +113,7 @@ describe('seed:user against PostgreSQL', () => {
 
     const actual = runSeedScript(['--email', email, '--name', 'Owner'], randomText().slice(0, 4));
 
-    const scope = createAppContainer({ DATABASE_URL: inject('databaseUrl') }, initTrackedOrm).createScope();
+    const scope = createAppContainer({ DATABASE_URL: inject('databaseUrl'), SESSION_SECRET }, initTrackedOrm).createScope();
     expect(actual.status).toBe(SEED_EXIT_CODE.InvalidInput);
     expect(await scope.cradle.userRepository.findByEmail(email)).toBeNull();
   });

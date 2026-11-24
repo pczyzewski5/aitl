@@ -140,3 +140,6 @@ Do zrobienia: instalator, README, BACKWARD_COMPATIBILITY, PR, wiersz PR-9 w trac
 ## 2026-11-24 (PR-9, krok 2.5, commit 2)
 Instalator: "Następne kroki" wskazują `seed:user` i `SEED_PASSWORD` (bez generowania sekretów i bez uruchamiania seeda), stałe w `scripts/setup/config.ts`; README (Getting started i sekcja "Konta użytkowników"); BACKWARD_COMPATIBILITY §3 o `SEED_PASSWORD` i kontrakcie komendy.
 Do zrobienia: wiersz PR-9 w track.md, SB-I, PR.
+
+## 2026-11-24 (PR-11, krok 2.7, commit 2)
+SB-I: po merge #76 padły 2 testy `seed.test.ts` (brak `SESSION_SECRET` wymaganego od #77); test ustawia teraz losowy sekret, README wymienia `SESSION_SECRET` przed `seed:user` (lekcja). Przeglądarka (Chrome, seedowana aplikacja z testu przejściowego, usunięty): żona loguje się, widzi tylko "Konto wspolne", wylogowanie wraca na `/login`, ponowne wejście na `/` też. Typecheck, lint, coverage 100

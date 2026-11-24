@@ -38,7 +38,7 @@ npm run seed:user -- --email <e-mail> --name <nazwa>
 npm run dev -w @aitl/app
 ```
 
-Przed `cp` sprawdź, czy `.env` już nie istnieje (nie nadpisuj go). Polecenie `pg_isready` powtarzaj, aż zwróci sukces. Pozostałe kroki są idempotentne. Przed `seed:user` ustaw `SEED_PASSWORD` w `.env`.
+Przed `cp` sprawdź, czy `.env` już nie istnieje (nie nadpisuj go). Polecenie `pg_isready` powtarzaj, aż zwróci sukces. Pozostałe kroki są idempotentne. Przed `seed:user` ustaw `SESSION_SECRET` i `SEED_PASSWORD` w `.env`.
 
 ### Konta użytkowników
 
