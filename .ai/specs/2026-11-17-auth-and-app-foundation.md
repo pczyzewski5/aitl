@@ -54,6 +54,9 @@ Wybory właściciela produktu, 2026-11-17; Q23-Q28 z 2026-11-24 wynikają z zatw
 | Q33 | "Dwie sesje naraz" (S02-K5) testuje test integracyjny API: dwa logowania, dwa tokeny, wylogowanie jednej sesji nie wpływa na drugą (Step 2.7); test w przeglądarce (E2E) tylko dla scenariusza żony | właściciel produktu | 2026-11-24 |
 | Q34 | Wygaśnięcie sesji w trakcie formularza (E02): zapis zwraca 401, formularz pokazuje komunikat "Zaloguj się ponownie", wpisane dane zostają; szczegóły w specyfikacji E02 (decyzja z odroczonym szczegółem) | właściciel produktu | 2026-11-24 |
 | Q35 | Stan pusty listy kont wskazuje "Skontaktuj się z administratorem aplikacji", bez nazwisk i adresów | właściciel produktu | 2026-11-24 |
+| Q36 | Fail-fast przy braku konfiguracji nie kończy procesu: `register()` w `instrumentation.ts` rzuca błąd walidacji env, ale Next 16 dalej obsługuje żądania i zwraca 500 `internal` (bez `process.exit(1)`); lekcja `2026-11-24-next-keeps-running-when-register-throws` | właściciel produktu | 2026-11-24 |
+| Q37 | `apiHandler` zwraca zawsze 200 przy sukcesie (koperta `{ ok: true, data }`); status 201 dla tworzenia zasobów i nagłówek `Retry-After` przy 429 wchodzą wraz z pierwszą route, która ich potrzebuje: nagłówek 429 dodaje PR-4 (`TooManyRequestsError` z `retryAfterSeconds`, krok 2.1), 201 przy pierwszej route tworzącej zasób, jako zgodna rozszerzająca zmiana opcji handlera | przegląd Fazy 1 | 2026-11-24 |
+| Q38 | `apiHandler` przekazuje kontekst route Next 16 jako trzeci argument `(request, scope, context)`; `params` jest typowane jako `ApiRouteParams<TParams>` (`{ params: Promise<TParams> }`) i odczytywane przez `await context.params` | przegląd Fazy 1 | 2026-11-24 |
 
 Powiązane: D01, D02, R01 (brak kwot w tym zakresie), R03. Spec ich nie zmienia.
 

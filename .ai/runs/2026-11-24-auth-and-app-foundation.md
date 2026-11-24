@@ -91,3 +91,7 @@ Do zrobienia: stała statusu health, nazwa testu ponownej próby ORM, dokumentac
 ## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 6)
 Stała `HEALTH_STATUS_UP` w health (nieeksportowana, bo route Next dopuszcza tylko eksporty handlerów); test ponownej próby ORM opisuje błąd konfiguracji/discovery, nie awarię bazy przy init.
 Do zrobienia: dopisy w specu i BACKWARD_COMPATIBILITY.md.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 7)
+Spec: dopisane Q36-Q38 (fail-fast bez zakończenia procesu, 200 przy sukcesie i plan na 201/Retry-After, `params` w handlerze); `BACKWARD_COMPATIBILITY.md` §2 opisuje kod `internal` (500). Istniejące decyzje bez zmian.
+Świadomie odłożone: cache ORM po zmianie URL, `orm.close()`, zmiana `serverExternalPackages`.
