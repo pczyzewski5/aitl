@@ -127,3 +127,7 @@ Do zrobienia: rejestracje w kontenerze i test integracyjny z prawdziwym argon2.
 Rejestracje per koncept w kontenerze: `registrations/{auth,bank-accounts,users}.ts` (hasher singleton, repozytoria i serwisy scoped na EM scope), `Cradle` rozszerzony; `serverExternalPackages` miało już `@node-rs/argon2` (PR-3), bez zmiany. Testy integracyjne: serwisy z kontenera na Postgresie z prawdziwym argon2id i parametrami produkcyjnymi (`auth-services.test.ts`) oraz kontrola bundlingu (`bundling.test.ts`); lekcja o hashowanych nazwach zewnętrznych pakietów w Turbopacku.
 Bundling zweryfikowany: po zepsuciu `argon2/index.js` health zwraca 500, więc zielony health pod `next start` dowodzi ładowania bindingu; HTTP-owego rozwiązania serwisu nie ma, bo brak route (pierwsza w 2.4a).
 Do zrobienia: wiersz PR-6 w track.md, SB-I, PR.
+
+## 2026-11-24 (PR-6, krok 2.3, commit 4)
+PR #75 (base `main`, leży na stosie #73, #70, #72); wiersz PR-6 w track.md (in-progress, wynik SB-I).
+Do zrobienia: zielone checki, merge po #73/#70/#72, SHA w track.md.
