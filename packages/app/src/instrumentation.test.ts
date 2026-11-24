@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { NODE_RUNTIME, register } from './instrumentation';
 
@@ -11,6 +12,7 @@ describe('register', () => {
   it('accepts a valid environment in the Node runtime', async () => {
     vi.stubEnv('NEXT_RUNTIME', NODE_RUNTIME);
     vi.stubEnv('DATABASE_URL', VALID_DATABASE_URL);
+    vi.stubEnv('SESSION_SECRET', randomBytes(32).toString('hex'));
 
     await expect(register()).resolves.toBeUndefined();
   });

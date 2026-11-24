@@ -131,3 +131,7 @@ Do zrobienia: wiersz PR-6 w track.md, SB-I, PR.
 ## 2026-11-24 (PR-6, krok 2.3, commit 4)
 PR #75 (base `main`, leży na stosie #73, #70, #72); wiersz PR-6 w track.md (in-progress, wynik SB-I).
 Do zrobienia: zielone checki, merge po #73/#70/#72, SHA w track.md.
+
+## 2026-11-24 (PR-7, krok 2.4a, commit 1)
+Baza: stos #73, #70, #72, #75 (gałąź `feature/auth-session-login` z `feature/auth-services-hasher`). Rdzeń sesji w `core`: `SESSION_SECRET` (>= 32 znaki) i `SESSION_COOKIE_SECURE` (domyślnie true przy `NODE_ENV=production`) w schemacie env, `SessionTokens` (token 32 B base64url, HMAC-SHA256 z prefiksem domeny `session:`/`throttle:`), `SessionService` (30 dni przesuwne, twardy limit 90 dni, przedłużanie najwyżej raz na godzinę, sprzątanie wygasłych przy logowaniu; implementuje port `SessionResolver`), `AuthService` (login z `verifyAgainstDecoy` dla nieznanego e-maila, logout), `requireCsrfHeader`, `parseJsonBody`; unity z fałszywym zegarem.
+Do zrobienia: adapter MikroORM sesji i rejestracje, route login/logout, ładowanie env z korzenia monorepo, testy integracyjne, BACKWARD_COMPATIBILITY, spec (nowe Q).

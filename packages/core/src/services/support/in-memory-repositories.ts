@@ -3,6 +3,11 @@ import { BANK_ACCOUNT_TYPE, type BankAccountRecord } from '../bank-accounts/bank
 import type { BankAccountMembershipRepository } from '../bank-accounts/bank-account-membership-repository.port';
 import type { BankAccountRepository } from '../bank-accounts/bank-account-repository.port';
 import type { PasswordHasher } from '../auth/password-hasher.port';
+import type {
+  NewSession,
+  SessionRecord,
+  SessionRepository,
+} from '../auth/session-repository.port';
 import type { NewUser, UserRecord, UserRepository } from '../users/user-repository.port';
 import type {
   ProvisioningRepositories,
@@ -11,7 +16,10 @@ import type {
 
 export const FAKE_HASH_PREFIX = 'fake-hash:';
 
+export type StoredSession = SessionRecord & Readonly<{ tokenHash: string }>;
+
 export class InMemoryStore {
+  sessions: StoredSession[] = [];
   readonly users: UserRecord[] = [];
   readonly bankAccounts: BankAccountRecord[] = [];
   readonly memberships: Array<{ userId: string; bankAccountId: string }> = [];
@@ -102,6 +110,38 @@ export class InMemoryMembershipRepository implements BankAccountMembershipReposi
 
   async add(userId: string, bankAccountId: string): Promise<void> {
     this.store.memberships.push({ userId, bankAccountId });
+  }
+}
+
+export class InMemorySessionRepository implements SessionRepository {
+  private readonly store: InMemoryStore;
+
+  constructor(store: InMemoryStore) {
+    this.store = store;
+  }
+
+  async create(session: NewSession): Promise<void> {
+    this.store.sessions.push({ id: randomUUID(), ...session });
+  }
+
+  async findByTokenHash(tokenHash: string): Promise<SessionRecord | null> {
+    return this.store.sessions.find((session) => session.tokenHash === tokenHash) ?? null;
+  }
+
+  async updateExpiresAt(id: string, expiresAt: Date): Promise<void> {
+    this.store.sessions = this.store.sessions.map((session) =>
+      session.id === id ? { ...session, expiresAt } : session,
+    );
+  }
+
+  async deleteByTokenHash(tokenHash: string): Promise<void> {
+    this.store.sessions = this.store.sessions.filter((session) => session.tokenHash !== tokenHash);
+  }
+
+  async deleteExpired(now: Date): Promise<void> {
+    this.store.sessions = this.store.sessions.filter(
+      (session) => now < session.expiresAt && now < session.absoluteExpiresAt,
+    );
   }
 }
 

@@ -5,6 +5,7 @@ import { createOrmConfig } from '@aitl/db';
 import { MikroORM, type Options } from '@mikro-orm/postgresql';
 import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 import { createAppContainer } from '../../packages/app/src/container/container.ts';
+import { createSessionSecret } from './support/app-server.ts';
 
 const MIGRATIONS_PATH = fileURLToPath(new URL('../../packages/db/migrations', import.meta.url));
 const RANDOM_BYTES = 12;
@@ -35,7 +36,7 @@ describe('services resolved from the application container against PostgreSQL', 
   });
 
   it('provisions the owner with a real argon2id hash made with the production parameters', async () => {
-    const container = createAppContainer({ DATABASE_URL: inject('databaseUrl') }, initTrackedOrm);
+    const container = createAppContainer({ DATABASE_URL: inject('databaseUrl'), SESSION_SECRET: createSessionSecret() }, initTrackedOrm);
     const password = randomText();
     const input = {
       mode: PROVISIONING_MODE.Owner,
@@ -62,7 +63,7 @@ describe('services resolved from the application container against PostgreSQL', 
   });
 
   it('keeps the personal account of the owner out of the shared-only user listing', async () => {
-    const container = createAppContainer({ DATABASE_URL: inject('databaseUrl') }, initTrackedOrm);
+    const container = createAppContainer({ DATABASE_URL: inject('databaseUrl'), SESSION_SECRET: createSessionSecret() }, initTrackedOrm);
     const sharedAccountName = randomText();
     const owner = await container.createScope().cradle.userProvisioningService.provision({
       mode: PROVISIONING_MODE.Owner,

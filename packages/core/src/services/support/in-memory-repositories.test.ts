@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createInMemoryRepositories,
   FakePasswordHasher,
+  InMemorySessionRepository,
   InMemoryStore,
   InMemoryUnitOfWork,
 } from './in-memory-repositories';
@@ -79,5 +80,60 @@ describe('in-memory repositories', () => {
 
     expect(sut.runs).toBe(1);
     expect(store.users).toEqual([actual]);
+  });
+});
+
+describe('InMemorySessionRepository', () => {
+  const NOW = new Date('2026-01-01T00:00:00Z');
+  const HOUR_MS = 60 * 60 * 1000;
+  const newSession = (tokenHash: string, expiresAt: Date, absoluteExpiresAt: Date) => ({
+    userId: randomText(),
+    tokenHash,
+    expiresAt,
+    absoluteExpiresAt,
+  });
+
+  it('finds, extends and deletes a session by its token hash', async () => {
+    const sut = new InMemorySessionRepository(new InMemoryStore());
+    const tokenHash = randomText();
+    const later = new Date(NOW.getTime() + HOUR_MS);
+    await sut.create(newSession(tokenHash, later, later));
+    const created = await sut.findByTokenHash(tokenHash);
+
+    await sut.updateExpiresAt(created?.id ?? '', NOW);
+    const extended = await sut.findByTokenHash(tokenHash);
+    await sut.deleteByTokenHash(tokenHash);
+
+    expect(extended?.expiresAt).toEqual(NOW);
+    expect(await sut.findByTokenHash(tokenHash)).toBeNull();
+  });
+
+  it('leaves other sessions alone when one is extended or deleted', async () => {
+    const sut = new InMemorySessionRepository(new InMemoryStore());
+    const later = new Date(NOW.getTime() + HOUR_MS);
+    const [first, second] = [randomText(), randomText()];
+    await sut.create(newSession(first, later, later));
+    await sut.create(newSession(second, later, later));
+    const firstRecord = await sut.findByTokenHash(first);
+
+    await sut.updateExpiresAt(firstRecord?.id ?? '', NOW);
+    await sut.deleteByTokenHash(first);
+
+    expect((await sut.findByTokenHash(second))?.expiresAt).toEqual(later);
+  });
+
+  it('deletes sessions past either of the two deadlines', async () => {
+    const sut = new InMemorySessionRepository(new InMemoryStore());
+    const later = new Date(NOW.getTime() + HOUR_MS);
+    const [idleExpired, absoluteExpired, valid] = [randomText(), randomText(), randomText()];
+    await sut.create(newSession(idleExpired, NOW, later));
+    await sut.create(newSession(absoluteExpired, later, NOW));
+    await sut.create(newSession(valid, later, later));
+
+    await sut.deleteExpired(NOW);
+
+    expect(await sut.findByTokenHash(idleExpired)).toBeNull();
+    expect(await sut.findByTokenHash(absoluteExpired)).toBeNull();
+    expect(await sut.findByTokenHash(valid)).not.toBeNull();
   });
 });

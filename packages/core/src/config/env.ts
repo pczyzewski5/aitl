@@ -11,7 +11,25 @@ const databaseEnvSchema = z.object({
   DATABASE_URL: z.string().min(1),
 });
 
-export const envSchema = runtimeEnvSchema.extend(databaseEnvSchema.shape);
+export const SESSION_SECRET_MIN_LENGTH = 32;
+export const BOOLEAN_ENV_VALUES = ['true', 'false'] as const;
+export const PRODUCTION_ENVIRONMENT = 'production';
+
+const sessionEnvSchema = z.object({
+  SESSION_SECRET: z.string().min(SESSION_SECRET_MIN_LENGTH),
+  SESSION_COOKIE_SECURE: z.enum(BOOLEAN_ENV_VALUES).optional(),
+});
+
+export const envSchema = runtimeEnvSchema
+  .extend(databaseEnvSchema.shape)
+  .extend(sessionEnvSchema.shape)
+  .transform((env) => ({
+    ...env,
+    SESSION_COOKIE_SECURE:
+      env.SESSION_COOKIE_SECURE === undefined
+        ? env.NODE_ENV === PRODUCTION_ENVIRONMENT
+        : env.SESSION_COOKIE_SECURE === 'true',
+  }));
 
 export type Env = z.infer<typeof envSchema>;
 
