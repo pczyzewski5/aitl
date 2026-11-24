@@ -219,3 +219,7 @@ Pitfalls: alphabetical order puts "Konto wspolne: wakacje" before the long name 
 
 ## 2026-11-24 (lint: ignore the untracked course materials)
 Added `lekcja-*/**` to the ESLint ignores: the untracked lesson 7 materials contain engine scripts (`.js`) that made `eslint .` fail in the main checkout (67 errors) and would have broken the pre-commit hook.
+
+## 2026-11-24 (lesson 7, exercise 2b stage 3: honesty and verification of the E01 prototype)
+Added per-screen notes (stories, simulation, what stays undecided), collapsed the scenario panel into a `<details>`, 14 more navigation/gate tests (45 total), wrapped the engine toolbar from host CSS (it overflowed at 320 px), replaced a raw `--space-1` with `--space-label-field`, wrote README limits and `RAPORT.md`. Token scan on `src/` (tool logic run once from the scratchpad): no violations. Chrome walk: 320 (iframe), 768, 1440, keyboard, every scenario control, comments mode, both exports (download captured, nothing saved).
+Pitfalls: Chrome window stops at about 500 px (use an iframe); comment "Delete" opens a native confirm that freezes automated tabs. Prototype is done; todo: real-person test and the spec decisions listed in the report.
