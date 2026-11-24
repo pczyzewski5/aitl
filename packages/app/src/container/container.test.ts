@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ORM_GLOBAL_KEY, type EntityManager, type OrmInit } from '@aitl/db';
 import { logger } from '@aitl/core';
 import { DEVELOPMENT_ENVIRONMENT, container, createAppContainer } from './container';
+import { createCoreRegistrations } from './registrations/core';
+import { createDbRegistrations } from './registrations/db';
 
 const DATABASE_URL = 'postgres://aitl@localhost:5432/aitl';
 
@@ -85,6 +87,28 @@ describe('createAppContainer', () => {
     await createAppContainer(production, otherInit).cradle.ormProvider.forkEntityManager();
 
     expect(otherInit).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('container registrations', () => {
+  const registeredKeys = [
+    ...Object.keys(createCoreRegistrations({})),
+    ...Object.keys(createDbRegistrations()),
+  ];
+
+  it('registers every key of the per-concept registration files', () => {
+    const sut = createAppContainer({ DATABASE_URL });
+
+    expect(Object.keys(sut.registrations).sort()).toEqual([...registeredKeys].sort());
+  });
+
+  it.each(registeredKeys)('resolves %s in a scope', (key) => {
+    const sut = createAppContainer({ DATABASE_URL }, createFakeOrmInit());
+    const scope = sut.createScope();
+
+    const actual = (scope.cradle as Record<string, unknown>)[key];
+
+    expect(actual).toBeDefined();
   });
 });
 

@@ -79,3 +79,7 @@ Głębokość 3+ nie jest redagowana (świadome ograniczenie kosztu ścieżek).
 ## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 3)
 Własny serializer `err` w loggerze (`type`, `message`, `code`, `stack`): pola sterownika typu `detail` nie trafiają do logu; test na poziomie loggera i `apiHandler`.
 Pułapka: `message` błędu sterownika nadal trafia do logu (może zawierać fragment danych); świadomie zostawione do diagnostyki.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 4)
+Kontener złożony z rejestracji per koncept: `container/registrations/{core,db}.ts` (`createXRegistrations` z `satisfies`), `Cradle = CoreCradle & DbCradle`; test rozwiązuje każdy klucz w scope i porównuje klucze kontenera z plikami rejestracji.
+Kolejny koncept dopisuje własny plik rejestracji i jedną linię spread w `container.ts`.
