@@ -2,8 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ORM_GLOBAL_KEY, type EntityManager, type OrmInit } from '@aitl/db';
 import { logger } from '@aitl/core';
 import { DEVELOPMENT_ENVIRONMENT, container, createAppContainer } from './container';
+import { createAuthRegistrations } from './registrations/auth';
+import { createBankAccountsRegistrations } from './registrations/bank-accounts';
 import { createCoreRegistrations } from './registrations/core';
 import { createDbRegistrations } from './registrations/db';
+import { createUsersRegistrations } from './registrations/users';
 
 const DATABASE_URL = 'postgres://aitl@localhost:5432/aitl';
 
@@ -94,6 +97,9 @@ describe('container registrations', () => {
   const registeredKeys = [
     ...Object.keys(createCoreRegistrations({})),
     ...Object.keys(createDbRegistrations()),
+    ...Object.keys(createAuthRegistrations()),
+    ...Object.keys(createBankAccountsRegistrations()),
+    ...Object.keys(createUsersRegistrations()),
   ];
 
   it('registers every key of the per-concept registration files', () => {
@@ -109,6 +115,26 @@ describe('container registrations', () => {
     const actual = (scope.cradle as Record<string, unknown>)[key];
 
     expect(actual).toBeDefined();
+  });
+});
+
+describe('container services', () => {
+  it('shares one password hasher between scopes', () => {
+    const sut = createAppContainer({ DATABASE_URL }, createFakeOrmInit());
+
+    expect(sut.createScope().cradle.passwordHasher).toBe(sut.createScope().cradle.passwordHasher);
+  });
+
+  it('gives every scope its own services bound to the entity manager of the scope', () => {
+    const sut = createAppContainer({ DATABASE_URL }, createFakeOrmInit());
+    const firstScope = sut.createScope();
+    const secondScope = sut.createScope();
+
+    expect(firstScope.cradle.bankAccountService).toBe(firstScope.cradle.bankAccountService);
+    expect(firstScope.cradle.bankAccountService).not.toBe(secondScope.cradle.bankAccountService);
+    expect(firstScope.cradle.userProvisioningService).not.toBe(
+      secondScope.cradle.userProvisioningService,
+    );
   });
 });
 
