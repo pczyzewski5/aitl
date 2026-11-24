@@ -212,3 +212,6 @@ Pitfalls: `.html` is outside lint and the 100% coverage scope, so no config exce
 ## 2026-11-24 (lesson 7, exercise 2b stage 1: clickable E01 prototype skeleton)
 Added `prototypes/e01-logowanie-konta/` (Vite on port 5180, React + `@aitl/ui`, review engine copied to `engine/` with `mostek.css` mapped to DS tokens, review bar, happy path s01 -> s02 -> s03 mock -> logout with redirect gates, 4 navigation tests run by hand) and one `ignores` line for `prototypes/*/engine/**` in `eslint.config.mjs`. Checked typecheck, build, tests and a Chrome walk of the path including a pinned comment.
 Pitfalls: engine expects host classes (`.btn`, `.segmented`...) and its Back history can loop after a gate redirect (engine not editable). Todo: stage 2 (states, roles, scenarios) and stage 3 (notes, README, 320/1440, dark theme, keyboard).
+
+## 2026-11-24 (lint: ignore the untracked course materials)
+Added `lekcja-*/**` to the ESLint ignores: the untracked lesson 7 materials contain engine scripts (`.js`) that made `eslint .` fail in the main checkout (67 errors) and would have broken the pre-commit hook.
