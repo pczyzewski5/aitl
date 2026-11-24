@@ -76,19 +76,12 @@ Teksty komponentu: patrz strona LoginForm (komunikaty zatwierdzone 2026-11-18). 
 ## 9. Kompozycja
 
 ```tsx
-<div className="flex min-h-screen flex-col bg-background text-foreground">
-  <header className="bg-primary text-primary-foreground">
-    <div className="mx-auto flex w-full max-w-240 items-center p-(--space-panel)">
-      <p className="text-xl font-semibold leading-base">AITL</p>
-    </div>
-  </header>
-  <main className="mx-auto w-full max-w-240 flex-1 px-(--space-panel) py-(--space-section)">
-    <LoginForm onSubmit={signIn} />
-  </main>
-</div>
+<AppShell>
+  <LoginForm onSubmit={signIn} />
+</AppShell>
 ```
 
-Nagłówek jest dziś zapisany w samej story; po drugim ekranie z tym samym paskiem (strona konta, E02) wyodrębniamy komponent `AppShell` (patrz POSTEP.md).
+Pasek i kolumna treści pochodzą z komponentu AppShell bez `logoutHref` (strona "Elementy produktu / AppShell").
 
 ## 10. Braki
 

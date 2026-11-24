@@ -1,0 +1,79 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './app-shell.stories';
+
+<Meta of={Stories} />
+
+# AppShell
+
+Wspólna rama każdej strony aplikacji: pasek z nazwą produktu i linkiem "Wyloguj" oraz kolumna treści. Wyodrębniona ze stories E01 (PR T), bo korzystają z niej ekrany E01, E02 i E03. Źródło reguł: R01.4 (kolumna do 960 px), A3 (referencje), specyfikacja E01 (`.ai/specs/2026-11-17-auth-and-app-foundation.md`), decyzje właściciela z 2026-11-18 (link na pasku `--primary`), WCAG 2.2 i WAI-ARIA. Reguła bez źródła jest oznaczona jako **propozycja** i czeka na decyzję właściciela.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Daje każdej stronie ten sam pasek i tę samą szerokość treści, więc ekrany nie powtarzają układu i nie rozjeżdżają się między sobą.
+
+## 2. Kiedy używać
+
+- Każda strona aplikacji: `/login`, `/` (przegląd miesiąca i wpisy konta).
+- Strona bez sesji (logowanie): bez propa `logoutHref`, pasek pokazuje tylko nazwę produktu.
+
+## 3. Kiedy nie używać
+
+Komponent nie jest nawigacją i nie ma stopki. Brak menu, logo, nazwy użytkownika i przełącznika motywu w pasku (R01.4): jedyna akcja to wylogowanie.
+
+## 4. Anatomia
+
+1. Korzeń: kolumna `flex` na całą wysokość okna, tło `--background`.
+2. Pasek (`header`, landmark "banner") na tle `--primary`: "AITL" po lewej, link "Wyloguj" (`TextLink`) po prawej.
+3. Treść (`main`) rosnąca do dołu okna, z odstępami `--space-panel` (boki) i `--space-section` (góra i dół).
+4. Wspólny kontener treści: `mx-auto w-full max-w-240` (960 px). Ten sam kontener obejmuje zawartość paska i `main`, więc nazwa produktu i lewa krawędź treści leżą w jednej linii. Tło paska jest na całą szerokość okna.
+
+**Decyzja (PR T): jeden kontener 960 px dla wszystkich stron.** Tabela wpisów mieści się w 960 px (poniżej ok. 600 px przewija się sama tabela), a wąska kolumna jest tym, czego wymaga R01.4. Strona nie wybiera własnej szerokości: gdyby coś wymagało szerszej kolumny (np. wykres w etapie z prognozą), to nowa decyzja o zmianie dla całego produktu, nie wyjątek jednej strony.
+
+## 5. Warianty
+
+| Postać | Kiedy wybrać |
+|---|---|
+| z `logoutHref` | każda strona po zalogowaniu |
+| bez `logoutHref` | strona bez sesji (`/login`) |
+
+<Canvas of={Stories.WithoutLogout} />
+
+## 6. Stany
+
+Komponent nie ma stanów: nie ładuje danych i nie reaguje na sesję. Stany ładowania i błędów należą do treści strony.
+
+## 7. Zachowanie i dostępność
+
+- Landmarki: `banner` i `main`, po jednym na stronę. Jeden `h1` dostarcza treść strony (rama go nie renderuje).
+- Kolejność fokusu: "Wyloguj" jest pierwszym elementem fokusowalnym, potem treść.
+- Link na tle `--primary` ma kolor `--primary-foreground`, podkreślenie także przy najechaniu i cel co najmniej 36 px.
+- Wylogowanie zmienia stan serwera (`POST /api/auth/logout`), więc w `app` link może być przyciskiem w formularzu: do decyzji w etapie 5 (patrz strona ekranu "Strona główna").
+- Brak linku "Przejdź do treści": pierwszy element po `Wyloguj` to już treść strony. Propozycja do rozważenia, gdy pasek dostanie więcej elementów.
+
+## 8. Treść
+
+Nazwa produktu "AITL" i etykieta "Wyloguj" są nazwanymi stałymi w `app-shell.messages.ts`, nadpisywalnymi propem `messages`.
+
+## 9. Responsywność
+
+| Szerokość | Zachowanie |
+|---|---|
+| 320 px | pasek w jednym wierszu (nazwa i link), treść w jednej kolumnie |
+| 768 px | jak wyżej |
+| 1440 px | kolumna do 960 px wyśrodkowana, tło paska na całą szerokość |
+
+<Canvas of={Stories.NarrowScreen} />
+
+## 10. Kompozycja
+
+```tsx
+<AppShell logoutHref="/logout">
+  <h1>Ile zostanie w miesiącu</h1>
+  ...
+</AppShell>
+```
+
+Brak: kontrolowanej szerokości treści, slotu na nawigację i stopkę (świadomie, patrz punkt 3).

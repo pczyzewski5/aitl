@@ -109,3 +109,5 @@ export {
   type SeriesControls,
 } from './components/entries/series-actions';
 export { DEFAULT_SERIES_ACTIONS_MESSAGES, type SeriesActionsMessages } from './components/entries/series-actions.messages';
+export { AppShell, type AppShellProps } from './components/layout/app-shell';
+export { DEFAULT_APP_SHELL_MESSAGES, type AppShellMessages } from './components/layout/app-shell.messages';
