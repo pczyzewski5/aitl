@@ -208,3 +208,7 @@ Pitfall: P4 (no session-expired message) matches the existing spec, so it needed
 ## 2026-11-24 (lesson 7, exercise 2a: grey E01 prototype)
 Added the grey discovery prototype of the E01 flow (login and bank account list) under `.ai/prototypes/discovery/e01-logowanie-konta/revision-001/` with the `om-mockup-prototype` skill: one local `index.html`, simulated fictitious data, scenario panel for the states from the approved screen map; browser check not run (`agent-browser` missing), flow checked in jsdom instead (29 checks), which caught a stale list timer after logout.
 Pitfalls: `.html` is outside lint and the 100% coverage scope, so no config exception was needed. Todo: owner walks the prototype and answers the questions in its README; real browser walk.
+
+## 2026-11-24 (lesson 7, exercise 2b stage 1: clickable E01 prototype skeleton)
+Added `prototypes/e01-logowanie-konta/` (Vite on port 5180, React + `@aitl/ui`, review engine copied to `engine/` with `mostek.css` mapped to DS tokens, review bar, happy path s01 -> s02 -> s03 mock -> logout with redirect gates, 4 navigation tests run by hand) and one `ignores` line for `prototypes/*/engine/**` in `eslint.config.mjs`. Checked typecheck, build, tests and a Chrome walk of the path including a pinned comment.
+Pitfalls: engine expects host classes (`.btn`, `.segmented`...) and its Back history can loop after a gate redirect (engine not editable). Todo: stage 2 (states, roles, scenarios) and stage 3 (notes, README, 320/1440, dark theme, keyboard).

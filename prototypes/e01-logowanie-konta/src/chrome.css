@@ -1,0 +1,72 @@
+/* Warstwa przeglądu: pasek, układ ekranów i klasy, których oczekuje silnik (.btn, .segmented, .toast...).
+   Wyłącznie tokeny z packages/ui/src/tokens.css, bez cieni. LUKA DS (N3): brak kontrolek paska przeglądu w DS. */
+html { background: var(--background); }
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+}
+
+.doc-toolbar {
+  position: sticky; top: 0; z-index: var(--z-index-sticky);
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-within-group) var(--space-between-groups);
+  padding: var(--space-within-group) var(--space-panel);
+  background: var(--card); border-bottom: 1px solid var(--border);
+}
+.screen-nav { display: flex; flex-wrap: wrap; gap: var(--space-within-group); }
+.screen-nav a {
+  display: inline-flex; align-items: center; min-height: var(--control-height); padding: 0 var(--space-within-group);
+  color: var(--primary); border-radius: var(--radius);
+}
+.scenario-control { display: flex; align-items: center; gap: var(--space-within-group); font-size: var(--font-size-sm); }
+.scenario-control label { font-weight: var(--font-weight-semibold); }
+.scenario-control > div { min-width: calc(var(--space-12) * 5); }
+.proto-banner { margin: var(--space-within-group) var(--space-panel); }
+
+.doc { padding: var(--space-panel); }
+.doc-head h1 { margin: 0 0 var(--space-between-groups); font-size: var(--font-size-lg); }
+.screen { margin-top: var(--space-section); }
+.screen-meta h2 { margin: 0; font-size: var(--font-size-base); font-weight: var(--font-weight-semibold); }
+.screen-meta p { margin: 0 0 var(--space-within-group); color: var(--muted-foreground); font-size: var(--font-size-sm); }
+.frame { background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-surface); overflow: hidden; }
+.frame [data-slot='app-shell'] { min-height: 0; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-within-group);
+  min-height: var(--control-height); padding: 0 var(--space-between-fields);
+  border: 1px solid transparent; border-radius: var(--radius);
+  font: inherit; font-size: var(--font-size-sm); cursor: pointer;
+}
+.btn:disabled { cursor: not-allowed; color: var(--muted-foreground); }
+.btn-sm { padding: 0 var(--space-within-group); }
+.btn-primary { background: var(--primary); color: var(--primary-foreground); }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-outline { background: var(--card); color: var(--foreground); border-color: var(--input); }
+.btn-outline:hover { background: var(--muted); }
+.btn-ghost { background: transparent; color: var(--foreground); }
+.btn-ghost:hover { background: var(--muted); }
+.btn:focus-visible, .screen-nav a:focus-visible, .anno-pin:focus-visible { outline: var(--ring-width) solid var(--ring); outline-offset: var(--ring-width); }
+
+.segmented { display: inline-flex; border: 1px solid var(--input); border-radius: var(--radius); overflow: hidden; }
+.segmented button {
+  min-height: var(--control-height); padding: 0 var(--space-between-fields);
+  border: 0; background: var(--card); color: var(--foreground); font: inherit; font-size: var(--font-size-sm); cursor: pointer;
+}
+.segmented button[aria-pressed='true'] { background: var(--primary); color: var(--primary-foreground); }
+
+.toast {
+  padding: var(--space-within-group) var(--space-between-fields);
+  background: var(--foreground); color: var(--background); border-radius: var(--radius); font-size: var(--font-size-sm);
+}
+.input {
+  width: 100%; min-height: var(--control-height); padding: 0 var(--space-within-group);
+  border: 1px solid var(--input); border-radius: var(--radius); background: var(--card); color: var(--foreground); font: inherit;
+}
+.row { display: flex; align-items: center; gap: var(--space-within-group); }
+.t-card-title { font-weight: var(--font-weight-semibold); }
+.t-overline, .t-hint { font-size: var(--font-size-sm); color: var(--muted-foreground); }
+.badge { display: inline-flex; padding: 0 var(--space-within-group); border-radius: var(--radius-badge); font-size: var(--font-size-sm); }
+.badge-warning { background: var(--muted); color: var(--foreground); }
