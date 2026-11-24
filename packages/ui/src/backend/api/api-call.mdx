@@ -1,0 +1,71 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Wzorce/Wywołania API (apiCall)" />
+
+# Wzorzec: wywołania API
+
+`apiCall` to jedyne miejsce w aplikacji, które woła `fetch()` do `/api/*`. Strony i formularze nie piszą własnej obsługi żądań, nagłówków i kopert błędów: dostają jeden, przewidywalny wynik i zamieniają go na stan ekranu (Alert, `ErrorState`, `EmptyState`, `LoginResult`). Źródło reguł: specyfikacja `.ai/specs/2026-11-17-auth-and-app-foundation.md` (nagłówek CSRF, koperta, Q24, Q29), `BACKWARD_COMPATIBILITY.md` §2 (koperta jest kontraktem, klient deklaruje własne typy), `AGENTS.md` (warstwa API i UI wielokrotnego użytku).
+
+## 1. Do czego służy
+
+Wysyła żądanie z wymaganym nagłówkiem `X-Requested-With: aitl` (ochrona CSRF dla route mutujących), serializuje body do JSON i parsuje kopertę odpowiedzi. Nigdy nie rzuca z powodu sieci ani odpowiedzi: zawsze zwraca wynik, który trzeba obsłużyć.
+
+## 2. Kiedy używać
+
+- Każde żądanie z przeglądarki do `/api/*`: logowanie, wylogowanie, lista kont, wpisy.
+- Zawsze razem z mapowaniem wyniku na stan ekranu w jednym miejscu (adapter w `app`), a nie rozsypane po komponentach.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Żądanie poza `/api/*` | nic: `apiCall` odrzuca takie ścieżki wyjątkiem `TypeError` (błąd programisty, nie stan użytkownika) |
+| Kod po stronie serwera (route, serwisy) | serwis z kontenera; `apiCall` jest tylko dla przeglądarki |
+
+## 4. Wynik
+
+```ts
+type ApiCallResult<Data> =
+  | { ok: true; status: number; data: Data }
+  | { ok: false; kind: 'api-error'; status: number; error: { code: string; message: string; fieldErrors?: ...; retryAfterSeconds?: number } }
+  | { ok: false; kind: 'invalid-response'; status: number }
+  | { ok: false; kind: 'network' };
+```
+
+| Co się stało | `kind` | Co zrobić na ekranie |
+|---|---|---|
+| koperta sukcesu | `ok: true` | pokaż dane |
+| koperta błędu (4xx, 5xx z kopertą) | `api-error` | wg `status` i `error.code`: 401 złe dane, 429 blokada z `retryAfterSeconds`, 403 brak dostępu |
+| odpowiedź nie jest kopertą (HTML z proxy, pusty body, niepoprawny JSON) | `invalid-response` | traktuj jak błąd serwera (komunikat Q29), bez szczegółów |
+| `fetch` rzucił (brak sieci) | `network` | komunikat o braku sieci, dane w formularzu zostają |
+
+`Data` deklaruje wywołujący: klient nie waliduje kształtu `data`, tylko kształt koperty. Koperta jest zadeklarowana w `ui` osobno od `core` (`ui` nie importuje `@aitl/*`), więc zmiana jej kształtu wymaga równoległej zmiany po obu stronach (patrz `BACKWARD_COMPATIBILITY.md` §2).
+
+## 5. Zachowanie
+
+- Nagłówek `X-Requested-With: aitl` jest dodawany zawsze, także do `GET`.
+- Body (`options.body`) jest serializowane przez `JSON.stringify` z nagłówkiem `Content-Type: application/json`; bez body żadne nagłówki treści nie są wysyłane.
+- Pola opcjonalne błędu (`fieldErrors`, `retryAfterSeconds`) o złym typie są pomijane, a nie zgłaszane jako błąd odpowiedzi.
+- Brak odliczania, ponawiania i przekierowań: to decyzje strony, nie transportu.
+
+## 6. Kod
+
+```ts
+import { apiCall } from '@aitl/ui';
+
+const result = await apiCall<{ bankAccounts: BankAccount[] }>('/api/bank-accounts');
+if (result.ok) {
+  showAccounts(result.data.bankAccounts);
+} else if (result.kind === 'api-error' && result.status === 401) {
+  redirectToLogin();
+} else {
+  showLoadError();
+}
+```
+
+Pełny adapter logowania (wynik `apiCall` na `LoginResult`) jest na stronie komponentu LoginForm.
+
+## 7. Powiązane
+
+- Z czym się go myli: `useFormValidation` (stan formularza, nie transport), `ErrorState` (pokazuje błąd, nie wykonuje żądania).
+- Występuje w: strony `/login` i `/` w `packages/app` (PR-10c).

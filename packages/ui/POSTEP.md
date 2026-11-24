@@ -465,6 +465,13 @@ Obowiązujące dla T: stan ekranu w adresie (`?account=…&month=RRRR-MM`); jedn
 - Linki między stronami to `?path=/docs/<id>`; identyfikatory sprawdzone względem `index.json` zbudowanego Storybooka (skrypt jednorazowy, poza repo). `check:tokens` skanuje też `.mdx`, więc przykładów zakazanych wartości nie wpisujemy w dokumentacji literalnie.
 - Do decyzji właściciela: czy plik `docs/design-system.md` ma być utrzymywany ręcznie (dziś tak), czy wymagać jego aktualizacji w checklistcie PR-a; czy etap 5 ma zawierać test agentem na ekranie z backlogu.
 
+## Notatki z PR-10a (krok 2.6a: rozszerzenie AppShell i LoginForm, `apiCall`)
+
+- Zamknięte luki z mapy ekranów E01: LDS1 (wylogowanie jako przycisk wyglądający jak link, `onLogout` w `AppShell`), LDS2 (`displayName` na pasku), LDS4 (`server-error` w `LoginForm` z tekstem Q29). `logoutHref` usunięte (brak konsumentów w `app`).
+- `LoginForm`: fokus wraca na pole e-mail po każdym nieudanym logowaniu (Q30); po sukcesie nie rusza fokusu (h1 robi strona, Q32).
+- Nowe: `ui/backend/api/apiCall.ts` (jedyny `fetch` do `/api/*`, strona "Wzorce / Wywołania API"), `ui/backend/feedback/loading-message.tsx`, `buildAccountHref`. `EmptyState` i `ErrorState` bez zmian (nie dublowane); stan pusty listy kont wskazuje administratora (Q35).
+- Nadal otwarte: LDS3 (brak dostępu bez ponawiania, od E02/E03), LDS5-LDS8.
+
 ## Notatki z PR V (etap 5: sprawdzenie i raport)
 
 - Raport: `.ai/specs/design/2026-11-24-raport-etapu-5.md` (liczby: 50 stron dokumentacji, 26 komponentów, 611 stories, 358 z testem interakcji; typecheck, lint, 560 testów jednostkowych z pokryciem 100%, build Storybooka, 611/611 testów Storybooka z axe, audit i `check:tokens` zielone; sweep 320/768/1440 px w obu motywach).

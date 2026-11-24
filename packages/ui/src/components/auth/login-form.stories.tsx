@@ -17,8 +17,9 @@ const SUMMARY_TITLE = 'Popraw dane logowania, żeby się zalogować';
 const INVALID_CREDENTIALS = 'Nie udało się zalogować. Sprawdź adres e-mail i hasło, a potem spróbuj ponownie.';
 const NETWORK_ERROR =
   'Nie udało się połączyć z serwerem. Sprawdź połączenie z internetem i spróbuj ponownie; wpisane dane zostały w formularzu.';
+const SERVER_ERROR = 'Coś poszło nie tak po naszej stronie. Spróbuj ponownie za chwilę; wpisane dane zostały w formularzu.';
 
-type Scenario = 'invalid-credentials' | 'too-many-attempts' | 'network' | 'rejects' | 'success' | 'pending';
+type Scenario = 'invalid-credentials' | 'too-many-attempts' | 'network' | 'server-error' | 'rejects' | 'success' | 'pending';
 
 interface ScenarioFormProps {
   scenario?: Scenario;
@@ -42,6 +43,8 @@ function ScenarioForm({ scenario = 'invalid-credentials', retryAfterSeconds = DE
         return { ok: false, kind: 'too-many-attempts', retryAfterSeconds };
       case 'network':
         return { ok: false, kind: 'network' };
+      case 'server-error':
+        return { ok: false, kind: 'server-error' };
       case 'rejects':
         throw new Error('offline');
       case 'pending':
@@ -62,7 +65,7 @@ const meta = {
   argTypes: {
     scenario: {
       control: 'inline-radio',
-      options: ['invalid-credentials', 'too-many-attempts', 'network', 'rejects', 'success', 'pending'],
+      options: ['invalid-credentials', 'too-many-attempts', 'network', 'server-error', 'rejects', 'success', 'pending'],
       description: 'Symulowana odpowiedź `onSubmit` po poprawnie wypełnionym formularzu',
     },
     retryAfterSeconds: { control: 'number', description: 'Sekundy z odpowiedzi 429 (`Retry-After`)' },
@@ -253,7 +256,41 @@ export const NetworkError: Story = {
 
     await expect(await canvas.findByRole('alert')).toHaveTextContent(NETWORK_ERROR);
     await expect(canvas.getByLabelText('Adres e-mail')).toHaveValue('jan@example.com');
+    await expect(canvas.getByLabelText('Adres e-mail')).toHaveFocus();
     await expect(submitButton(canvasElement)).not.toHaveAttribute('aria-busy');
+  },
+};
+
+export const ServerError: Story = {
+  name: 'Błąd serwera 500 (komunikat bez szczegółów, dane zostają, fokus na e-mailu)',
+  args: { scenario: 'server-error' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await fillLogin(canvasElement);
+
+    await userEvent.click(submitButton(canvasElement));
+
+    const alert = await canvas.findByRole('alert');
+    await expect(alert).toHaveTextContent(SERVER_ERROR);
+    await expect(alert.textContent).not.toMatch(/500|wyjątek|stack|SQL/i);
+    await expect(canvas.getByLabelText('Adres e-mail')).toHaveValue('jan@example.com');
+    await expect(canvas.getByLabelText('Hasło')).toHaveValue('tajne-haslo');
+    await expect(canvas.getByLabelText('Adres e-mail')).toHaveFocus();
+  },
+};
+
+export const FocusReturnsToEmailAfterFailure: Story = {
+  name: 'Test: po błędzie logowania (złe dane, blokada, sieć, 500) fokus wraca na pole e-mail',
+  args: { scenario: 'invalid-credentials' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await fillLogin(canvasElement);
+    await expect(canvas.getByLabelText('Hasło')).toHaveFocus();
+
+    await userEvent.click(submitButton(canvasElement));
+
+    await canvas.findByRole('alert');
+    await expect(canvas.getByLabelText('Adres e-mail')).toHaveFocus();
   },
 };
 

@@ -76,3 +76,27 @@ Do zrobienia: krok 2.1 (`core/http/auth.ts`, błędy, walidator).
 Dodane `core/http/auth.ts` (porty `SessionResolver`/`BankAccountMembershipLookup`, `requireSession`, `assertMemberOfBankAccount`, fail-closed: odpowiedz inna niz `true` -> 403), `InvalidCredentialsError`, `TooManyRequestsError`, `Retry-After` i `retryAfterSeconds` w `apiHandler`, `loginSchema` (e-mail trim + lower-case). Unity 100% pokrycia, SB-A zielone.
 Decyzja: bledy resolvera/lookupu propaguja sie (500, dostep nie przyznany) zamiast mapowania na 403, bo spec wymaga 500 przy niedostepnej bazie.
 Do zrobienia: PR, wiersz PR-4 w track.md.
+
+## 2026-11-24 (PR-10a, krok 2.6a, commit 1)
+Gałąź `feature/ui-appshell-loginform` z `origin/feature/core-auth-primitives` (zależność od PR #70). `AppShell`: `logoutHref` zastąpione przez `onLogout` (przycisk wyglądający jak link, Q24) i `displayName` (Q25); stories i dokumentacja ekranów E01/E02 przepięte, stories testują przycisk, klawiaturę i długą nazwę na 320 px.
+Do zrobienia: LoginForm (500, fokus), `apiCall`, `LoadingMessage`, stan pusty, `docs/design-system.md`, PR.
+
+## 2026-11-24 (PR-10a, krok 2.6a, commit 2)
+`LoginForm`: nowy rodzaj `server-error` w `LoginFailure` z tekstem Q29 (`serverError` w messages) i fokus na polu e-mail po każdym nieudanym logowaniu (Q30), także przy wyjątku żądania; po sukcesie formularz fokusu nie rusza (h1 po zalogowaniu robi strona, Q32). Testy jednostkowe i stories (500, fokus) dodane, dokumentacja `login-form.mdx` zaktualizowana.
+Do zrobienia: `apiCall`, `LoadingMessage`, stan pusty (Q35), `docs/design-system.md`, PR.
+
+## 2026-11-24 (PR-10a, krok 2.6a, commit 3)
+`ui/backend/api/apiCall.ts`: jedyny `fetch` do `/api/*`, zawsze `X-Requested-With: aitl`, wynik `ok` / `api-error` / `invalid-response` / `network` (nigdy nie rzuca z powodu sieci ani niepoprawnego JSON; ścieżka spoza `/api/` rzuca `TypeError`). Testy 100%, strona `Wzorce/Wywołania API`, przykład adaptera w `login-form.mdx`.
+Do zrobienia: `LoadingMessage`, stan pusty (Q35), `docs/design-system.md`, PR.
+
+## 2026-11-24 (PR-10a, krok 2.6a, commit 4)
+Feedback bez duplikatów: `EmptyState` i `ErrorState` zostają w `components/ui/`, dodany tylko `LoadingMessage` (`ui/backend/feedback`, `role="status"`). Stan pusty listy kont: opis "Skontaktuj się z administratorem aplikacji." (Q35). Helper `buildAccountHref` (`/?account=<id>`, Q26) wyeksportowany z `@aitl/ui`.
+Do zrobienia: `docs/design-system.md`, AGENTS.md (miejsce feedback), POSTEP.md, track.md, PR.
+
+## 2026-11-24 (PR-10a, krok 2.6a, commit 5)
+Dokumentacja: `docs/design-system.md` (AppShell, LoginForm, LoadingMessage, `apiCall`, `buildAccountHref`, reguły błędów, fokusu i stanu pustego), `AGENTS.md` (feedback: tylko `LoadingMessage`, bez dublowania `EmptyState`/`ErrorState`), `POSTEP.md`. SB-A + SB-U zielone lokalnie (typecheck, lint, coverage 100%, build, audit, test:storybook 619/619, check:tokens, build-storybook).
+Do zrobienia: PR, wiersz PR-10a w track.md, zielone checki.
+
+## 2026-11-24 (PR-10a, krok 2.6a, commit 6)
+PR #74 (base `feature/core-auth-primitives`, bo #70 niezmergowany; CI odpala się na dowolnej bazie); wiersz PR-10a w track.md (in-progress, wynik SB).
+Do zrobienia: zielone checki, po merge #70 przestawić bazę na `main`, merge, SHA w track.md.
