@@ -48,6 +48,52 @@ async function waitUntilHealthy(url: string, app: ChildProcess): Promise<void> {
   throw new Error(`Application did not become healthy within ${STARTUP_TIMEOUT_MS} ms`);
 }
 
+export type FailedApp = {
+  healthStatus: number;
+  output: () => string;
+  stop: () => Promise<void>;
+};
+
+export async function startAppWithInvalidEnv(env: Record<string, string>): Promise<FailedApp> {
+  const port = await findFreePort();
+  const url = `http://127.0.0.1:${port}`;
+  const chunks: string[] = [];
+  const baseEnv = { ...process.env };
+  delete baseEnv.DATABASE_URL;
+  const app = spawn(process.execPath, [NEXT_BIN, 'start', '--port', String(port)], {
+    cwd: APP_DIRECTORY,
+    env: { ...baseEnv, ...env, PORT: String(port) },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  app.stdout?.on('data', (chunk: Buffer) => chunks.push(chunk.toString()));
+  app.stderr?.on('data', (chunk: Buffer) => chunks.push(chunk.toString()));
+
+  const stop = async (): Promise<void> => {
+    if (app.exitCode !== null) {
+      return;
+    }
+    const exited = new Promise<void>((resolve) => app.once('exit', () => resolve()));
+    app.kill('SIGTERM');
+    await exited;
+  };
+
+  const deadline = Date.now() + STARTUP_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    const status = await fetch(`${url}${HEALTH_PATH}`)
+      .then((response) => response.status)
+      .catch(() => null);
+
+    if (status !== null) {
+      return { healthStatus: status, output: () => chunks.join(''), stop };
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+  }
+
+  await stop();
+  throw new Error(`Application did not answer within ${STARTUP_TIMEOUT_MS} ms`);
+}
+
 export async function startApp(env: Record<string, string>): Promise<RunningApp> {
   const port = await findFreePort();
   const url = `http://127.0.0.1:${port}`;
