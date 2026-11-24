@@ -20,7 +20,7 @@ Statusy: todo / in-progress / done. Kolumny PR, SHA i SB uzupełnia agent po zak
 | PR-2 | 1.2 | #18 | `createApiHandler` + health | SB-I | PR-1 | done | #67 | b765b90 | SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, integracyjne) |
 | PR-3 | 1.3 | #17 | Awilix, leniwy ORM, `serverExternalPackages` | SB-I | PR-1 | done | #68 | 984b49a | SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, integracyjne) |
 | PR-4 | 2.0 + 2.1 | #18 | standardy (JWT -> sesja serwerowa, także AGENTS.md i CODE_REVIEW.md gdzie dotyczy), `core/http/auth.ts`, `InvalidCredentialsError`, `TooManyRequestsError`, walidator login | SB-A | PR-2 | in-progress | #70 | | SB-A zielone lokalnie (typecheck, lint, coverage 100%, build, audit) |
-| PR-5 | 2.2 | #20 | encje users/bank-accounts/auth + migracja up/down z CHECK-ami | SB-I | może równolegle z Fazą 1 | todo | | | |
+| PR-5 | 2.2 | #20 | encje users/bank-accounts/auth + migracja up/down z CHECK-ami | SB-I | może równolegle z Fazą 1 | in-progress | #72 | | SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, integracyjne) |
 | PR-6 | 2.3 | #18/#20 | hasher argon2id (`@node-rs/argon2`), repozytoria, serwisy, kontener | SB-I | PR-3, PR-4, PR-5 | todo | | | |
 | PR-7 | 2.4a | #18 | sesja, login, logout, CSRF, `SESSION_SECRET`; aktualizacja BACKWARD_COMPATIBILITY (route login/logout, env) | SB-I | PR-6 | todo | | | |
 | PR-8 | 2.4b | #18 | throttle, API kont, kontrakt, BACKWARD_COMPATIBILITY (reszta) | SB-I | PR-7 | todo | | | |

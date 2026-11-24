@@ -104,3 +104,12 @@ Do zrobienia: krok 2.1 (`core/http/auth.ts`, błędy, walidator).
 Dodane `core/http/auth.ts` (porty `SessionResolver`/`BankAccountMembershipLookup`, `requireSession`, `assertMemberOfBankAccount`, fail-closed: odpowiedz inna niz `true` -> 403), `InvalidCredentialsError`, `TooManyRequestsError`, `Retry-After` i `retryAfterSeconds` w `apiHandler`, `loginSchema` (e-mail trim + lower-case). Unity 100% pokrycia, SB-A zielone.
 Decyzja: bledy resolvera/lookupu propaguja sie (500, dostep nie przyznany) zamiast mapowania na 403, bo spec wymaga 500 przy niedostepnej bazie.
 Do zrobienia: PR, wiersz PR-4 w track.md.
+
+## 2026-11-24 (PR-5, krok 2.2, commit 1)
+Encje `User`, `BankAccount`, `BankAccountMembership`, `Session`, `LoginThrottle` w `db/src/entities/{users,bank-accounts,auth}/` i migracja `auth_entities` wygenerowana MikroORM (CHECK e-mail małymi literami, CHECK właściciel wg typu, częściowe unikalne indeksy: jedno osobiste na właściciela i `(type, name)` dla wspólnych, FK z `restrict`/`cascade`) wraz ze snapshotem.
+Testy integracyjne: up, naruszenia (dwa osobiste, osobiste bez właściciela, drugi wspólny, e-mail wielkimi literami i inne), down i ponowne up; unity 100%. Lekcja o generowaniu migracji (skrypt jest `--blank`).
+Do zrobienia: PR, wiersz PR-5 w track.md, zielone checki.
+
+## 2026-11-24 (PR-5, krok 2.2, commit 2)
+PR #72; wiersz PR-5 w track.md (in-progress, wynik SB).
+Do zrobienia: zielone checki, merge, SHA w track.md.
