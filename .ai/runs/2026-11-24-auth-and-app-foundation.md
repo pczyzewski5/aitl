@@ -45,3 +45,7 @@ Do zrobienia: kontener Awilix w `app`, `serverExternalPackages`, test integracyj
 `app/src/container/{container,cradle}.ts` (Awilix PROXY, strict; `env` i `ormProvider` singletony, `entityManagerProvider` scoped), `serverExternalPackages` w `next.config.ts`, test integracyjny kontenera na Postgresie.
 Weryfikacja bundlingu tymczasową route (niezacommitowana): build i zapytanie przez EM działają pod `next start`, ale także BEZ `serverExternalPackages` (Next 16 sam externalizuje `@mikro-orm/*` i `pino` z transpilowanych pakietów); lista zostaje jawna wg specu.
 Do zrobienia: PR, uzupełnienie wiersza PR-3 w track.md.
+
+## 2026-11-24 (PR-3, krok 1.3, commit 3)
+PR #68; wiersz PR-3 w track.md (in-progress, wynik SB).
+Do zrobienia: zielone checki, merge, SHA w track.md.
