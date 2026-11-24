@@ -144,3 +144,7 @@ Unity adaptera z fałszywym EM; integracja z Postgresem w commicie z testami HTT
 Route `POST /api/auth/login` i `POST /api/auth/logout` (CSRF `X-Requested-With: aitl`, `parseJsonBody` + `loginSchema`, cookie `aitl_session` httpOnly/lax/path `/`/maxAge 90 dni, `secure` z env; logout zawsze 200 i wygaszone cookie), helper `http/session-cookie.ts`. `next.config.ts` ładuje `.env` z korzenia repo przez `@next/env` z wymuszonym przeładowaniem (nowe Q39); `.env.example` ma `SESSION_SECRET=`.
 Pułapka: bez `forceReload` `loadEnvConfig` zwraca wynik z `packages/app` (lekcja). Testy integracyjne (`auth-session`, `env-loading`): poprawny login, ten sam wynik dla złego hasła i e-maila, flagi cookie (także `Secure` w produkcji), wygaśnięcie przesuwne i twarde, logout usuwa rekord, brak CSRF -> 403, logi bez haseł/tokenów/sekretu (także przy awarii bazy). `ci.yml` bez zmian (Q40).
 Do zrobienia: SB-I, PR, wiersz PR-7 w track.md. Throttle i API kont to PR-8.
+
+## 2026-11-24 (PR-7, krok 2.4a, commit 4)
+SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, integracyjne). Pulapka: `migrations.test.ts` zakladal, ze migruje wspolna baze jako pierwszy; po dodaniu plikow testowych kolejnosc sie zmienila, wiec test dostal wlasna baze (lekcja).
+Do zrobienia: PR, wiersz PR-7 w track.md, zielone checki.
