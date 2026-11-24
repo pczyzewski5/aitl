@@ -131,3 +131,8 @@ Do zrobienia: wiersz PR-6 w track.md, SB-I, PR.
 ## 2026-11-24 (PR-6, krok 2.3, commit 4)
 PR #75 (base `main`, leży na stosie #73, #70, #72); wiersz PR-6 w track.md (in-progress, wynik SB-I).
 Do zrobienia: zielone checki, merge po #73/#70/#72, SHA w track.md.
+
+## 2026-11-24 (PR-9, krok 2.5, commit 1)
+Baza: `origin/feature/auth-services-hasher` (#75, stos #73, #70, #72). Seed: logika w `packages/app/src/seed/` (`run-seed`, `seed-arguments`, `seed-config`), wrapper `scripts/seed-user.ts` (tsx, zamyka ORM w `finally`), komenda `npm run seed:user`, `SEED_PASSWORD=` w `.env.example`; hasło tylko z env (stdin odłożone), min. 8 / 12 przy production, kody wyjścia 0/1/2, ostrzeżenie przez `PasswordHasher.verify` bez zapisu i bez haseł w logu.
+Testy: unity 100% (wrapper objęty progiem) i integracyjne z prawdziwym procesem (dwa konta, idempotencja, ostrzeżenie). Lekcja o tsx.
+Do zrobienia: instalator, README, BACKWARD_COMPATIBILITY, PR, wiersz PR-9 w track.md.
