@@ -83,3 +83,7 @@ Pułapka: `message` błędu sterownika nadal trafia do logu (może zawierać fra
 ## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 4)
 Kontener złożony z rejestracji per koncept: `container/registrations/{core,db}.ts` (`createXRegistrations` z `satisfies`), `Cradle = CoreCradle & DbCradle`; test rozwiązuje każdy klucz w scope i porównuje klucze kontenera z plikami rejestracji.
 Kolejny koncept dopisuje własny plik rejestracji i jedną linię spread w `container.ts`.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 5)
+Jeden moduł `app/src/http/api-handler.ts` eksportuje `apiHandler` zbudowany na `container.createScope()` i loggerze z kontenera; health z niego korzysta. Test: scope z kontenera, osobny scope na wywołanie, log przez logger kontenera.
+Do zrobienia: stała statusu health, nazwa testu ponownej próby ORM, dokumentacja.
