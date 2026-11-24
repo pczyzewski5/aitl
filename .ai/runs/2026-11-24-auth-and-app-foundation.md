@@ -8,7 +8,7 @@ Cele:
 
 Spec: [.ai/specs/implemented/2026-11-17-auth-and-app-foundation.md](../specs/implemented/2026-11-17-auth-and-app-foundation.md)
 Postęp i plan PR-ów: [.ai/pipeline-runs/2026-11-24-auth-and-app-foundation/track.md](../pipeline-runs/2026-11-24-auth-and-app-foundation/track.md)
-Status: in-progress
+Status: done
 
 ---
 
@@ -299,3 +299,7 @@ Do zrobienia: nity.
 ## 2026-11-24 (poprawki po przegladzie Fazy 2, nity)
 Haslo logowania `.max(1024)`, tytuly stron `/login` ("Logowanie - AITL") i `/` ("Konta - AITL"), nowa migracja `login_throttles_failures_check` (`CHECK (failures >= 0)`, up/down, test odrzucenia -1; test cofania migracji cofa teraz dwie). Pominiete: jawne `algorithm: Algorithm.Argon2id` (ambient `const enum` w `@node-rs/argon2` psuje typecheck przy `isolatedModules`, a domyslny algorytm to argon2id i pilnuje go test prefiksu `$argon2id$`).
 Do zrobienia: PR, checki.
+
+## 2026-11-24 (zamknięcie zadania)
+Wszystkie PR-y #70-#82 w `main` (stos mergowany poza kolejnością, więc #76 wszedł jako pusty, a #74 do gałęzi #70; kod jest w `main`). SHA i statusy `done` uzupełnione w track.md, status dziennika `done`.
+Do zrobienia: ręczny test `needs-qa` (#79, #80), zamknięcie issue #6, #10, #11, #17-#20 przez właściciela.
