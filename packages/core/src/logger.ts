@@ -47,8 +47,48 @@ export const REDACTED_PATHS = buildRedactedPaths(SENSITIVE_KEYS, REDACTION_MAX_D
 
 export const REDACTED_PLACEHOLDER = '[Redacted]';
 
+export const ERROR_LOG_KEY = 'err';
+
+export type SerializedError = {
+  type: string;
+  message: string;
+  code?: string | number;
+  stack?: string;
+};
+
+function readErrorCode(error: Error): string | number | undefined {
+  const code = (error as { code?: unknown }).code;
+
+  return typeof code === 'string' || typeof code === 'number' ? code : undefined;
+}
+
+export function serializeError(error: unknown): SerializedError {
+  if (!(error instanceof Error)) {
+    return { type: typeof error, message: String(error) };
+  }
+
+  const serialized: SerializedError = { type: error.constructor.name, message: error.message };
+  const code = readErrorCode(error);
+
+  if (code !== undefined) {
+    serialized.code = code;
+  }
+
+  if (error.stack !== undefined) {
+    serialized.stack = error.stack;
+  }
+
+  return serialized;
+}
+
 export function createLogger(destination?: DestinationStream): Logger {
-  return pino({ redact: { paths: [...REDACTED_PATHS], censor: REDACTED_PLACEHOLDER } }, destination);
+  return pino(
+    {
+      redact: { paths: [...REDACTED_PATHS], censor: REDACTED_PLACEHOLDER },
+      serializers: { [ERROR_LOG_KEY]: serializeError },
+    },
+    destination,
+  );
 }
 
 export const logger = createLogger();

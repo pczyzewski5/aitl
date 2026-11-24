@@ -128,6 +128,21 @@ describe('createApiHandler', () => {
     expect(logged.err.message).toBe(secretMessage);
   });
 
+  it('does not log driver-specific fields of an unexpected error', async () => {
+    const { log, lines } = createCapturingLog();
+    const apiHandler = createApiHandler(() => ({}), log);
+    const detail = randomBytes(8).toString('hex');
+    const driverError = Object.assign(new Error('insert failed'), { code: '23505', detail });
+
+    await apiHandler(() => {
+      throw driverError;
+    })(request, undefined);
+
+    const logged = JSON.parse(lines[0] ?? '{}') as { err: Record<string, unknown> };
+    expect(lines[0]).not.toContain(detail);
+    expect(logged.err.code).toBe('23505');
+  });
+
   it('maps an error thrown while creating the scope to 500', async () => {
     const { log, lines } = createCapturingLog();
     const apiHandler = createApiHandler((): object => {

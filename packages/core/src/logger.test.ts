@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import type { Logger } from 'pino';
 import { describe, expect, it } from 'vitest';
-import { createLogger, logger, REDACTED_PLACEHOLDER, SENSITIVE_KEYS } from './logger';
+import { createLogger, logger, REDACTED_PLACEHOLDER, SENSITIVE_KEYS, serializeError } from './logger';
 
 function captureLogLine(write: (log: Logger) => void): Record<string, unknown> {
   const lines: string[] = [];
@@ -60,7 +60,42 @@ describe('createLogger', () => {
     expect(actual.res).toEqual({ headers: { 'set-cookie': REDACTED_PLACEHOLDER } });
   });
 
+  it('logs only type, message, code and stack of an error', () => {
+    const detail = randomBytes(8).toString('hex');
+    const error = Object.assign(new TypeError('boom'), { code: '28P01', detail });
+
+    const actual = captureLogLine((log) => log.error({ err: error }, 'failed'));
+
+    expect(actual.err).toEqual({ type: 'TypeError', message: 'boom', code: '28P01', stack: error.stack });
+    expect(JSON.stringify(actual)).not.toContain(detail);
+  });
+
   it('exposes a ready shared logger', () => {
     expect(typeof logger.info).toBe('function');
+  });
+});
+
+describe('serializeError', () => {
+  it('keeps a numeric code', () => {
+    const error = Object.assign(new Error('boom'), { code: 42 });
+
+    expect(serializeError(error).code).toBe(42);
+  });
+
+  it('omits a code that is neither a string nor a number', () => {
+    const error = Object.assign(new Error('boom'), { code: { nested: true } });
+
+    expect(serializeError(error)).not.toHaveProperty('code');
+  });
+
+  it('omits the stack when the error has none', () => {
+    const error = new Error('boom');
+    error.stack = undefined;
+
+    expect(serializeError(error)).toEqual({ type: 'Error', message: 'boom' });
+  });
+
+  it('describes a thrown non-error value', () => {
+    expect(serializeError('plain text')).toEqual({ type: 'string', message: 'plain text' });
   });
 });

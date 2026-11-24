@@ -75,3 +75,7 @@ Do zrobienia: redakcja logów, serializer `err`, rejestracje kontenera, moduł `
 ## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 2)
 Redakcja logów generowana z listy `SENSITIVE_KEYS` na głębokościach 0-2 (np. `password`, `*.password`, `*.*.password`), z wariantami wielkości liter nagłówków; sprawdzone empirycznie z pino, także dla tablic obiektów (`items[].password` łapie ścieżka głębokości 2).
 Głębokość 3+ nie jest redagowana (świadome ograniczenie kosztu ścieżek).
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 3)
+Własny serializer `err` w loggerze (`type`, `message`, `code`, `stack`): pola sterownika typu `detail` nie trafiają do logu; test na poziomie loggera i `apiHandler`.
+Pułapka: `message` błędu sterownika nadal trafia do logu (może zawierać fragment danych); świadomie zostawione do diagnostyki.
