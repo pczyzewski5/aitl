@@ -1,0 +1,78 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks';
+import * as Stories from './loading-message.stories';
+
+<Meta of={Stories} />
+
+# LoadingMessage
+
+Krótki tekst "Ładowanie…" w miejscu treści, której kształtu nie znamy. Uzupełnia `Skeleton` (znany kształt) i nie dubluje stanów `EmptyState` i `ErrorState`: te dwa już istnieją w `components/ui/` i są jedynymi komponentami stanu pustego i błędu wczytania. Źródło reguł: `AGENTS.md` (warstwa `ui/backend/feedback`), strona Skeleton ("tekst Ładowanie… w miejscu treści"), WCAG 2.2 (4.1.3 komunikaty statusu) i WAI-ARIA (`role="status"`). Reguła bez źródła jest oznaczona jako **propozycja**.
+
+<Canvas of={Stories.Playground} />
+<Controls of={Stories.Playground} />
+
+## 1. Do czego służy
+
+Mówi, że coś się wczytuje, tam, gdzie szkielet nie ma sensu, i ogłasza to czytnikowi ekranu.
+
+## 2. Kiedy używać
+
+- Ładuje się jeden krótki element albo treść o nieznanym kształcie (np. sprawdzanie sesji przed przekierowaniem).
+- Zawsze razem z miejscem, w którym po załadowaniu pojawi się treść, `EmptyState` albo `ErrorState`.
+
+## 3. Kiedy nie używać
+
+| Sytuacja | Użyj zamiast |
+|---|---|
+| Znamy kształt treści (lista kont, wiersze wpisów, karty) | Skeleton w kontenerze z `aria-busy` |
+| Wysyłanie formularza | Button z `loading` ("Logowanie…", "Zapisywanie…") |
+| Lista jest załadowana i pusta | EmptyState |
+| Nie udało się wczytać | ErrorState z ponowieniem |
+
+## 4. Anatomia
+
+Jeden akapit `p` z `role="status"`: tekst 14 px w `--muted-foreground`, zawijany (`wrap-anywhere`). Bez ikony i animacji (R01.6).
+
+## 5. Warianty
+
+Jeden wygląd. Prop `message` zmienia tylko tekst.
+
+## 6. Stany
+
+Brak stanów: komponent jest wyświetlany, dopóki trwa ładowanie, i znika razem z nim.
+
+## 7. Zachowanie i dostępność
+
+- `role="status"` to uprzejmy obszar `aria-live`: czytnik ogłasza tekst, gdy się pojawi, bez przerywania. Element musi być dodany do dokumentu w chwili rozpoczęcia ładowania, żeby zmiana została ogłoszona.
+- Nie bierze fokusu i nie jest elementem interaktywnym.
+- Kolor `--muted-foreground` na `--background` spełnia kontrast z tabeli tokenów (`.ai/specs/design/2026-11-17-tokeny.md`).
+
+## 8. Treść
+
+Domyślnie "Ładowanie…" (stała `DEFAULT_LOADING_MESSAGE`). Własny tekst opisuje czynność w trzeciej osobie bez ozdobników: "Wczytywanie kont…". Bez wykrzykników.
+
+## 9. Responsywność
+
+Tekst zawija się, także długi nieprzerwany ciąg, bez przewijania poziomego na 320 px.
+
+<Canvas of={Stories.LongTextNarrowScreen} />
+
+## 10. API
+
+| Prop | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `message` | `string` | `'Ładowanie…'` | tekst wskaźnika |
+| `className` | `string` | | dodatkowe klasy |
+| inne | atrybuty `p` | | `id`, `data-*` itd. trafiają na element |
+
+## 11. Kod
+
+```tsx
+import { LoadingMessage } from '@aitl/ui';
+
+{isLoading ? <LoadingMessage message="Wczytywanie kont…" /> : <AccountList accounts={accounts} />}
+```
+
+## 12. Powiązane
+
+- Z czym się go myli: Skeleton (znany kształt), Button `loading` (wysyłanie), `EmptyState` i `ErrorState` (stany po zakończeniu ładowania).
+- Występuje w: strony `/login` i `/` w `packages/app` (PR-10c), tam gdzie szkielet nie pasuje.

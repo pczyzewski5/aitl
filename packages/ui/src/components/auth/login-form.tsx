@@ -16,6 +16,7 @@ import { DEFAULT_LOGIN_MESSAGES } from './messages';
 import type { LoginFormMessages } from './messages';
 
 const EMAIL_PATTERN = /^\S+@\S+\.\S+$/;
+const EMAIL_FIELD = 'email';
 
 type LoginValues = { email: string; password: string };
 type LoginHeadingLevel = 'h1' | 'h2';
@@ -51,11 +52,17 @@ function LoginForm({ onSubmit, messages, headingLevel: Heading = 'h1', className
         return { ok: true };
       }
 
+      const failWith = (formError: string): SubmitResult<LoginValues> => {
+        form.focusField(EMAIL_FIELD);
+
+        return { ok: false, formError };
+      };
+
       let result: LoginResult;
       try {
         result = await onSubmit({ email: values.email.trim(), password: values.password });
       } catch {
-        return { ok: false, formError: text.network };
+        return failWith(text.network);
       }
 
       if (result.ok) {
@@ -63,7 +70,7 @@ function LoginForm({ onSubmit, messages, headingLevel: Heading = 'h1', className
         return { ok: true };
       }
 
-      return { ok: false, formError: describeLoginFailure(result, text) };
+      return failWith(describeLoginFailure(result, text));
     },
   });
 
@@ -79,8 +86,8 @@ function LoginForm({ onSubmit, messages, headingLevel: Heading = 'h1', className
           </Alert>
         )}
         <ErrorSummary title={text.summaryTitle} errors={form.summary} onSelect={form.focusField} />
-        <Field label={text.emailLabel} {...form.getFieldProps('email')}>
-          <Input type="email" autoComplete="username" autoCapitalize="none" spellCheck={false} {...form.getInputProps('email')} />
+        <Field label={text.emailLabel} {...form.getFieldProps(EMAIL_FIELD)}>
+          <Input type="email" autoComplete="username" autoCapitalize="none" spellCheck={false} {...form.getInputProps(EMAIL_FIELD)} />
         </Field>
         <Field label={text.passwordLabel} {...form.getFieldProps('password')}>
           <Input type="password" autoComplete="current-password" {...form.getInputProps('password')} />

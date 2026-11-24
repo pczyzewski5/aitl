@@ -12,6 +12,7 @@ interface LoginFormMessages {
   tooManyAttempts: (secondsText: string) => string;
   tooManyAttemptsWithoutTime: string;
   network: string;
+  serverError: string;
 }
 
 const DEFAULT_LOGIN_MESSAGES: LoginFormMessages = {
@@ -29,6 +30,7 @@ const DEFAULT_LOGIN_MESSAGES: LoginFormMessages = {
   tooManyAttemptsWithoutTime: 'Zbyt wiele prób logowania. Spróbuj ponownie za chwilę.',
   network:
     'Nie udało się połączyć z serwerem. Sprawdź połączenie z internetem i spróbuj ponownie; wpisane dane zostały w formularzu.',
+  serverError: 'Coś poszło nie tak po naszej stronie. Spróbuj ponownie za chwilę; wpisane dane zostały w formularzu.',
 };
 
 export { DEFAULT_LOGIN_MESSAGES };

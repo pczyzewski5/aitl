@@ -18,7 +18,10 @@ export const PRODUCTION_ENVIRONMENT = 'production';
 const sessionEnvSchema = z.object({
   SESSION_SECRET: z.string().min(SESSION_SECRET_MIN_LENGTH),
   SESSION_COOKIE_SECURE: z.enum(BOOLEAN_ENV_VALUES).optional(),
+  TRUSTED_PROXY_HOPS: z.string().regex(/^\d+$/).optional(),
 });
+
+export const DEFAULT_TRUSTED_PROXY_HOPS = 0;
 
 export const envSchema = runtimeEnvSchema
   .extend(databaseEnvSchema.shape)
@@ -29,6 +32,10 @@ export const envSchema = runtimeEnvSchema
       env.SESSION_COOKIE_SECURE === undefined
         ? env.NODE_ENV === PRODUCTION_ENVIRONMENT
         : env.SESSION_COOKIE_SECURE === 'true',
+    TRUSTED_PROXY_HOPS:
+      env.TRUSTED_PROXY_HOPS === undefined
+        ? DEFAULT_TRUSTED_PROXY_HOPS
+        : Number(env.TRUSTED_PROXY_HOPS),
   }));
 
 export type Env = z.infer<typeof envSchema>;

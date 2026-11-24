@@ -1,8 +1,17 @@
-export default function HomePage() {
-  return (
-    <main>
-      <h1>AITL</h1>
-      <p>Śledzenie i analiza wydatków</p>
-    </main>
-  );
+import { redirect } from 'next/navigation';
+import { loadCurrentUser } from '../http/current-user';
+import { LOGIN_PATH } from '../routes';
+import { AccountsScreen } from './accounts-screen';
+
+export const dynamic = 'force-dynamic';
+
+export const metadata = { title: 'Konta - AITL' };
+
+export default async function HomePage() {
+  const user = await loadCurrentUser();
+  if (user === null) {
+    redirect(LOGIN_PATH);
+  }
+
+  return <AccountsScreen displayName={user.displayName} />;
 }

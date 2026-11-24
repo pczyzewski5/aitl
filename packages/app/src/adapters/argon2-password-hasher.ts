@@ -23,6 +23,7 @@ export class Argon2PasswordHasher implements PasswordHasher {
 
   constructor(parameters: Argon2Parameters) {
     this.parameters = parameters;
+    this.cacheDecoyHash();
   }
 
   hash(password: string): Promise<string> {
@@ -34,8 +35,17 @@ export class Argon2PasswordHasher implements PasswordHasher {
   }
 
   async verifyAgainstDecoy(password: string): Promise<void> {
-    this.decoyHash ??= this.hash(randomBytes(DECOY_PASSWORD_BYTES).toString('hex'));
+    await verify(await (this.decoyHash ?? this.cacheDecoyHash()), password);
+  }
 
-    await verify(await this.decoyHash, password);
+  private cacheDecoyHash(): Promise<string> {
+    const decoyHash = this.hash(randomBytes(DECOY_PASSWORD_BYTES).toString('hex'));
+    this.decoyHash = decoyHash;
+
+    decoyHash.catch(() => {
+      this.decoyHash = undefined;
+    });
+
+    return decoyHash;
   }
 }

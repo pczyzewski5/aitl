@@ -2,6 +2,11 @@ import { randomUUID } from 'node:crypto';
 import { BANK_ACCOUNT_TYPE, type BankAccountRecord } from '../bank-accounts/bank-account';
 import type { BankAccountMembershipRepository } from '../bank-accounts/bank-account-membership-repository.port';
 import type { BankAccountRepository } from '../bank-accounts/bank-account-repository.port';
+import type {
+  LoginThrottleRepository,
+  ThrottleCounter,
+  ThrottleReservation,
+} from '../auth/login-throttle-repository.port';
 import type { PasswordHasher } from '../auth/password-hasher.port';
 import type {
   NewSession,
@@ -18,7 +23,16 @@ export const FAKE_HASH_PREFIX = 'fake-hash:';
 
 export type StoredSession = SessionRecord & Readonly<{ tokenHash: string }>;
 
+export type StoredThrottle = {
+  keyHash: string;
+  failures: number;
+  windowStartedAt: Date;
+  lockedUntil: Date | null;
+  updatedAt: Date;
+};
+
 export class InMemoryStore {
+  throttles: StoredThrottle[] = [];
   sessions: StoredSession[] = [];
   readonly users: UserRecord[] = [];
   readonly bankAccounts: BankAccountRecord[] = [];
@@ -34,6 +48,10 @@ export class InMemoryUserRepository implements UserRepository {
 
   async findByEmail(email: string): Promise<UserRecord | null> {
     return this.store.users.find((user) => user.email === email) ?? null;
+  }
+
+  async findById(id: string): Promise<UserRecord | null> {
+    return this.store.users.find((user) => user.id === id) ?? null;
   }
 
   async create(user: NewUser): Promise<UserRecord> {
@@ -142,6 +160,46 @@ export class InMemorySessionRepository implements SessionRepository {
     this.store.sessions = this.store.sessions.filter(
       (session) => now < session.expiresAt && now < session.absoluteExpiresAt,
     );
+  }
+}
+
+export class InMemoryLoginThrottleRepository implements LoginThrottleRepository {
+  private readonly store: InMemoryStore;
+
+  constructor(store: InMemoryStore) {
+    this.store = store;
+  }
+
+  async reserveAttempt(
+    { keyHash, limit, windowMs, lockMs }: ThrottleCounter,
+    now: Date,
+  ): Promise<ThrottleReservation> {
+    const existing = this.store.throttles.find((throttle) => throttle.keyHash === keyHash);
+    const isLocked = existing?.lockedUntil !== undefined && existing.lockedUntil !== null && existing.lockedUntil > now;
+    const isFresh =
+      existing === undefined || (!isLocked && now.getTime() - existing.windowStartedAt.getTime() >= windowMs);
+    const throttle: StoredThrottle = isFresh
+      ? { keyHash, failures: 0, windowStartedAt: now, lockedUntil: null, updatedAt: now }
+      : existing;
+
+    throttle.failures += 1;
+    throttle.updatedAt = now;
+
+    if (!isLocked && throttle.failures >= limit) {
+      throttle.lockedUntil = new Date(now.getTime() + lockMs);
+    }
+
+    this.store.throttles = [...this.store.throttles.filter((stored) => stored.keyHash !== keyHash), throttle];
+
+    return { failures: throttle.failures, lockedUntil: throttle.lockedUntil };
+  }
+
+  async deleteByKeyHashes(keyHashes: readonly string[]): Promise<void> {
+    this.store.throttles = this.store.throttles.filter(({ keyHash }) => !keyHashes.includes(keyHash));
+  }
+
+  async deleteStale(staleBefore: Date): Promise<void> {
+    this.store.throttles = this.store.throttles.filter(({ updatedAt }) => updatedAt > staleBefore);
   }
 }
 

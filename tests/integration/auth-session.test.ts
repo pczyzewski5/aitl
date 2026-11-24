@@ -130,6 +130,20 @@ describe('session login and logout against PostgreSQL', () => {
       expect(cookie).not.toContain('Secure');
     });
 
+    it('replaces the session of the cookie sent with the login', async () => {
+      const oldToken = await login();
+
+      const response = await post(app, LOGIN_PATH, { email, password }, {
+        [CSRF_HEADER_NAME]: CSRF_HEADER_VALUE,
+        Cookie: `${SESSION_COOKIE_NAME}=${oldToken}`,
+      });
+
+      const newToken = readToken(readCookie(response));
+      expect(response.status).toBe(200);
+      expect(await findSessions(hashToken(oldToken))).toHaveLength(0);
+      expect(await findSessions(hashToken(newToken))).toHaveLength(1);
+    });
+
     it('stores only the HMAC of the token with the user and both deadlines', async () => {
       const token = await login();
 

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createInMemoryRepositories,
   FakePasswordHasher,
+  InMemoryLoginThrottleRepository,
   InMemorySessionRepository,
   InMemoryStore,
   InMemoryUnitOfWork,
@@ -36,6 +37,8 @@ describe('in-memory repositories', () => {
 
     expect(await users.findByEmail(email)).toEqual(created);
     expect(await users.findByEmail(`${randomText()}@example.test`)).toBeNull();
+    expect(await users.findById(created.id)).toEqual(created);
+    expect(await users.findById(randomText())).toBeNull();
   });
 
   it('finds bank accounts by id, shared name and personal owner', async () => {
@@ -135,5 +138,64 @@ describe('InMemorySessionRepository', () => {
     expect(await sut.findByTokenHash(idleExpired)).toBeNull();
     expect(await sut.findByTokenHash(absoluteExpired)).toBeNull();
     expect(await sut.findByTokenHash(valid)).not.toBeNull();
+  });
+});
+
+describe('InMemoryLoginThrottleRepository', () => {
+  const NOW = new Date('2026-01-01T00:00:00Z');
+  const WINDOW_MS = 1000;
+  const LOCK_MS = 5000;
+  const counter = (keyHash: string, limit: number) => ({ keyHash, limit, windowMs: WINDOW_MS, lockMs: LOCK_MS });
+  const at = (offsetMs: number): Date => new Date(NOW.getTime() + offsetMs);
+
+  it('counts attempts and locks a key once the limit is reached without moving an active lock', async () => {
+    const sut = new InMemoryLoginThrottleRepository(new InMemoryStore());
+    const keyHash = randomText();
+
+    const first = await sut.reserveAttempt(counter(keyHash, 2), NOW);
+    const second = await sut.reserveAttempt(counter(keyHash, 2), at(10));
+    const third = await sut.reserveAttempt(counter(keyHash, 2), at(20));
+
+    expect(first).toEqual({ failures: 1, lockedUntil: null });
+    expect(second).toEqual({ failures: 2, lockedUntil: at(10 + LOCK_MS) });
+    expect(third).toEqual({ failures: 3, lockedUntil: at(10 + LOCK_MS) });
+  });
+
+  it('keeps an active lock past the window and starts a new window once the lock ended', async () => {
+    const sut = new InMemoryLoginThrottleRepository(new InMemoryStore());
+    const keyHash = randomText();
+    await sut.reserveAttempt(counter(keyHash, 1), NOW);
+
+    const duringLock = await sut.reserveAttempt(counter(keyHash, 1), at(WINDOW_MS));
+    const afterLock = await sut.reserveAttempt(counter(keyHash, 2), at(LOCK_MS));
+
+    expect(duringLock).toEqual({ failures: 2, lockedUntil: at(LOCK_MS) });
+    expect(afterLock).toEqual({ failures: 1, lockedUntil: null });
+  });
+
+  it('starts a new window after the old one ended and deletes by key', async () => {
+    const sut = new InMemoryLoginThrottleRepository(new InMemoryStore());
+    const keyHash = randomText();
+    await sut.reserveAttempt(counter(keyHash, 3), NOW);
+
+    const afterWindow = await sut.reserveAttempt(counter(keyHash, 3), at(WINDOW_MS));
+    await sut.deleteByKeyHashes([keyHash]);
+    const afterDelete = await sut.reserveAttempt(counter(keyHash, 3), at(WINDOW_MS + 1));
+
+    expect(afterWindow).toEqual({ failures: 1, lockedUntil: null });
+    expect(afterDelete).toEqual({ failures: 1, lockedUntil: null });
+  });
+
+  it('deletes counters last updated at or before the threshold', async () => {
+    const store = new InMemoryStore();
+    const sut = new InMemoryLoginThrottleRepository(store);
+    const stale = randomText();
+    const fresh = randomText();
+    await sut.reserveAttempt(counter(stale, 3), NOW);
+    await sut.reserveAttempt(counter(fresh, 3), at(10));
+
+    await sut.deleteStale(NOW);
+
+    expect(store.throttles.map(({ keyHash }) => keyHash)).toEqual([fresh]);
   });
 });

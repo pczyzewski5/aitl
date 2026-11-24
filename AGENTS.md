@@ -33,7 +33,7 @@ Folder konceptu tworzymy dopiero z jego pierwszym plikiem, bez pustych szkielet�
 Każda route i strona korzysta ze wspólnych warstw zamiast własnej obsługi fetch/walidacji/auth/błędów:
 
 - `packages/core/src/http/`: `errors.ts` (hierarchia `AppError`), `apiHandler.ts` (mapuje błędy na status i kopertę JSON, loguje nieoczekiwane), `makeCrudRoute.ts` (CRUD ze schematu i serwisu), `auth.ts` (`requireSession`, asercje własności i członkostwa, bez ról).
-- `packages/ui/src/backend/`: `api/apiCall.ts` (jedyne miejsce z `fetch()` do `/api/*`), `forms/CrudForm.tsx`, `tables/DataTable.tsx`, `feedback/{LoadingMessage,ErrorMessage,EmptyState}.tsx`.
+- `packages/ui/src/backend/`: `api/apiCall.ts` (jedyne miejsce z `fetch()` do `/api/*`), `forms/CrudForm.tsx`, `tables/DataTable.tsx`, `feedback/LoadingMessage.tsx`. Stany pusty i błędu wczytania to istniejące `EmptyState` i `ErrorState` w `ui/src/components/ui/`: nie dubluj ich w `backend/feedback`.
 
 Nowy komponent wielokrotnego użytku ma jedno miejsce: prymityw shadcn w `ui/src/components/ui/` (tylko przez `npx shadcn@latest add`), generyczny wzorzec panelu w `ui/src/backend/<category>/`, komponent konceptu w `ui/src/components/<concept>/`, komponent jednej strony obok jej `page.tsx`.
 

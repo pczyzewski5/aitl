@@ -41,6 +41,18 @@ export class BankAccountService {
       .map(({ id, type, name }) => ({ id, type, name }));
   }
 
+  async getSummary(bankAccountId: string): Promise<BankAccountSummary> {
+    const bankAccount = await this.bankAccounts.findById(bankAccountId);
+
+    if (bankAccount === null) {
+      throw new NotFoundError(BANK_ACCOUNT_NOT_FOUND_MESSAGE);
+    }
+
+    const { id, type, name } = bankAccount;
+
+    return { id, type, name };
+  }
+
   async addMember(bankAccountId: string, userId: string): Promise<void> {
     const bankAccount = await this.bankAccounts.findById(bankAccountId);
 

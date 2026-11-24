@@ -13,5 +13,6 @@ export type NewUser = Readonly<{
 
 export interface UserRepository {
   findByEmail(email: string): Promise<UserRecord | null>;
+  findById(id: string): Promise<UserRecord | null>;
   create(user: NewUser): Promise<UserRecord>;
 }
