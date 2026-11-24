@@ -5,7 +5,7 @@ import * as Stories from './login-screen.stories';
 
 # Ekran: Logowanie (`/login`)
 
-Pełnoekranowa kompozycja strony logowania (E01-S01). Źródło: specyfikacja `.ai/specs/2026-11-17-auth-and-app-foundation.md` (UI/UX, API), R01.1, R01.4, R01.7, decyzje właściciela z 2026-11-18. Strona w `packages/app` powstanie później (etap 5); tu jest wzorzec, do którego ma się sprowadzić.
+Pełnoekranowa kompozycja strony logowania (E01-S01). Źródło: specyfikacja `.ai/specs/implemented/2026-11-17-auth-and-app-foundation.md` (UI/UX, API), R01.1, R01.4, R01.7, decyzje właściciela z 2026-11-18. Strona w `packages/app` powstanie później (etap 5); tu jest wzorzec, do którego ma się sprowadzić.
 
 <Canvas of={Stories.Default} />
 
@@ -81,7 +81,7 @@ Teksty komponentu: patrz strona LoginForm (komunikaty zatwierdzone 2026-11-18). 
 </AppShell>
 ```
 
-Pasek i kolumna treści pochodzą z komponentu AppShell bez `logoutHref` (strona "Elementy produktu / AppShell").
+Pasek i kolumna treści pochodzą z komponentu AppShell bez `displayName` i `onLogout` (strona "Elementy produktu / AppShell").
 
 ## 10. Braki
 

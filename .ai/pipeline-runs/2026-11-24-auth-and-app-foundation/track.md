@@ -1,6 +1,6 @@
 # Track: auth i fundamenty aplikacji
 
-Spec: [.ai/specs/2026-11-17-auth-and-app-foundation.md](../../specs/2026-11-17-auth-and-app-foundation.md)
+Spec: [.ai/specs/implemented/2026-11-17-auth-and-app-foundation.md](../../specs/implemented/2026-11-17-auth-and-app-foundation.md)
 Dziennik: [.ai/runs/2026-11-24-auth-and-app-foundation.md](../../runs/2026-11-24-auth-and-app-foundation.md)
 Plan zatwierdzony przez właściciela: 2026-11-24. Poziom ryzyka: risk-high (review drugiej osoby, `needs-qa` przy PR-ach UI i izolacji).
 
@@ -22,14 +22,15 @@ Statusy: todo / in-progress / done. Kolumny PR, SHA i SB uzupełnia agent po zak
 | PR-4 | 2.0 + 2.1 | #18 | standardy (JWT -> sesja serwerowa, także AGENTS.md i CODE_REVIEW.md gdzie dotyczy), `core/http/auth.ts`, `InvalidCredentialsError`, `TooManyRequestsError`, walidator login | SB-A | PR-2 | in-progress | #70 | | SB-A zielone lokalnie (typecheck, lint, coverage 100%, build, audit) |
 | PR-5 | 2.2 | #20 | encje users/bank-accounts/auth + migracja up/down z CHECK-ami | SB-I | może równolegle z Fazą 1 | in-progress | #72 | | SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, integracyjne) |
 | PR-6 | 2.3 | #18/#20 | hasher argon2id (`@node-rs/argon2`), repozytoria, serwisy, kontener | SB-I | PR-3, PR-4, PR-5 | in-progress | #75 | | SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, integracyjne); leży na stosie #73, #70, #72 |
-| PR-7 | 2.4a | #18 | sesja, login, logout, CSRF, `SESSION_SECRET`; aktualizacja BACKWARD_COMPATIBILITY (route login/logout, env) | SB-I | PR-6 | todo | | | |
-| PR-8 | 2.4b | #18 | throttle, API kont, kontrakt, BACKWARD_COMPATIBILITY (reszta) | SB-I | PR-7 | todo | | | |
+| PR-7 | 2.4a | #18 | sesja, login, logout, CSRF, `SESSION_SECRET`; aktualizacja BACKWARD_COMPATIBILITY (route login/logout, env) | SB-I | PR-6 | in-progress | #77 | | SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, integracyjne); leży na stosie #73, #70, #72, #75 |
+| PR-8 | 2.4b | #18 | throttle, API kont, kontrakt, BACKWARD_COMPATIBILITY (reszta) | SB-I | PR-7 | in-progress | #78 | | SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, integracyjne 78 testów, throttle 3x bez flaky); leży na stosie #73, #70, #72, #75, #77 |
 | PR-9 | 2.5 | #18 | seed (logika w `packages/app/src/seed/`, cienki wrapper w `scripts/`), `SEED_PASSWORD` w `.env.example` | SB-I | PR-6; równolegle z PR-7/8 | in-progress | #76 | | SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, integracyjne); leży na stosie #73, #70, #72, #75 |
-| PR-10a | 2.6a | #19 | ui: rozszerzenie AppShell (displayName, wylogowanie jako przycisk wyglądający jak link) i LoginForm (komunikat 500, fokus), `ui/backend/api/apiCall.ts`, feedback (bez duplikowania istniejących EmptyState/ErrorState), `docs/design-system.md` | SB-A + SB-U | PR-4 | todo | | | |
-| PR-10b | 2.6b | #19 | Tailwind i style `@aitl/ui` w `app` | SB-I | - | todo | | | |
-| PR-10c | 2.6c | #19, #10 | strony `/login` i `/` (lista kont, `/?account=<id>`), redirecty, wylogowanie, fokus na h1; `needs-qa` | SB-I + SB-U | PR-8, PR-10a, PR-10b | todo | | | |
-| PR-11 | 2.7 | #11 | izolacja i druga osoba, test API dwóch sesji, E2E tylko żony; `needs-qa` | SB-I | PR-8, PR-9, PR-10c | todo | | | |
-| PR-12 | close-out | - | spec do `implemented/`, backlog, checkboxy monorepo-migration | SB-A | PR-11 | todo | | | |
+| PR-10a | 2.6a | #19 | ui: rozszerzenie AppShell (displayName, wylogowanie jako przycisk wyglądający jak link) i LoginForm (komunikat 500, fokus), `ui/backend/api/apiCall.ts`, feedback (bez duplikowania istniejących EmptyState/ErrorState), `docs/design-system.md` | SB-A + SB-U | PR-4 | in-progress | #74 | | PR na bazie `feature/core-auth-primitives` (#70), po merge #70 przestawić bazę na `main` |
+| PR-10b | 2.6b | #19 | Tailwind i style `@aitl/ui` w `app` | SB-I | - | in-progress | #71 | | SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, integracyjne) |
+| PR-10c | 2.6c | #19, #10 | strony `/login` i `/` (lista kont, `/?account=<id>`), redirecty, wylogowanie, fokus na h1; `needs-qa` | SB-I + SB-U | PR-8, PR-10a, PR-10b | in-progress | #79 | | SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, test:integration 87/87); weryfikacja w Chrome wykonana; nowa route `GET /api/auth/me`; PR leży na stosie #70-#78, #74, #71 |
+| PR-11 | 2.7 | #11 | izolacja i druga osoba, test API dwóch sesji, E2E tylko żony; `needs-qa` | SB-I | PR-8, PR-9, PR-10c | in-progress | #80 | | SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, integracyjne 105/105); E2E żony w Chrome wykonane; leży na stosie #70, #72, #73, #75, #76, #77, #78, #74, #71, #79 |
+| PR-3b | review Fazy 1 | #18 | poprawki po review Fazy 1 (apiHandler, logger, kontener) | SB-I | PR-3 | in-progress | #73 | | wiersz dodany w close-out; wynik SB w opisie PR #73; leży na stosie #70, #72 |
+| PR-12 | close-out | - | spec do `implemented/`, backlog, checkboxy monorepo-migration | SB-A | PR-11 | in-progress | #81 | | SB-A zielone lokalnie; PR leży na stosie #70, #72, #73, #75, #76, #77, #78, #74, #71, #79, #80 |
 | PR-#2 | instalator | #2 | `npm run setup`, bez generowania sekretów (tylko instrukcja); follow-up o `seed:user` po PR-9 | SB-A | równolegle z Fazą 1 w osobnym worktree, merge przed PR-7 | done | #65 | a4f4a6f | SB-A zielone, instalator sprawdzony dwukrotnie (idempotentność) |
 
 ## Zasady pracy

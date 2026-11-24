@@ -29,7 +29,10 @@ type BankAccountType = 'shared' | 'personal';
 
 describe('database migrations', () => {
   let orm: MikroORM;
-  const client = new Client({ connectionString: inject('databaseUrl') });
+  const databaseName = `migrations_${randomBytes(HASH_BYTES).toString('hex')}`;
+  const databaseUrl = new URL(inject('databaseUrl'));
+  databaseUrl.pathname = `/${databaseName}`;
+  const client = new Client({ connectionString: databaseUrl.toString() });
 
   const randomHex = (): string => randomBytes(HASH_BYTES).toString('hex');
 
@@ -92,8 +95,12 @@ describe('database migrations', () => {
   };
 
   beforeAll(async () => {
+    const adminClient = new Client({ connectionString: inject('databaseUrl') });
+    await adminClient.connect();
+    await adminClient.query(`CREATE DATABASE ${databaseName}`);
+    await adminClient.end();
     orm = await MikroORM.init(
-      createOrmConfig({ databaseUrl: inject('databaseUrl'), migrationsPath: MIGRATIONS_PATH }),
+      createOrmConfig({ databaseUrl: databaseUrl.toString(), migrationsPath: MIGRATIONS_PATH }),
     );
     await client.connect();
   });
@@ -317,16 +324,30 @@ describe('database migrations', () => {
     });
   });
 
+  describe('login throttle failures check', () => {
+    it('rejects a negative failure count', async () => {
+      const actual = client.query(
+        `INSERT INTO ${LOGIN_THROTTLES_TABLE} (id, created_at, updated_at, key_hash, failures, window_started_at)
+         VALUES ($1, now(), now(), $2, -1, now())`,
+        [randomUUID(), randomHex()],
+      );
+
+      await expect(actual).rejects.toMatchObject({ code: CHECK_VIOLATION });
+    });
+  });
+
   it('reverts the auth migration and applies it again', async () => {
     const migrator = orm.migrator;
     const expected = [...AUTH_TABLES].sort();
 
+    const revertedChecks = await migrator.down();
     const reverted = await migrator.down();
     const tablesAfterDown = await listExistingAuthTables();
     await migrator.up();
     const tablesAfterUp = await listExistingAuthTables();
     const rowsAfterUp = await countRows(USERS_TABLE);
 
+    expect(revertedChecks).toHaveLength(1);
     expect(reverted).toHaveLength(1);
     expect(tablesAfterDown).toEqual([]);
     expect(tablesAfterUp).toEqual(expected);

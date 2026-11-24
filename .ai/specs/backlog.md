@@ -29,3 +29,17 @@ Słownik: „konto użytkownika” = login (User); „konto bankowe” = konto p
 | E02-S01-T01 | [#21](https://github.com/pczyzewski5/aitl/issues/21) | Encja wpisu (wpływ/wydatek) i migracja | #12 | E01-S01-T04 (#20) | no |
 | E02-S01-T02 | [#22](https://github.com/pczyzewski5/aitl/issues/22) | Szkielet listy i formularza z ui/backend na realnym przykładzie | #12 | E02-S01-T01 (#21) | no |
 | E03-S01-T01 | [#23](https://github.com/pczyzewski5/aitl/issues/23) | Porównać wynik z arkuszem Google właściciela (test A01) | #16 | E03-S01 (#16) | no |
+
+## Status implementacji E01 (stan na 2026-11-24)
+
+Śledzone tu, nie na GitHubie (issues bez zmian). Spec: `.ai/specs/implemented/2026-11-17-auth-and-app-foundation.md`, plan PR-ów: `.ai/pipeline-runs/2026-11-24-auth-and-app-foundation/track.md`. "Zaimplementowane" oznacza kod gotowy w otwartych PR-ach; nic poza Fazą 1 nie jest jeszcze na `main`.
+
+| Id | Issue | Status | PR-y |
+|---|---|---|---|
+| E01 | #6 | w toku: wszystkie historie zaimplementowane w otwartych PR-ach, do zamknięcia po merge stosu | #70-#80 |
+| E01-S01 | #10 | zaimplementowane, czeka na merge i testy ręczne właściciela | #79 (strony), stos #70-#78 |
+| E01-S02 | #11 | zaimplementowane, czeka na merge i testy ręczne właściciela | #80 (izolacja, E2E żony), #76 (seed) |
+| E01-S01-T01 | #17 | zrobione, zmergowane | #68, #69 |
+| E01-S01-T02 | #18 | częściowo zmergowane: env, logger, `apiHandler` (#64, #67); auth, sesja, throttle, seed w otwartych PR-ach | #70, #73, #75, #76, #77, #78 |
+| E01-S01-T03 | #19 | zaimplementowane, czeka na merge | #74, #71, #79 |
+| E01-S01-T04 | #20 | zaimplementowane, czeka na merge | #72 |

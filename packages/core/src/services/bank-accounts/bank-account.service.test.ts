@@ -21,6 +21,24 @@ describe('BankAccountService', () => {
     sut = new BankAccountService(bankAccounts, memberships);
   });
 
+  describe('getSummary', () => {
+    it('returns id, type and name without the owner', async () => {
+      const { bankAccounts } = createInMemoryRepositories(store);
+      const personal = await bankAccounts.createPersonal(randomUUID(), randomName());
+      const expected = { id: personal.id, type: BANK_ACCOUNT_TYPE.Personal, name: personal.name };
+
+      const actual = await sut.getSummary(personal.id);
+
+      expect(actual).toEqual(expected);
+    });
+
+    it('throws NotFoundError for an unknown account', async () => {
+      const actual = sut.getSummary(randomUUID());
+
+      await expect(actual).rejects.toThrow(new NotFoundError(BANK_ACCOUNT_NOT_FOUND_MESSAGE));
+    });
+  });
+
   describe('listForUser', () => {
     it('lists shared accounts before personal ones, then alphabetically by name', async () => {
       const { bankAccounts, memberships } = createInMemoryRepositories(store);

@@ -1,6 +1,6 @@
 # Mapa ekranów: Epik E01 "Dostęp i logowanie" (AITL)
 
-Status: PROJEKT do zatwierdzenia. Źródła: `.ai/specs/product-brief.md` (Key flows, Business rules, Decisions), `.ai/specs/backlog.md`, issues #6, #10, #11, #17-#20, `.ai/specs/2026-11-17-auth-and-app-foundation.md`, `packages/ui/POSTEP.md`, `docs/design-system.md`, `packages/ui/src/screens/e01/`, `packages/ui/src/stories/system/`. Brak person (nie wymyślano). Niczego nie rozstrzygam: wszystko niejasne trafiło do sekcji 7.
+Status: PROJEKT do zatwierdzenia. Źródła: `.ai/specs/product-brief.md` (Key flows, Business rules, Decisions), `.ai/specs/backlog.md`, issues #6, #10, #11, #17-#20, `.ai/specs/implemented/2026-11-17-auth-and-app-foundation.md`, `packages/ui/POSTEP.md`, `docs/design-system.md`, `packages/ui/src/screens/e01/`, `packages/ui/src/stories/system/`. Brak person (nie wymyślano). Niczego nie rozstrzygam: wszystko niejasne trafiło do sekcji 7.
 
 Konwencja: S01-K3 = historia E01-S01, kryterium nr 3 (numeracja kryteriów według kolejności w issue na GitHubie). Terminologia za backlogiem: "konto użytkownika" = login (User), "konto bankowe" = BankAccount (wspólne albo osobiste).
 

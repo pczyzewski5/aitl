@@ -1,7 +1,7 @@
 import { formatSeconds } from './format-seconds';
 import type { LoginFormMessages } from './messages';
 
-type LoginFailureKind = 'invalid-credentials' | 'too-many-attempts' | 'network';
+type LoginFailureKind = 'invalid-credentials' | 'too-many-attempts' | 'network' | 'server-error';
 
 interface LoginFailure {
   ok: false;
@@ -22,6 +22,8 @@ function describeLoginFailure(failure: LoginFailure, messages: LoginFormMessages
     }
     case 'network':
       return messages.network;
+    case 'server-error':
+      return messages.serverError;
   }
 }
 

@@ -5,7 +5,7 @@ import * as Stories from './bank-account-list.stories';
 
 # BankAccountList
 
-Lista kont bankowych zalogowanego użytkownika (E01-S01, E01-S02): nazwa konta jako link, plakietka "Wspólne" albo "Osobiste" i cztery stany danych (ładowanie, pusto, błąd, wczytane). Składa się z Badge, TextLink, Skeleton, EmptyState i ErrorState. Źródło reguł: specyfikacja `.ai/specs/2026-11-17-auth-and-app-foundation.md` (`GET /api/bank-accounts`, Q5-Q7, Q13), R01.2 (plakietki), R01.5, A3, tokeny, decyzje właściciela z 2026-11-18, WCAG 2.2. Reguła bez źródła jest oznaczona jako **propozycja**.
+Lista kont bankowych zalogowanego użytkownika (E01-S01, E01-S02): nazwa konta jako link, plakietka "Wspólne" albo "Osobiste" i cztery stany danych (ładowanie, pusto, błąd, wczytane). Składa się z Badge, TextLink, Skeleton, EmptyState i ErrorState. Źródło reguł: specyfikacja `.ai/specs/implemented/2026-11-17-auth-and-app-foundation.md` (`GET /api/bank-accounts`, Q5-Q7, Q13), R01.2 (plakietki), R01.5, A3, tokeny, decyzje właściciela z 2026-11-18, WCAG 2.2. Reguła bez źródła jest oznaczona jako **propozycja**.
 
 <Canvas of={Stories.Playground} />
 <Controls of={Stories.Playground} />
@@ -78,7 +78,7 @@ Najechanie i fokus ma link (jak TextLink: podkreślenie zawsze, najechanie `--pr
 Teksty to nazwane stałe w `messages.ts` (`DEFAULT_BANK_ACCOUNT_LIST_MESSAGES`), nadpisywalne propem `messages`. Nazwy kont pochodzą z danych (przykłady oznaczamy "(przykład)", A5).
 
 - Tytuł: "Twoje konta bankowe". Plakietki: "Wspólne", "Osobiste".
-- Pusto: "Nie masz jeszcze żadnego konta bankowego" + "Gdy konto zostanie Ci przypisane, zobaczysz je tutaj." Konta tworzy administrator (seed), więc domyślnie bez przycisku; opcjonalna `emptyAction` (np. "Sprawdź ponownie") jest przeznaczona na odświeżenie listy.
+- Pusto: "Nie masz jeszcze żadnego konta bankowego" + "Skontaktuj się z administratorem aplikacji." (Q35: wskazuje administratora, bez nazwisk i adresów). Konta tworzy administrator (seed), więc domyślnie bez przycisku; opcjonalna `emptyAction` (np. "Sprawdź ponownie") jest przeznaczona na odświeżenie listy.
 - Błąd: "Nie udało się wczytać kont bankowych" + "Sprawdź połączenie z internetem i spróbuj ponownie." + przycisk "Spróbuj ponownie".
 - Długość nazwy: bez obcinania, zawija się. Kolejność: dokładnie jak z API, bez sortowania (decyzja właściciela, 2026-11-18).
 

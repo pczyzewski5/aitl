@@ -1,7 +1,7 @@
 # Zapis wpływów i wydatków (E02)
 
 Status: DRAFT po decyzjach właściciela i review, bez otwartych pytań.
-Źródła: epik #7 (E02), historie #12-#15, zadania #21, #22; `.ai/specs/product-brief.md` (D01, R01, R02, R03, A03); `.ai/specs/2026-11-17-auth-and-app-foundation.md` (zależność: `BankAccount`, członkostwo, `apiHandler`, `assertMemberOfBankAccount`, `apiCall`, `ui/backend/feedback`, wzorzec `/api/bank-accounts/{id}`); `AGENTS.md`; `.ai/specs/2026-09-01-engineering-standards.md` (faza 4b); `BACKWARD_COMPATIBILITY.md`.
+Źródła: epik #7 (E02), historie #12-#15, zadania #21, #22; `.ai/specs/product-brief.md` (D01, R01, R02, R03, A03); `.ai/specs/implemented/2026-11-17-auth-and-app-foundation.md` (zależność: `BankAccount`, członkostwo, `apiHandler`, `assertMemberOfBankAccount`, `apiCall`, `ui/backend/feedback`, wzorzec `/api/bank-accounts/{id}`); `AGENTS.md`; `.ai/specs/2026-09-01-engineering-standards.md` (faza 4b); `BACKWARD_COMPATIBILITY.md`.
 Spec siostrzany: `.ai/specs/2026-11-17-monthly-remainder.md` (E03, czyta dane z tego specu).
 
 ## 📝 TLDR

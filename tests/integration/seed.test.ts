@@ -6,6 +6,7 @@ import { createOrmConfig } from '@aitl/db';
 import { MikroORM, type Options } from '@mikro-orm/postgresql';
 import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 import { createAppContainer } from '../../packages/app/src/container/container.ts';
+import { createSessionSecret } from './support/app-server.ts';
 import { SEED_EXIT_CODE, SEED_MESSAGE, SEED_PASSWORD_ENV } from '../../packages/app/src/seed/seed-config.ts';
 
 const MIGRATIONS_PATH = fileURLToPath(new URL('../../packages/db/migrations', import.meta.url));
@@ -13,8 +14,7 @@ const REPOSITORY_ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const SEED_COMMAND = ['--import', 'tsx', 'scripts/seed-user.ts'];
 const SEED_TIMEOUT_MS = 60_000;
 const RANDOM_BYTES = 12;
-const SESSION_SECRET_BYTES = 32;
-const SESSION_SECRET = randomBytes(SESSION_SECRET_BYTES).toString('hex');
+const SESSION_SECRET = createSessionSecret();
 
 const randomText = (): string => randomBytes(RANDOM_BYTES).toString('hex');
 

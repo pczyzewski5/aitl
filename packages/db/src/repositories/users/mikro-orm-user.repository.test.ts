@@ -49,6 +49,26 @@ describe('MikroOrmUserRepository', () => {
     expect(actual).toBeNull();
   });
 
+  it('finds a user by id and maps it to a record', async () => {
+    const row = createRow();
+    const findOne = vi.fn().mockResolvedValue(row);
+    const sut = createSut({ findOne });
+    const expected = { id: row.id, email: row.email, displayName: row.displayName, passwordHash: row.passwordHash };
+
+    const actual = await sut.findById(row.id);
+
+    expect(actual).toEqual(expected);
+    expect(findOne).toHaveBeenCalledWith(User, { id: row.id });
+  });
+
+  it('returns null for an unknown id', async () => {
+    const sut = createSut({ findOne: vi.fn().mockResolvedValue(null) });
+
+    const actual = await sut.findById(randomText());
+
+    expect(actual).toBeNull();
+  });
+
   it('creates a user, flushes it and maps the result', async () => {
     const row = createRow();
     const create = vi.fn().mockReturnValue(row);

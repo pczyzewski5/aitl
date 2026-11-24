@@ -21,7 +21,7 @@ Następny krok: właściciel przegląda PR U (etap 4, patrz sekcja "Notatki z PR
 
 - Brief: `.ai/specs/product-brief.md`; badania: `.ai/specs/research/` (wywiady, decyzje).
 - Backlog: `.ai/specs/backlog.md` (E01 Dostęp i logowanie, E02 Zapis wpływów i wydatków, E03 Ile zostanie w miesiącu; E04 i E05 zaparkowane, bez historii).
-- Specyfikacje: `.ai/specs/2026-11-17-auth-and-app-foundation.md`, `.ai/specs/2026-11-17-entries-income-expenses.md`, `.ai/specs/2026-11-17-monthly-remainder.md`, standardy: `.ai/specs/2026-09-01-engineering-standards.md`.
+- Specyfikacje: `.ai/specs/implemented/2026-11-17-auth-and-app-foundation.md`, `.ai/specs/2026-11-17-entries-income-expenses.md`, `.ai/specs/2026-11-17-monthly-remainder.md`, standardy: `.ai/specs/2026-09-01-engineering-standards.md`.
 - Referencje: `.ai/specs/design/2026-11-17-referencje.md` (R01.1-R01.8, A1-A5, K1-K3, luki L1-L7).
 - Tokeny: `.ai/specs/design/2026-11-17-tokeny.md` (trzy warstwy, tabela kontrastu WCAG).
 - Audyt i makieta wyjściowa leżą poza repo (lokalnie u właściciela); ich wnioski są już w referencjach i tokenach.
@@ -464,6 +464,13 @@ Obowiązujące dla T: stan ekranu w adresie (`?account=…&month=RRRR-MM`); jedn
 - Plik dla agentów: `docs/design-system.md` (reguły oznaczone REGUŁA, PRZYKŁAD, LUKA), odwołanie w lokalnym `AGENTS.md` (decyzja właściciela nr 4). Opisuje tylko to, co istnieje w kodzie (nazwy eksportów i propsów sprawdzone w źródłach).
 - Linki między stronami to `?path=/docs/<id>`; identyfikatory sprawdzone względem `index.json` zbudowanego Storybooka (skrypt jednorazowy, poza repo). `check:tokens` skanuje też `.mdx`, więc przykładów zakazanych wartości nie wpisujemy w dokumentacji literalnie.
 - Do decyzji właściciela: czy plik `docs/design-system.md` ma być utrzymywany ręcznie (dziś tak), czy wymagać jego aktualizacji w checklistcie PR-a; czy etap 5 ma zawierać test agentem na ekranie z backlogu.
+
+## Notatki z PR-10a (krok 2.6a: rozszerzenie AppShell i LoginForm, `apiCall`)
+
+- Zamknięte luki z mapy ekranów E01: LDS1 (wylogowanie jako przycisk wyglądający jak link, `onLogout` w `AppShell`), LDS2 (`displayName` na pasku), LDS4 (`server-error` w `LoginForm` z tekstem Q29). `logoutHref` usunięte (brak konsumentów w `app`).
+- `LoginForm`: fokus wraca na pole e-mail po każdym nieudanym logowaniu (Q30); po sukcesie nie rusza fokusu (h1 robi strona, Q32).
+- Nowe: `ui/backend/api/apiCall.ts` (jedyny `fetch` do `/api/*`, strona "Wzorce / Wywołania API"), `ui/backend/feedback/loading-message.tsx`, `buildAccountHref`. `EmptyState` i `ErrorState` bez zmian (nie dublowane); stan pusty listy kont wskazuje administratora (Q35).
+- Nadal otwarte: LDS3 (brak dostępu bez ponawiania, od E02/E03), LDS5-LDS8.
 
 ## Notatki z PR V (etap 5: sprawdzenie i raport)
 

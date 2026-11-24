@@ -5,7 +5,7 @@ import * as Stories from './login-form.stories';
 
 # LoginForm
 
-Formularz logowania (E01-S01): e-mail, hasło i przycisk "Zaloguj się" na karcie. Składa się z Card, Field, Input, Button, Alert i wzorca formularza (`useFormValidation`, `ErrorSummary`). Źródło reguł: specyfikacja `.ai/specs/2026-11-17-auth-and-app-foundation.md` (E01-S01, kontrakt `POST /api/auth/login`), R01.7, A3 (referencje), tokeny, decyzje właściciela z 2026-11-18 (komunikaty logowania, blokada bez odliczania na żywo), WCAG 2.2 i WAI-ARIA. Reguła bez źródła jest oznaczona jako **propozycja**.
+Formularz logowania (E01-S01): e-mail, hasło i przycisk "Zaloguj się" na karcie. Składa się z Card, Field, Input, Button, Alert i wzorca formularza (`useFormValidation`, `ErrorSummary`). Źródło reguł: specyfikacja `.ai/specs/implemented/2026-11-17-auth-and-app-foundation.md` (E01-S01, kontrakt `POST /api/auth/login`), R01.7, A3 (referencje), tokeny, decyzje właściciela z 2026-11-18 (komunikaty logowania, blokada bez odliczania na żywo), WCAG 2.2 i WAI-ARIA. Reguła bez źródła jest oznaczona jako **propozycja**.
 
 <Canvas of={Stories.Playground} />
 <Controls of={Stories.Playground} />
@@ -25,7 +25,7 @@ Pozwala zalogować się własnym kontem i mówi wprost, co się stało i co zrob
 |---|---|
 | Formularz wpisu, filtrowania, ustawień | wzorzec formularza (`useFormValidation`) z własnymi polami |
 | Rejestracja, reset i zmiana hasła | nie istnieją w produkcie (Q1, Q9 specyfikacji); gdy się pojawią, osobny formularz |
-| Wylogowanie | link "Wyloguj" w nagłówku (TextLink), nie formularz |
+| Wylogowanie | przycisk "Wyloguj" w nagłówku (AppShell), nie formularz |
 
 ## 4. Anatomia
 
@@ -54,7 +54,8 @@ Jeden wygląd, bez wariantów. Prop `headingLevel` zmienia tylko poziom nagłów
 | Wysyłanie | przycisk `loading` ("Logowanie…"), dane zostają, drugie wysłanie zablokowane | Wysyłanie |
 | Błędne dane (401) | Alert u góry, ten sam tekst dla nieznanego e-maila i złego hasła | Błędne dane |
 | Blokada (429) | Alert u góry z liczbą sekund, statyczny | Blokada po zbyt wielu próbach |
-| Brak sieci | Alert u góry, dane zostają | Brak sieci, Żądanie rzuca wyjątek |
+| Brak sieci | Alert u góry, dane zostają, fokus na polu e-mail | Brak sieci, Żądanie rzuca wyjątek |
+| Błąd serwera (500) | Alert u góry z tekstem bez szczegółów (Q29), dane zostają, fokus na polu e-mail | Błąd serwera 500 |
 | Sukces | formularz nie pokazuje nic własnego; przekierowanie robi aplikacja | Sukces |
 | Zablokowany | nie dotyczy: przycisk jest zawsze dostępny, a błędy mówią, co poprawić | |
 
@@ -64,11 +65,13 @@ Jeden wygląd, bez wariantów. Prop `headingLevel` zmienia tylko poziom nagłów
 <Canvas of={Stories.InvalidCredentials} />
 <Canvas of={Stories.Lockout} />
 <Canvas of={Stories.NetworkError} />
+<Canvas of={Stories.ServerError} />
 
 ## 7. Zachowanie i dostępność
 
 - Walidacja po opuszczeniu dotkniętego pola i przy wysłaniu; `noValidate` na formularzu, `aria-required="true"` na polach; komunikat jest powiązany z polem (`aria-describedby`) i ogłaszany (`role="alert"` w Field). Źródło: reguły wzorca formularza, zatwierdzone 2026-11-18.
 - Po nieudanym wysłaniu fokus trafia na pierwsze nieprawidłowe pole; podsumowanie (tylko gdy błędów jest więcej niż jeden) ma linki przenoszące fokus do pól.
+- Po każdym nieudanym logowaniu (złe dane, blokada, brak sieci, błąd serwera, wyjątek żądania) fokus wraca na pole "Adres e-mail" (Q30): użytkownik poprawia dane od początku, a czytnik ekranu ogłasza Alert niezależnie od fokusu. Po udanym logowaniu formularz nie rusza fokusu: przejście na `h1` nowego ekranu (Q32) należy do strony w `app`.
 - Alert błędu serwera ma `role="alert"`: czytnik ekranu ogłasza go od razu. Komunikat jest **statyczny**, bez odliczania na żywo, żeby czytnik nie był zalewany co sekundę (decyzja właściciela, 2026-11-18). Po upływie czasu użytkownik po prostu wysyła formularz ponownie.
 - Blokada podwójnego wysłania: przycisk `loading` ma `aria-busy` i `aria-disabled` (zostaje w kolejności fokusu), a ponowne wysłanie przez Enter w polu jest ignorowane do zakończenia żądania. Po udanym logowaniu kolejne wysłania są ignorowane, dopóki aplikacja nie przekieruje.
 - Kolejność fokusu: e-mail, hasło, przycisk. Cel kliknięcia: pola i przycisk 36 px (`--control-height`).
@@ -85,6 +88,7 @@ Wszystkie teksty to nazwane stałe w `messages.ts` (`DEFAULT_LOGIN_MESSAGES`), n
 | 429 | "Zbyt wiele prób logowania. Spróbuj ponownie za 87 sekund." |
 | 429 bez czasu (brak `retryAfterSeconds`) | "Zbyt wiele prób logowania. Spróbuj ponownie za chwilę." (**propozycja**: kontrakt API zawsze podaje sekundy, to zabezpieczenie) |
 | Brak sieci | "Nie udało się połączyć z serwerem. Sprawdź połączenie z internetem i spróbuj ponownie; wpisane dane zostały w formularzu." |
+| Błąd serwera 500 (Q29) | "Coś poszło nie tak po naszej stronie. Spróbuj ponownie za chwilę; wpisane dane zostały w formularzu." (bez kodu, bez szczegółów) |
 | Pusty e-mail, niepełny e-mail | "Wpisz adres e-mail, np. jan@example.com.", "Adres e-mail wygląda na niepełny. Sprawdź, czy ma znak @ i domenę, np. jan@example.com." |
 | Puste hasło | "Wpisz hasło." |
 
@@ -115,7 +119,7 @@ Kontrakt `LoginResult` (`ui` nie importuje `@aitl/*`, więc `app` tłumaczy kope
 ```ts
 type LoginResult =
   | { ok: true }
-  | { ok: false; kind: 'invalid-credentials' | 'too-many-attempts' | 'network'; retryAfterSeconds?: number };
+  | { ok: false; kind: 'invalid-credentials' | 'too-many-attempts' | 'network' | 'server-error'; retryAfterSeconds?: number };
 ```
 
 | Odpowiedź API (`app`) | Wynik dla `onSubmit` |
@@ -123,7 +127,8 @@ type LoginResult =
 | 200 `{ ok: true }` | `{ ok: true }`, potem przekierowanie na `/` |
 | 401 `invalid_credentials` | `{ ok: false, kind: 'invalid-credentials' }` |
 | 429 `too_many_attempts` z `error.retryAfterSeconds` (i `Retry-After`) | `{ ok: false, kind: 'too-many-attempts', retryAfterSeconds }` |
-| `fetch` rzuca, 5xx, niepoprawny JSON | `{ ok: false, kind: 'network' }` albo wyjątek (formularz traktuje wyjątek jak brak sieci) |
+| `fetch` rzuca (brak sieci) | `{ ok: false, kind: 'network' }` albo wyjątek (formularz traktuje wyjątek jak brak sieci) |
+| 5xx, niepoprawny JSON w odpowiedzi | `{ ok: false, kind: 'server-error' }` |
 | 400 `validation_error` | nie powinno się zdarzyć po walidacji w formularzu; `app` mapuje na `network` albo `invalid-credentials` (**do decyzji w etapie 5**) |
 
 ## 11. Kod
@@ -141,17 +146,23 @@ Typowy przykład z produktu (adapter w `app`):
 ```tsx
 'use client';
 
-import { LoginForm, type LoginResult } from '@aitl/ui';
+import { apiCall, LoginForm, type LoginResult } from '@aitl/ui';
 
 async function signIn(values: { email: string; password: string }): Promise<LoginResult> {
-  const response = await apiCall('/api/auth/login', { method: 'POST', body: values });
+  const response = await apiCall<{ displayName: string }>('/api/auth/login', { method: 'POST', body: values });
   if (response.ok) {
     return { ok: true };
   }
-  if (response.error.code === 'too_many_attempts') {
+  if (response.kind === 'network') {
+    return { ok: false, kind: 'network' };
+  }
+  if (response.kind === 'api-error' && response.status === 401) {
+    return { ok: false, kind: 'invalid-credentials' };
+  }
+  if (response.kind === 'api-error' && response.status === 429) {
     return { ok: false, kind: 'too-many-attempts', retryAfterSeconds: response.error.retryAfterSeconds };
   }
-  return { ok: false, kind: 'invalid-credentials' };
+  return { ok: false, kind: 'server-error' };
 }
 
 <LoginForm onSubmit={async (values) => {

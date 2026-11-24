@@ -33,8 +33,8 @@ Kryteria ukończenia:
 ## Faza 4: Awilix w `packages/app`
 
 Kryteria ukończenia:
-- [ ] composition root kontenera DI, rejestracja serwisów z `core` i połączenia z `db`
-- [ ] wstrzykiwanie przez konstruktor, test jednostkowy kontenera
+- [x] composition root kontenera DI, rejestracja serwisów z `core` i połączenia z `db`
+- [x] wstrzykiwanie przez konstruktor, test jednostkowy kontenera
 
 ## Faza 4b: warstwa wielokrotnego użytku (standardy inżynieryjne)
 
@@ -43,11 +43,13 @@ Kryteria ukończenia:
 Kryteria ukończenia:
 - [x] zasady ze speca w `AGENTS.md`
 - [x] `core/src/http/errors.ts` (hierarchia `AppError`)
-- [ ] `core/src/http/{apiHandler,makeCrudRoute,auth}.ts`, `core/src/config/env.ts`, `core/src/logger.ts`
+- [x] `core/src/http/{apiHandler,auth}.ts`, `core/src/config/env.ts`, `core/src/logger.ts`
+- [ ] `core/src/http/makeCrudRoute.ts`
 - [ ] `ui/src/backend/{api,forms,tables,feedback}` zbudowane na jednym realnym przykładzie, przed drugim konceptem
 
 ## Faza 5: UI (Tailwind i shadcn/ui)
 
 Kryteria ukończenia:
-- [ ] Tailwind dla stron frontendowych w `app`, shadcn/ui dla stron panelu admina
+- [x] Tailwind dla stron frontendowych w `app`
+- [ ] shadcn/ui dla stron panelu admina
 - [ ] wspólne komponenty w `packages/ui`, tryb jasny i ciemny

@@ -44,17 +44,18 @@ Wszystkie importy: `import { ... } from '@aitl/ui'`. Strona dokumentacji kompone
 | `Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogDescription`, `DialogFooter`, `DialogClose`, `DialogTrigger` | krótka, osobna interakcja przerywająca bieżący widok (formularz w oknie) | zwykła treść strony; potwierdzenie nieodwracalnej akcji (`ConfirmDialog`) |
 | `ConfirmDialog` (`title`, `description`, `confirmLabel`, `cancelLabel`, `confirming`) | potwierdzenie akcji nieodwracalnej, przycisk nazwany czasownikiem | akcja odwracalna lub zwykła |
 | `Menu` (`triggerLabel`, `items`) | akcje jednego wiersza lub obiektu | główna akcja strony (`Button`) |
-| `Skeleton` | miejsce na treść, która się ładuje (kontener z `aria-busy`) | informacja o błędzie lub braku danych |
-| `EmptyState` (`title`, `description`, `action`) | sekcja pusta, najwyżej jedna akcja | błąd wczytania (`ErrorState`) |
-| `ErrorState` (`title`, `retryLabel`, `onRetry`, `announce`) | sekcja, której nie udało się wczytać, z "Spróbuj ponownie" | błąd walidacji pola (`Field`); błąd w formularzu (`Alert`) |
+| `Skeleton` | miejsce na treść, która się ładuje (kontener z `aria-busy`) | informacja o błędzie lub braku danych; treść o nieznanym kształcie (`LoadingMessage`) |
+| `EmptyState` (`title`, `description`, `action`) | sekcja pusta, najwyżej jedna akcja; jedyny komponent stanu pustego (nie ma drugiego w `ui/backend/feedback`) | błąd wczytania (`ErrorState`) |
+| `ErrorState` (`title`, `retryLabel`, `onRetry`, `announce`) | sekcja, której nie udało się wczytać, z "Spróbuj ponownie"; jedyny komponent błędu wczytania (nie ma drugiego w `ui/backend/feedback`) | błąd walidacji pola (`Field`); błąd w formularzu (`Alert`) |
 | `ToastProvider`, `useToast` (`toast({ message, announce })`) | krótkie potwierdzenie po zapisie | błąd wymagający decyzji lub ponowienia (`Alert` lub `ErrorState`) |
 
 ### Elementy produktu
 
 | Import | Kiedy | Kiedy nie |
 |---|---|---|
-| `AppShell` (`logoutHref`) | rama każdej strony: pasek "AITL", opcjonalny "Wyloguj", jedna kolumna do 960 px | strona bez ramy produktu |
-| `LoginForm` (`onSubmit`) | logowanie e-mailem i hasłem | inne formularze (użyj wzorca formularza) |
+| `AppShell` (`displayName`, `onLogout`) | rama każdej strony: pasek "AITL", nazwa zalogowanej osoby i "Wyloguj" (przycisk wyglądający jak link, bez propów: sam "AITL"), jedna kolumna do 960 px | strona bez ramy produktu; wylogowanie jako link do adresu |
+| `LoginForm` (`onSubmit`) | logowanie e-mailem i hasłem; `onSubmit` zwraca `LoginResult` (`invalid-credentials`, `too-many-attempts`, `network`, `server-error`), po błędzie fokus wraca na e-mail | inne formularze (użyj wzorca formularza) |
+| `LoadingMessage` (`message`) | tekst "Ładowanie…" jako status, gdy kształt treści jest nieznany | treść o znanym kształcie (`Skeleton`); wysyłanie formularza (`Button` z `loading`) |
 | `BankAccountList` (`status`, `accounts`, `onRetry`) | lista kont bankowych użytkownika ze stanami | przegląd wyniku miesiąca (`AccountRemainderCard`) |
 | `AccountRemainderCard` (`status`, `name`, `accountType`, `remainderMinor`, `incomeMinor`, `expensesMinor`, `selected`, `onSelect`) | wynik "ile zostanie" jednego konta, wybór aktywnego konta | suma kont; konto bez stanu `selected` jako przycisk |
 | `MonthSwitcher` (`month`, `onMonthChange`, `min`, `max`) | zmiana oglądanego miesiąca | wybór dowolnej daty (`Input`) |
@@ -65,6 +66,7 @@ Wszystkie importy: `import { ... } from '@aitl/ui'`. Strona dokumentacji kompone
 
 ### Pomocnicze
 
+- **[REGUŁA]** `apiCall` to jedyne miejsce z `fetch()` do `/api/*`: zawsze dodaje `X-Requested-With: aitl`, nigdy nie rzuca z powodu sieci ani odpowiedzi i zwraca `ok`, `api-error` (z `status` i `error.code`), `invalid-response` albo `network`. Ścieżka spoza `/api/` to błąd programisty (`TypeError`). `buildAccountHref(id)` buduje link konta `/?account=<id>`.
 - **[REGUŁA]** `formatMoneyMinor` formatuje każdą kwotę (kwoty jako liczby całkowite w jednostce podstawowej, bez `float`). `parseAmountToMinor` parsuje tekst wpisany w polu. `addMonths`, `formatMonthLabel`, `isMonthKey` obsługują klucz miesiąca `RRRR-MM`. `cn` skleja klasy.
 - **[REGUŁA]** Brak wymaganego elementu (np. `Textarea`, `Tabs`, `Tooltip`, `Popover`, `Avatar`) oznacza [LUKA]: patrz "Czego brakuje".
 
@@ -104,7 +106,10 @@ Klasy Tailwinda są dostępne tylko dla znaczeń (domyślna paleta jest wyzerowa
 - **[REGUŁA]** Jeśli pole ma etykietę, to przez `Field` (widoczna etykieta, `hint`, `error` pod polem). Pola leżą na `--card` albo `--form-surface`, nigdy bezpośrednio na `--background`.
 - **[REGUŁA]** Jeśli pole jest opcjonalne, to `optional` na `Field` (tekst "(opcjonalne)"). Domyślnie pola są wymagane. Formularze mają `noValidate`, a błędy pokazuje `useFormValidation` z `ErrorSummary`.
 - **[REGUŁA]** Jeśli wybierasz jedną opcję: do kilku `RadioGroup`, więcej `Select`. Jeśli niezależną opcję: `Checkbox`.
-- **[REGUŁA]** Jeśli sekcja się ładuje, to `Skeleton` w kontenerze z `aria-busy`; jeśli jest pusta, `EmptyState` z najwyżej jedną akcją; jeśli się nie wczytała, `ErrorState` z ponowieniem.
+- **[REGUŁA]** Jeśli sekcja się ładuje, to `Skeleton` w kontenerze z `aria-busy`; jeśli jest pusta, `EmptyState` z najwyżej jedną akcją; jeśli się nie wczytała, `ErrorState` z ponowieniem; jeśli kształt treści jest nieznany, `LoadingMessage`.
+- **[REGUŁA]** Jeśli logowanie się nie powiodło (złe dane, blokada, brak sieci, 500), to komunikat w formularzu (`Alert`), dane zostają, a fokus wraca na pole e-mail. Błąd 500 ma jeden tekst bez szczegółów (Q29). Po zalogowaniu i po wylogowaniu fokus idzie na `h1` nowego ekranu (Q32), robi to strona, nie komponent.
+- **[REGUŁA]** Jeśli wylogowujesz, to `onLogout` w `AppShell` (przycisk wyglądający jak link, żądanie `POST` przez `apiCall`), nigdy link do adresu.
+- **[REGUŁA]** Jeśli lista kont jest pusta, to `EmptyState` z tekstem "Skontaktuj się z administratorem aplikacji." (Q35): bez nazwisk i adresów. Link konta ma postać `/?account=<id>` (`buildAccountHref`).
 - **[REGUŁA]** Jeśli operacja się powiodła, to `Toast` (krótkie potwierdzenie); jeśli się nie powiodła w oknie lub formularzu, to komunikat w oknie lub formularzu, z danymi zachowanymi.
 - **[REGUŁA]** Jeśli akcja jest nieodwracalna, to `ConfirmDialog` z nazwą obiektu w tytule i czasownikiem na przycisku ("Usuń wpis"), fokus domyślny na "Anuluj".
 - **[REGUŁA]** Jeśli pokazujesz kwotę, to przez `formatMoneyMinor`, ze znakiem "+" lub "-" albo etykietą, nie samym kolorem.
@@ -153,4 +158,5 @@ npm run typecheck && npm run lint && npm run test:coverage && npm run build
 | E03 Ile zostanie w miesiącu | "Ekrany / E03": przegląd miesiąca (ta sama strona co E02) | `AccountRemainderCard`, `MonthSwitcher` |
 
 - **[REGUŁA]** Stan ekranu E02 i E03 jest w adresie (`?account=...&month=RRRR-MM`); błędne wartości wracają do domyślnych.
-- **[LUKA]** Strony w `packages/app` korzystające z tych ekranów powstaną w etapie 5; do tego czasu ekrany istnieją tylko w Storybooku.
+- **[REGUŁA]** E01 jest podpięty w `packages/app`: `/login` (`LoginForm`, wynik `apiCall` mapowany na `LoginResult`) i `/` (`AppShell` z `displayName`, `BankAccountList` z `headingLevel="h1"`, link konta `buildAccountHref`). Fokus na h1 po zalogowaniu i wylogowaniu ustawia `app` w odroczonym efekcie.
+- **[LUKA]** Strony E02 i E03 w `packages/app` powstaną w etapie 5; do tego czasu ekrany E02 i E03 istnieją tylko w Storybooku.

@@ -5,7 +5,7 @@ import * as Stories from './home-screen.stories';
 
 # Ekran: Strona główna (`/`)
 
-Pełnoekranowa kompozycja strony po zalogowaniu: pasek z nazwą produktu i linkiem "Wyloguj" oraz lista kont bankowych użytkownika (E01-S01, E01-S02). Źródło: specyfikacja `.ai/specs/2026-11-17-auth-and-app-foundation.md` (UI/UX, `GET /api/bank-accounts`), R01.1, R01.4, A3, decyzje właściciela z 2026-11-18 (link na pasku `--primary`). Strona w `packages/app` powstanie później (etap 5).
+Pełnoekranowa kompozycja strony po zalogowaniu: pasek z nazwą produktu, nazwą zalogowanej osoby i przyciskiem "Wyloguj" oraz lista kont bankowych użytkownika (E01-S01, E01-S02). Źródło: specyfikacja `.ai/specs/implemented/2026-11-17-auth-and-app-foundation.md` (UI/UX, `GET /api/bank-accounts`), R01.1, R01.4, A3, decyzje właściciela z 2026-11-18 (akcja na pasku `--primary`), Q24 i Q25 (wylogowanie jako przycisk, `displayName` na pasku). Strona w `packages/app` powstanie później (etap 5).
 
 <Canvas of={Stories.Loaded} />
 
@@ -24,7 +24,7 @@ Przegląd miesiąca ("ile zostanie") i wpisy konta to osobne ekrany (E03, E02); 
 
 ## 4. Anatomia
 
-1. Pasek nagłówka z AppShell (`header`, landmark "banner") na tle `--primary`: tekst "AITL" po lewej, link "Wyloguj" (TextLink) po prawej.
+1. Pasek nagłówka z AppShell (`header`, landmark "banner") na tle `--primary`: tekst "AITL" po lewej, po prawej nazwa zalogowanej osoby i przycisk "Wyloguj" wyglądający jak link.
 2. Treść (`main`) w kolumnie do 960 px (R01.4): BankAccountList z nagłówkiem `h1` "Twoje konta bankowe".
 3. Brak stopki, brak logo, brak nawigacji (jedyna akcja to wylogowanie).
 
@@ -41,7 +41,7 @@ Link na tle `--primary` ma kolor `--primary-foreground` z podkreśleniem także 
 | Błąd wczytania z ponowieniem | Stan: błąd wczytania |
 | 768 px | Szerokość: 768 px |
 | 320 px, długa nazwa konta | Szerokość: 320 px, długa nazwa konta |
-| Testy: link na pasku `--primary`, kolejność fokusu | Test: link "Wyloguj"..., Test: kolejność fokusu |
+| Testy: przycisk na pasku `--primary`, kolejność fokusu | Test: przycisk "Wyloguj"..., Test: kolejność fokusu |
 
 Stan "częściowe dane" i "dużo danych" pokazuje strona komponentu BankAccountList (osiem kont); sesja wygasła to przekierowanie na `/login`, nie stan tego ekranu.
 
@@ -53,12 +53,12 @@ Stan "częściowe dane" i "dużo danych" pokazuje strona komponentu BankAccountL
 ## 6. Zachowanie i dostępność
 
 - Landmarki: `banner`, `main`; jeden `h1`. Kolejność fokusu: "Wyloguj", potem konta w kolejności z API.
-- Wylogowanie: `POST /api/auth/logout` (tylko CSRF) i przekierowanie na `/login`; to link wyglądający jak link, ale w `app` może być przyciskiem w formularzu (**do decyzji w etapie 5**: link `<a>` do `GET` nie nadaje się, bo wylogowanie zmienia stan; story używa `TextLink` jako wzorca wyglądu).
+- Wylogowanie: przycisk wyglądający jak link woła `onLogout`; strona wykonuje `POST /api/auth/logout` (tylko CSRF), przekierowuje na `/login` i przenosi fokus na `h1` nowego ekranu (Q24, Q32). Decyzja zamknięta: link `<a>` do `GET` nie nadaje się, bo wylogowanie zmienia stan.
 - Stany ładowania i błędu: wg komponentu BankAccountList (`aria-busy`, `role="alert"` w błędzie).
 
 ## 7. Treść
 
-Teksty listy: patrz strona BankAccountList. Nagłówek: tylko "AITL"; link: "Wyloguj" (czasownik, bez "Do zobaczenia!").
+Teksty listy: patrz strona BankAccountList. Nagłówek: "AITL" i nazwa zalogowanej osoby; przycisk: "Wyloguj" (czasownik, bez "Do zobaczenia!").
 
 ## 8. Responsywność
 
@@ -74,7 +74,7 @@ Teksty listy: patrz strona BankAccountList. Nagłówek: tylko "AITL"; link: "Wyl
 ## 9. Kompozycja
 
 ```tsx
-<AppShell logoutHref="/logout">
+<AppShell displayName={user.displayName} onLogout={logOut}>
   <BankAccountList status="loaded" accounts={accounts} onRetry={reload} headingLevel="h1" />
 </AppShell>
 ```

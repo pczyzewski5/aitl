@@ -33,7 +33,7 @@ Folder konceptu tworzymy dopiero z jego pierwszym plikiem, bez pustych szkielet�
 Każda route i strona korzysta ze wspólnych warstw zamiast własnej obsługi fetch/walidacji/auth/błędów:
 
 - `packages/core/src/http/`: `errors.ts` (hierarchia `AppError`), `apiHandler.ts` (mapuje błędy na status i kopertę JSON, loguje nieoczekiwane), `makeCrudRoute.ts` (CRUD ze schematu i serwisu), `auth.ts` (`requireSession`, asercje własności i członkostwa, bez ról).
-- `packages/ui/src/backend/`: `api/apiCall.ts` (jedyne miejsce z `fetch()` do `/api/*`), `forms/CrudForm.tsx`, `tables/DataTable.tsx`, `feedback/{LoadingMessage,ErrorMessage,EmptyState}.tsx`.
+- `packages/ui/src/backend/`: `api/apiCall.ts` (jedyne miejsce z `fetch()` do `/api/*`), `forms/CrudForm.tsx`, `tables/DataTable.tsx`, `feedback/LoadingMessage.tsx`. Stany pusty i błędu wczytania to istniejące `EmptyState` i `ErrorState` w `ui/src/components/ui/`: nie dubluj ich w `backend/feedback`.
 
 Nowy komponent wielokrotnego użytku ma jedno miejsce: prymityw shadcn w `ui/src/components/ui/` (tylko przez `npx shadcn@latest add`), generyczny wzorzec panelu w `ui/src/backend/<category>/`, komponent konceptu w `ui/src/components/<concept>/`, komponent jednej strony obok jej `page.tsx`.
 
@@ -60,7 +60,7 @@ Przed zbudowaniem lub zmianą ekranu lub komponentu przeczytaj `docs/design-syst
 
 ## Baza danych (lokalnie)
 
-- `docker compose up -d postgres` startuje PostgreSQL, a `.env` (kopia `.env.example`, ignorowany przez git) przekazuje `DATABASE_URL`.
+- `docker compose up -d postgres` startuje PostgreSQL, a `.env` w korzeniu repo (kopia `.env.example`, ignorowany przez git, ładowany w `packages/app/next.config.ts` przez `@next/env`) przekazuje `DATABASE_URL` i `SESSION_SECRET` (>= 32 znaki, losowy).
 - Migracje: `npm run migration:create|migration:up|migration:down -w @aitl/db`. Pliki migracji są generowane do `packages/db/migrations` (poza `src`, więc poza progiem pokrycia); ich poprawność sprawdza test integracyjny `tests/integration/migrations.test.ts`.
 
 ## Testy i CI

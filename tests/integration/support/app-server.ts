@@ -1,4 +1,5 @@
 import { spawn, type ChildProcess } from 'node:child_process';
+import { randomBytes } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { createServer } from 'node:net';
 import { fileURLToPath } from 'node:url';
@@ -9,10 +10,19 @@ const HEALTH_PATH = '/api/health';
 const STARTUP_TIMEOUT_MS = 60_000;
 const POLL_INTERVAL_MS = 250;
 
+const SESSION_SECRET_BYTES = 32;
+
+export type AppEnv = Record<string, string | undefined>;
+
 export type RunningApp = {
   url: string;
+  output: () => string;
   stop: () => Promise<void>;
 };
+
+export function createSessionSecret(): string {
+  return randomBytes(SESSION_SECRET_BYTES).toString('hex');
+}
 
 async function findFreePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -54,15 +64,13 @@ export type FailedApp = {
   stop: () => Promise<void>;
 };
 
-export async function startAppWithInvalidEnv(env: Record<string, string>): Promise<FailedApp> {
+export async function startAppWithInvalidEnv(env: AppEnv): Promise<FailedApp> {
   const port = await findFreePort();
   const url = `http://127.0.0.1:${port}`;
   const chunks: string[] = [];
-  const baseEnv = { ...process.env };
-  delete baseEnv.DATABASE_URL;
   const app = spawn(process.execPath, [NEXT_BIN, 'start', '--port', String(port)], {
     cwd: APP_DIRECTORY,
-    env: { ...baseEnv, ...env, PORT: String(port) },
+    env: { ...process.env, DATABASE_URL: '', SESSION_SECRET: '', ...env, PORT: String(port) },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   app.stdout?.on('data', (chunk: Buffer) => chunks.push(chunk.toString()));
@@ -94,14 +102,26 @@ export async function startAppWithInvalidEnv(env: Record<string, string>): Promi
   throw new Error(`Application did not answer within ${STARTUP_TIMEOUT_MS} ms`);
 }
 
-export async function startApp(env: Record<string, string>): Promise<RunningApp> {
+export async function startApp(env: AppEnv): Promise<RunningApp> {
   const port = await findFreePort();
   const url = `http://127.0.0.1:${port}`;
+  const chunks: string[] = [];
   const app = spawn(process.execPath, [NEXT_BIN, 'start', '--port', String(port)], {
     cwd: APP_DIRECTORY,
-    env: { ...process.env, ...env, PORT: String(port) },
-    stdio: 'inherit',
+    env: {
+      ...process.env,
+      SESSION_SECRET: createSessionSecret(),
+      SESSION_COOKIE_SECURE: 'false',
+      ...env,
+      PORT: String(port),
+    },
+    stdio: ['ignore', 'pipe', 'pipe'],
   });
+  const collect = (chunk: Buffer): void => {
+    chunks.push(chunk.toString());
+  };
+  app.stdout?.on('data', collect);
+  app.stderr?.on('data', collect);
 
   try {
     await waitUntilHealthy(url, app);
@@ -119,5 +139,5 @@ export async function startApp(env: Record<string, string>): Promise<RunningApp>
     await exited;
   };
 
-  return { url, stop };
+  return { url, output: () => chunks.join(''), stop };
 }

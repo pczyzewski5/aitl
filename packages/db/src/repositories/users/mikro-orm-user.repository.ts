@@ -22,6 +22,13 @@ export class MikroOrmUserRepository implements UserRepository {
     return user === null ? null : toRecord(user);
   }
 
+  async findById(id: string): Promise<UserRecord | null> {
+    const em = await this.entityManagerProvider.getEntityManager();
+    const user = await em.findOne(User, { id });
+
+    return user === null ? null : toRecord(user);
+  }
+
   async create(newUser: NewUser): Promise<UserRecord> {
     const em = await this.entityManagerProvider.getEntityManager();
     const user = em.create(User, newUser);

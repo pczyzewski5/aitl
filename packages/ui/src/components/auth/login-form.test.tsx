@@ -163,6 +163,11 @@ describe('LoginForm', () => {
       result: { ok: false, kind: 'network' },
       expected: 'Nie udało się połączyć z serwerem. Sprawdź połączenie z internetem i spróbuj ponownie; wpisane dane zostały w formularzu.',
     },
+    {
+      name: 'server error',
+      result: { ok: false, kind: 'server-error' },
+      expected: 'Coś poszło nie tak po naszej stronie. Spróbuj ponownie za chwilę; wpisane dane zostały w formularzu.',
+    },
   ])('shows the $name as an alert at the top and keeps the data', async ({ result, expected }) => {
     renderForm({ onSubmit: vi.fn(async () => result) });
     fill(EMAIL, PASSWORD);
@@ -174,6 +179,35 @@ describe('LoginForm', () => {
     expect(screen.getByRole('form', { name: 'Logowanie' }).firstElementChild).toBe(alert);
     expect((screen.getByLabelText('Hasło') as HTMLInputElement).value).toBe(PASSWORD);
     expect(screen.getByLabelText('Adres e-mail').hasAttribute('aria-invalid')).toBe(false);
+  });
+
+  it.each<{ name: string; onSubmit: () => Promise<LoginResult> }>([
+    { name: 'invalid credentials', onSubmit: async () => ({ ok: false, kind: 'invalid-credentials' }) },
+    { name: 'lockout', onSubmit: async () => ({ ok: false, kind: 'too-many-attempts', retryAfterSeconds: 87 }) },
+    { name: 'network failure result', onSubmit: async () => ({ ok: false, kind: 'network' }) },
+    { name: 'server error', onSubmit: async () => ({ ok: false, kind: 'server-error' }) },
+    { name: 'rejected request', onSubmit: async () => Promise.reject(new Error('offline')) },
+  ])('moves focus back to the e-mail field after $name', async ({ onSubmit }) => {
+    renderForm({ onSubmit: vi.fn(onSubmit) });
+    fill(EMAIL, PASSWORD);
+    screen.getByLabelText('Hasło').focus();
+
+    submit();
+
+    await screen.findByRole('alert');
+    expect(document.activeElement).toBe(screen.getByLabelText('Adres e-mail'));
+  });
+
+  it('does not move focus to the e-mail field after a successful login', async () => {
+    renderForm();
+    fill(EMAIL, PASSWORD);
+    const password = screen.getByLabelText('Hasło');
+    password.focus();
+
+    submit();
+
+    await screen.findByRole('button', { name: 'Zaloguj się' });
+    expect(document.activeElement).not.toBe(screen.getByLabelText('Adres e-mail'));
   });
 
   it('shows the network message when the request itself rejects', async () => {

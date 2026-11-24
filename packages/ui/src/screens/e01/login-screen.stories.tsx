@@ -12,7 +12,7 @@ const MOBILE_VIEWPORT = { value: 'mobile1', isRotated: false };
 const TABLET_VIEWPORT = { value: 'tablet', isRotated: false };
 const PRODUCT_NAME = 'AITL';
 
-type Scenario = 'invalid-credentials' | 'too-many-attempts' | 'network' | 'pending';
+type Scenario = 'invalid-credentials' | 'too-many-attempts' | 'network' | 'server-error' | 'pending';
 
 interface LoginScreenProps {
   scenario?: Scenario;
@@ -33,6 +33,8 @@ function LoginScreen({ scenario = 'invalid-credentials', retryAfterSeconds = DEF
         return { ok: false, kind: 'too-many-attempts', retryAfterSeconds };
       case 'network':
         return { ok: false, kind: 'network' };
+      case 'server-error':
+        return { ok: false, kind: 'server-error' };
       case 'pending':
         return new Promise<never>(() => undefined);
       default:
@@ -55,7 +57,7 @@ const meta = {
   argTypes: {
     scenario: {
       control: 'inline-radio',
-      options: ['invalid-credentials', 'too-many-attempts', 'network', 'pending'],
+      options: ['invalid-credentials', 'too-many-attempts', 'network', 'server-error', 'pending'],
       description: 'Symulowana odpowiedź serwera po poprawnie wypełnionym formularzu',
     },
     retryAfterSeconds: { control: 'number' },
