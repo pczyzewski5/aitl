@@ -67,3 +67,8 @@ Do zrobienia: PR-2 (krok 1.2) i PR-3 (krok 1.3) równolegle.
 ## 2026-11-24 (Faza 1, health na scope kontenera)
 `GET /api/health` korzysta z `container.createScope()` zamiast tymczasowego pustego scope; wiersze PR-2 (#67, b765b90) i PR-3 (#68, 984b49a) oznaczone jako done.
 Do zrobienia: przegląd Opusem po Fazie 1, potem PR-4 (kroki 2.0 + 2.1) i PR-5 (krok 2.2) równolegle.
+
+## 2026-11-24 (PR-5, krok 2.2, commit 1)
+Encje `User`, `BankAccount`, `BankAccountMembership`, `Session`, `LoginThrottle` w `db/src/entities/{users,bank-accounts,auth}/` i migracja `auth_entities` wygenerowana MikroORM (CHECK e-mail małymi literami, CHECK właściciel wg typu, częściowe unikalne indeksy: jedno osobiste na właściciela i `(type, name)` dla wspólnych, FK z `restrict`/`cascade`) wraz ze snapshotem.
+Testy integracyjne: up, naruszenia (dwa osobiste, osobiste bez właściciela, drugi wspólny, e-mail wielkimi literami i inne), down i ponowne up; unity 100%. Lekcja o generowaniu migracji (skrypt jest `--blank`).
+Do zrobienia: PR, wiersz PR-5 w track.md, zielone checki.
