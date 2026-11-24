@@ -5,6 +5,7 @@ import type { BankAccountRepository } from '../bank-accounts/bank-account-reposi
 import type {
   LoginThrottleRepository,
   ThrottleCounter,
+  ThrottleReservation,
 } from '../auth/login-throttle-repository.port';
 import type { PasswordHasher } from '../auth/password-hasher.port';
 import type {
@@ -27,6 +28,7 @@ export type StoredThrottle = {
   failures: number;
   windowStartedAt: Date;
   lockedUntil: Date | null;
+  updatedAt: Date;
 };
 
 export class InMemoryStore {
@@ -168,34 +170,36 @@ export class InMemoryLoginThrottleRepository implements LoginThrottleRepository 
     this.store = store;
   }
 
-  async findActiveLockUntil(keyHashes: readonly string[], now: Date): Promise<Date | null> {
-    const lockedUntilTimes = this.store.throttles
-      .filter(({ keyHash }) => keyHashes.includes(keyHash))
-      .flatMap(({ lockedUntil }) => (lockedUntil !== null && lockedUntil > now ? [lockedUntil] : []));
-
-    return lockedUntilTimes.length === 0
-      ? null
-      : new Date(Math.max(...lockedUntilTimes.map((lockedUntil) => lockedUntil.getTime())));
-  }
-
-  async recordFailure({ keyHash, limit, windowMs, lockMs }: ThrottleCounter, now: Date): Promise<void> {
+  async reserveAttempt(
+    { keyHash, limit, windowMs, lockMs }: ThrottleCounter,
+    now: Date,
+  ): Promise<ThrottleReservation> {
     const existing = this.store.throttles.find((throttle) => throttle.keyHash === keyHash);
-    const isFresh = existing === undefined || now.getTime() - existing.windowStartedAt.getTime() >= windowMs;
+    const isLocked = existing?.lockedUntil !== undefined && existing.lockedUntil !== null && existing.lockedUntil > now;
+    const isFresh =
+      existing === undefined || (!isLocked && now.getTime() - existing.windowStartedAt.getTime() >= windowMs);
     const throttle: StoredThrottle = isFresh
-      ? { keyHash, failures: 0, windowStartedAt: now, lockedUntil: null }
+      ? { keyHash, failures: 0, windowStartedAt: now, lockedUntil: null, updatedAt: now }
       : existing;
 
     throttle.failures += 1;
+    throttle.updatedAt = now;
 
-    if (throttle.failures >= limit) {
+    if (!isLocked && throttle.failures >= limit) {
       throttle.lockedUntil = new Date(now.getTime() + lockMs);
     }
 
     this.store.throttles = [...this.store.throttles.filter((stored) => stored.keyHash !== keyHash), throttle];
+
+    return { failures: throttle.failures, lockedUntil: throttle.lockedUntil };
   }
 
   async deleteByKeyHashes(keyHashes: readonly string[]): Promise<void> {
     this.store.throttles = this.store.throttles.filter(({ keyHash }) => !keyHashes.includes(keyHash));
+  }
+
+  async deleteStale(staleBefore: Date): Promise<void> {
+    this.store.throttles = this.store.throttles.filter(({ updatedAt }) => updatedAt > staleBefore);
   }
 }
 

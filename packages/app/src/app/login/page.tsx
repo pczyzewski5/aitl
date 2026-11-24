@@ -5,6 +5,8 @@ import { LoginScreen } from './login-screen';
 
 export const dynamic = 'force-dynamic';
 
+export const metadata = { title: 'Logowanie - AITL' };
+
 export default async function LoginPage() {
   if ((await loadCurrentUser()) !== null) {
     redirect(HOME_PATH);

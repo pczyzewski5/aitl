@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { LOGIN_PATH } from '../routes';
 import { AccountsScreen } from './accounts-screen';
-import HomePage from './page';
+import HomePage, { metadata } from './page';
 
 const mocks = vi.hoisted(() => ({
   loadCurrentUser: vi.fn(),
@@ -17,6 +17,10 @@ vi.mock('next/navigation', () => ({ redirect: mocks.redirect }));
 const randomText = (): string => randomBytes(8).toString('hex');
 
 describe('HomePage', () => {
+  it('declares a page title that tells it apart from other pages', () => {
+    expect(metadata.title).toBe('Konta - AITL');
+  });
+
   beforeEach(() => {
     mocks.loadCurrentUser.mockReset();
     mocks.redirect.mockClear();

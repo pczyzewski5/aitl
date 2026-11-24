@@ -259,3 +259,39 @@ Status dziennika zostaje `in-progress`: `done` dopiero po merge wszystkich PR-ó
 ## 2026-11-24 (PR-12, close-out, commit 6)
 PR #81 otwarty (base main, stos #70, #72, #73, #75, #76, #77, #78, #74, #71, #79, #80); numer w wierszu PR-12 w track.md.
 Do zrobienia: zielone checki, po merge stosu przestawić bazę, SHA w track.md, `Status: done` w dzienniku po merge wszystkich PR-ów.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 2, M1)
+Gałąź `feature/phase-2-review-fixes` z szczytu stosu (#80). Throttle: zamiast `assertNotLocked` + `recordFailure` jeden atomowy upsert `reserveAttempt` (`RETURNING`) przed weryfikacją hasła; próba ponad próg -> 429 bez argon2; aktywna blokada nie jest przesuwana, okno nie odnawia się w trakcie blokady. Test równoległy: 10 błędnych prób = dokładnie 5 x 401 i 5 x 429 (stary kod: 10 x 401).
+Pułapka: poprawne hasło w serii kasuje licznik `ip+email`, więc ścisłe "401 <= próg" w serii z poprawnym hasłem nie jest do utrzymania przy resecie po sukcesie (zgłoszone w PR). Do zrobienia: m4, m1, m2, m5-m8, nity.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 2, m4)
+Sukces logowania kasuje tylko licznik `ip+email` (`reset`), licznik per e-mail zostaje do końca okna; testy jednostkowe i integracyjny zaktualizowane (e-mail: 10 prób po 2 seriach), opis w BC i specu.
+Do zrobienia: m1, m2, m5-m8, nity.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 2, m1)
+Wabik argon2 liczony w konstruktorze hashera, odrzucony promise nie jest cache'owany (kolejne wywołanie liczy od nowa), a `register()` w `instrumentation.ts` rozgrzewa singleton `passwordHasher` przy starcie, więc pierwsze logowanie nieistniejącego e-maila nie płaci za wabik.
+Do zrobienia: m2, m5-m8, nity.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 2, m2)
+`LoginThrottleRepository.deleteStale` kasuje wiersze `login_throttles` nietknięte (`updated_at`) dłużej niż max(okno, blokada); wołane na początku `reserveAttempt`, analogicznie do `deleteExpired` sesji, po istniejącym indeksie `updated_at`. Fake dostał `updatedAt`; test na prawdziwej bazie.
+Do zrobienia: m5-m8, nity.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 2, m5)
+Rotacja sesji: `AuthService.login` dostaje token z istniejącego cookie (route czyta go przez `readSessionToken`) i po utworzeniu nowej sesji usuwa starą; nieudane logowanie nie rusza starej sesji, logowanie bez cookie nie usuwa innych sesji (Q33). Opis w BC; test integracyjny na cookie ze starym tokenem.
+Do zrobienia: m6-m8, nity.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 2, m6)
+`toLoginResult` mapuje 400 (np. pusty lub nieprawidłowy e-mail, który ominął walidację klienta) tak jak 401 na `invalid-credentials`, zamiast pokazywać "błąd serwera"; stała `HTTP_BAD_REQUEST` w `routes.ts`, test 400 zmieniony.
+Do zrobienia: m7, m8, nity.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 2, m7)
+`SESSION_SECRET`: walidacja zostaje na min. 32 znaki (zaostrzenie byłoby zmianą łamiącą istniejących `.env` i testów), a zalecenie "losowy, np. `openssl rand -hex 32` (64 znaki hex)" trafiło do README, BC §3 i specu; sekcja "Algorytm" i "Stały koszt" w specu opisuje już rezerwację próby, `deleteStale` i wabik z M1, m1, m2, m4.
+Do zrobienia: m3, nity.
+
+## 2026-11-24 (poprawki po przegladzie Fazy 2, m3)
+Ryzyko `TRUSTED_PROXY_HOPS=0` dopisane do BC §3 i do edge cases specu: przy 0 kazdy znajacy e-mail blokuje konto pieciem blednych prob na 15 minut; zaakceptowane w Q15, do rozwazenia przed produkcja.
+Do zrobienia: nity.
+
+## 2026-11-24 (poprawki po przegladzie Fazy 2, nity)
+Haslo logowania `.max(1024)`, tytuly stron `/login` ("Logowanie - AITL") i `/` ("Konta - AITL"), nowa migracja `login_throttles_failures_check` (`CHECK (failures >= 0)`, up/down, test odrzucenia -1; test cofania migracji cofa teraz dwie). Pominiete: jawne `algorithm: Algorithm.Argon2id` (ambient `const enum` w `@node-rs/argon2` psuje typecheck przy `isolatedModules`, a domyslny algorytm to argon2id i pilnuje go test prefiksu `$argon2id$`).
+Do zrobienia: PR, checki.

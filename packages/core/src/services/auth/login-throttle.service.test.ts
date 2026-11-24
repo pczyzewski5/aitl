@@ -10,6 +10,7 @@ import {
   LoginThrottleService,
   TOO_MANY_ATTEMPTS_MESSAGE,
 } from './login-throttle.service';
+import type { LoginThrottleRepository } from './login-throttle-repository.port';
 import { SessionTokens } from './session-tokens';
 
 const randomText = (): string => randomBytes(8).toString('hex');
@@ -27,9 +28,9 @@ describe('LoginThrottleService', () => {
   const advance = (ms: number): void => {
     now = new Date(now.getTime() + ms);
   };
-  const fail = async (times: number): Promise<void> => {
+  const reserve = async (times: number): Promise<void> => {
     for (let attempt = 0; attempt < times; attempt += 1) {
-      await sut.recordFailure({ email, clientIp });
+      await sut.reserveAttempt({ email, clientIp });
     }
   };
 
@@ -45,58 +46,58 @@ describe('LoginThrottleService', () => {
     clientIp = randomText();
   });
 
-  it('lets attempts through below the limit', async () => {
-    await fail(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL - 1);
+  it('lets the attempts up to the limit through', async () => {
+    const actual = reserve(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL);
 
-    await expect(sut.assertNotLocked({ email, clientIp })).resolves.toBeUndefined();
+    await expect(actual).resolves.toBeUndefined();
   });
 
-  it('locks after the limit with the remaining lock time in whole seconds', async () => {
-    await fail(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL);
+  it('refuses the attempt over the limit with the remaining lock time in whole seconds', async () => {
+    await reserve(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL);
     advance(PARTIAL_LOCK_ELAPSED_MS);
     const expectedSeconds = Math.ceil((LOGIN_THROTTLE_LOCK_MS - PARTIAL_LOCK_ELAPSED_MS) / MILLISECONDS_PER_SECOND);
 
-    const actual = sut.assertNotLocked({ email, clientIp });
+    const actual = sut.reserveAttempt({ email, clientIp });
 
     await expect(actual).rejects.toThrow(new TooManyRequestsError(TOO_MANY_ATTEMPTS_MESSAGE, expectedSeconds));
     await expect(actual).rejects.toMatchObject({ retryAfterSeconds: expectedSeconds });
   });
 
   it('keeps the lock until it ends and unlocks afterwards', async () => {
-    await fail(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL);
+    await reserve(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL);
 
     advance(LOGIN_THROTTLE_LOCK_MS - 1);
-    await expect(sut.assertNotLocked({ email, clientIp })).rejects.toBeInstanceOf(TooManyRequestsError);
+    await expect(sut.reserveAttempt({ email, clientIp })).rejects.toBeInstanceOf(TooManyRequestsError);
     advance(1);
 
-    await expect(sut.assertNotLocked({ email, clientIp })).resolves.toBeUndefined();
+    await expect(sut.reserveAttempt({ email, clientIp })).resolves.toBeUndefined();
   });
 
   it('forgets failures older than the window', async () => {
-    await fail(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL - 1);
+    await reserve(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL - 1);
     advance(LOGIN_THROTTLE_WINDOW_MS);
 
-    await fail(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL - 1);
+    await reserve(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL - 1);
 
-    await expect(sut.assertNotLocked({ email, clientIp })).resolves.toBeUndefined();
+    await expect(sut.reserveAttempt({ email, clientIp })).resolves.toBeUndefined();
   });
 
   it('does not lock another e-mail from the same address', async () => {
-    await fail(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL);
+    await reserve(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL);
 
-    await expect(sut.assertNotLocked({ email: `${randomText()}@example.test`, clientIp })).resolves.toBeUndefined();
+    await expect(sut.reserveAttempt({ email: `${randomText()}@example.test`, clientIp })).resolves.toBeUndefined();
   });
 
   it('locks an e-mail for every address once the higher per-email limit is reached', async () => {
     for (let attempt = 0; attempt < LOGIN_FAILURE_LIMIT_PER_EMAIL; attempt += 1) {
-      await sut.recordFailure({ email, clientIp: randomText() });
+      await sut.reserveAttempt({ email, clientIp: randomText() });
     }
 
-    await expect(sut.assertNotLocked({ email, clientIp: randomText() })).rejects.toBeInstanceOf(TooManyRequestsError);
+    await expect(sut.reserveAttempt({ email, clientIp: randomText() })).rejects.toBeInstanceOf(TooManyRequestsError);
   });
 
   it('keeps hashed keys only', async () => {
-    await fail(1);
+    await reserve(1);
 
     const keys = store.throttles.map(({ keyHash }) => keyHash).join();
     expect(store.throttles).toHaveLength(2);
@@ -104,12 +105,40 @@ describe('LoginThrottleService', () => {
     expect(keys).not.toContain(clientIp);
   });
 
-  it('removes both counters on reset', async () => {
-    await fail(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL);
+  it('removes only the address and e-mail counter on reset and keeps the e-mail counter', async () => {
+    await reserve(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL);
 
     await sut.reset({ email, clientIp });
 
-    expect(store.throttles).toHaveLength(0);
-    await expect(sut.assertNotLocked({ email, clientIp })).resolves.toBeUndefined();
+    expect(store.throttles).toHaveLength(1);
+    expect(store.throttles[0]?.failures).toBe(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL);
+    await expect(sut.reserveAttempt({ email, clientIp })).resolves.toBeUndefined();
+  });
+
+  it('removes counters left untouched for longer than the window and the lock when a new attempt arrives', async () => {
+    await reserve(1);
+    advance(Math.max(LOGIN_THROTTLE_WINDOW_MS, LOGIN_THROTTLE_LOCK_MS) - 1);
+    await sut.reserveAttempt({ email: `${randomText()}@example.test`, clientIp });
+    expect(store.throttles).toHaveLength(4);
+
+    advance(1);
+    await sut.reserveAttempt({ email: `${randomText()}@example.test`, clientIp });
+
+    expect(store.throttles).toHaveLength(4);
+    expect(store.throttles.every(({ updatedAt }) => updatedAt > START)).toBe(true);
+  });
+
+  it('falls back to the full lock time when the repository reports no end of the lock', async () => {
+    const overLimit = { failures: LOGIN_FAILURE_LIMIT_PER_EMAIL + 1, lockedUntil: null };
+    const repository: LoginThrottleRepository = {
+      reserveAttempt: async () => overLimit,
+      deleteByKeyHashes: async () => undefined,
+      deleteStale: async () => undefined,
+    };
+    const stubbedSut = new LoginThrottleService(repository, new SessionTokens(randomBytes(32).toString('hex')), () => now);
+
+    const actual = stubbedSut.reserveAttempt({ email, clientIp });
+
+    await expect(actual).rejects.toMatchObject({ retryAfterSeconds: LOGIN_THROTTLE_LOCK_MS / MILLISECONDS_PER_SECOND });
   });
 });

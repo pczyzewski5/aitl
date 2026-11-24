@@ -2,6 +2,7 @@ import { defineEntity, p } from '@mikro-orm/postgresql';
 import { baseEntityProperties } from '../base.entity';
 
 export const LOGIN_THROTTLES_TABLE = 'login_throttles';
+export const LOGIN_THROTTLES_FAILURES_CHECK = 'login_throttles_failures_check';
 
 export const LoginThrottle = defineEntity({
   name: 'LoginThrottle',
@@ -14,4 +15,5 @@ export const LoginThrottle = defineEntity({
     lockedUntil: p.datetime().nullable(),
   },
   indexes: [{ properties: ['updatedAt'] }],
+  checks: [{ name: LOGIN_THROTTLES_FAILURES_CHECK, expression: 'failures >= 0' }],
 });

@@ -26,31 +26,25 @@ describe('MikroOrmLoginThrottleRepository', () => {
     { name: 'a Date', value: LOCKED_UNTIL, expected: LOCKED_UNTIL },
     { name: 'a string', value: LOCKED_UNTIL.toISOString(), expected: LOCKED_UNTIL },
     { name: 'null', value: null, expected: null },
-  ])('maps the latest lock returned as $name', async ({ value, expected }) => {
-    const execute = vi.fn().mockResolvedValue([{ locked_until: value }]);
+  ])('maps the reserved attempt with the lock returned as $name', async ({ value, expected }) => {
+    const failures = 3;
+    const execute = vi.fn().mockResolvedValue([{ failures, locked_until: value }]);
     const sut = createSut(createConnectionEntityManager(execute));
-    const keyHashes = [randomText(), randomText()];
 
-    const actual = await sut.findActiveLockUntil(keyHashes, NOW);
+    const actual = await sut.reserveAttempt(
+      { keyHash: randomText(), limit: LIMIT, windowMs: FIFTEEN_MINUTES_MS, lockMs: FIFTEEN_MINUTES_MS },
+      NOW,
+    );
 
-    expect(actual).toEqual(expected);
-    expect(execute).toHaveBeenCalledWith(expect.stringContaining('locked_until > ?'), [keyHashes, NOW]);
+    expect(actual).toEqual({ failures, lockedUntil: expected });
   });
 
-  it('treats an empty result as no lock', async () => {
-    const sut = createSut(createConnectionEntityManager(vi.fn().mockResolvedValue([])));
-
-    const actual = await sut.findActiveLockUntil([randomText()], NOW);
-
-    expect(actual).toBeNull();
-  });
-
-  it('records a failure with one atomic upsert keyed by the hash', async () => {
-    const execute = vi.fn().mockResolvedValue(undefined);
+  it('reserves an attempt with one atomic upsert keyed by the hash that returns the counter', async () => {
+    const execute = vi.fn().mockResolvedValue([{ failures: 1, locked_until: null }]);
     const sut = createSut(createConnectionEntityManager(execute));
     const keyHash = randomText();
 
-    await sut.recordFailure(
+    await sut.reserveAttempt(
       { keyHash, limit: LIMIT, windowMs: FIFTEEN_MINUTES_MS, lockMs: FIFTEEN_MINUTES_MS },
       NOW,
     );
@@ -58,8 +52,10 @@ describe('MikroOrmLoginThrottleRepository', () => {
     const [sql, params] = execute.mock.calls[0] as [string, unknown[]];
     expect(execute).toHaveBeenCalledTimes(1);
     expect(sql).toContain('on conflict (key_hash) do update');
+    expect(sql).toContain('returning failures, locked_until');
+    expect(sql.match(/\?/g)).toHaveLength(params.length);
     expect(params).toContain(keyHash);
-    expect(params.filter((param) => param === LIMIT)).toHaveLength(3);
+    expect(params.filter((param) => param === LIMIT)).toHaveLength(2);
     expect(params).toContainEqual(LOCKED_UNTIL);
     expect(params).toContainEqual(WINDOW_START);
   });
@@ -72,5 +68,14 @@ describe('MikroOrmLoginThrottleRepository', () => {
     await sut.deleteByKeyHashes(keyHashes);
 
     expect(nativeDelete).toHaveBeenCalledWith(LoginThrottle, { keyHash: { $in: keyHashes } });
+  });
+
+  it('deletes the counters not updated since the threshold', async () => {
+    const nativeDelete = vi.fn().mockResolvedValue(3);
+    const sut = createSut({ nativeDelete });
+
+    await sut.deleteStale(WINDOW_START);
+
+    expect(nativeDelete).toHaveBeenCalledWith(LoginThrottle, { updatedAt: { $lte: WINDOW_START } });
   });
 });

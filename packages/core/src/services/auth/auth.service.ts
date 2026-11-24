@@ -33,27 +33,28 @@ export class AuthService {
     this.loginThrottle = loginThrottle;
   }
 
-  async login({ email, password }: LoginInput, clientIp: string): Promise<LoginResult> {
+  async login(
+    { email, password }: LoginInput,
+    clientIp: string,
+    previousSessionToken: string | null,
+  ): Promise<LoginResult> {
     const identity: LoginAttemptIdentity = { email, clientIp };
-    await this.loginThrottle.assertNotLocked(identity);
+    await this.loginThrottle.reserveAttempt(identity);
 
     const user = await this.users.findByEmail(email);
 
     if (user === null) {
       await this.passwordHasher.verifyAgainstDecoy(password);
-      await this.loginThrottle.recordFailure(identity);
-
       throw new InvalidCredentialsError(INVALID_CREDENTIALS_MESSAGE);
     }
 
     if (!(await this.passwordHasher.verify(password, user.passwordHash))) {
-      await this.loginThrottle.recordFailure(identity);
-
       throw new InvalidCredentialsError(INVALID_CREDENTIALS_MESSAGE);
     }
 
     await this.loginThrottle.reset(identity);
     const { token } = await this.sessionService.start(user.id);
+    await this.sessionService.end(previousSessionToken);
 
     return {
       user: { id: user.id, email: user.email, displayName: user.displayName },

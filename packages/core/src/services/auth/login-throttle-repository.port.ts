@@ -5,8 +5,13 @@ export type ThrottleCounter = Readonly<{
   lockMs: number;
 }>;
 
+export type ThrottleReservation = Readonly<{
+  failures: number;
+  lockedUntil: Date | null;
+}>;
+
 export interface LoginThrottleRepository {
-  findActiveLockUntil(keyHashes: readonly string[], now: Date): Promise<Date | null>;
-  recordFailure(counter: ThrottleCounter, now: Date): Promise<void>;
+  reserveAttempt(counter: ThrottleCounter, now: Date): Promise<ThrottleReservation>;
   deleteByKeyHashes(keyHashes: readonly string[]): Promise<void>;
+  deleteStale(staleBefore: Date): Promise<void>;
 }

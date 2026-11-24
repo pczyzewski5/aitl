@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Argon2PasswordHasher, ARGON2_PRODUCTION_PARAMETERS } from './argon2-password-hasher';
 
 const CHEAP_PARAMETERS = { memoryCost: 8, timeCost: 1, parallelism: 1 };
@@ -8,6 +8,10 @@ const PASSWORD_BYTES = 16;
 const randomPassword = (): string => randomBytes(PASSWORD_BYTES).toString('hex');
 
 describe('Argon2PasswordHasher', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('hashes with argon2id and the parameters given to the constructor', async () => {
     const sut = new Argon2PasswordHasher(CHEAP_PARAMETERS);
 
@@ -45,14 +49,29 @@ describe('Argon2PasswordHasher', () => {
     expect(actual).toBe(false);
   });
 
-  it('computes the decoy hash once and reuses it', async () => {
+  it('computes the decoy hash at construction and reuses it', async () => {
+    const hashSpy = vi.spyOn(Argon2PasswordHasher.prototype, 'hash');
     const sut = new Argon2PasswordHasher(CHEAP_PARAMETERS);
-    const hashSpy = vi.spyOn(sut, 'hash');
+    const callsAfterConstruction = hashSpy.mock.calls.length;
 
     await sut.verifyAgainstDecoy(randomPassword());
     await sut.verifyAgainstDecoy(randomPassword());
 
+    expect(callsAfterConstruction).toBe(1);
     expect(hashSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not cache a failed decoy hash and computes it again on the next call', async () => {
+    const hashSpy = vi
+      .spyOn(Argon2PasswordHasher.prototype, 'hash')
+      .mockRejectedValueOnce(new Error(randomPassword()));
+    const sut = new Argon2PasswordHasher(CHEAP_PARAMETERS);
+
+    const failed = sut.verifyAgainstDecoy(randomPassword());
+
+    await expect(failed).rejects.toThrow();
+    await expect(sut.verifyAgainstDecoy(randomPassword())).resolves.toBeUndefined();
+    expect(hashSpy).toHaveBeenCalledTimes(2);
   });
 
   it('keeps the production parameters at 19 MiB, 2 iterations and 1 lane', () => {
