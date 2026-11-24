@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createInMemoryRepositories,
   FakePasswordHasher,
+  InMemoryLoginThrottleRepository,
   InMemorySessionRepository,
   InMemoryStore,
   InMemoryUnitOfWork,
@@ -135,5 +136,42 @@ describe('InMemorySessionRepository', () => {
     expect(await sut.findByTokenHash(idleExpired)).toBeNull();
     expect(await sut.findByTokenHash(absoluteExpired)).toBeNull();
     expect(await sut.findByTokenHash(valid)).not.toBeNull();
+  });
+});
+
+describe('InMemoryLoginThrottleRepository', () => {
+  const NOW = new Date('2026-01-01T00:00:00Z');
+  const WINDOW_MS = 1000;
+  const LOCK_MS = 5000;
+  const counter = (keyHash: string, limit: number) => ({ keyHash, limit, windowMs: WINDOW_MS, lockMs: LOCK_MS });
+  const at = (offsetMs: number): Date => new Date(NOW.getTime() + offsetMs);
+
+  it('locks a key once the limit is reached and reports the latest lock among keys', async () => {
+    const sut = new InMemoryLoginThrottleRepository(new InMemoryStore());
+    const first = randomText();
+    const second = randomText();
+
+    await sut.recordFailure(counter(first, 2), NOW);
+    await sut.recordFailure(counter(first, 2), at(10));
+    await sut.recordFailure(counter(second, 1), at(20));
+
+    expect(await sut.findActiveLockUntil([first], at(30))).toEqual(at(10 + LOCK_MS));
+    expect(await sut.findActiveLockUntil([first, second], at(30))).toEqual(at(20 + LOCK_MS));
+    expect(await sut.findActiveLockUntil([randomText()], at(30))).toBeNull();
+    expect(await sut.findActiveLockUntil([first], at(10 + LOCK_MS))).toBeNull();
+  });
+
+  it('starts a new window after the old one ended and deletes by key', async () => {
+    const sut = new InMemoryLoginThrottleRepository(new InMemoryStore());
+    const keyHash = randomText();
+    await sut.recordFailure(counter(keyHash, 2), NOW);
+
+    await sut.recordFailure(counter(keyHash, 2), at(WINDOW_MS));
+
+    expect(await sut.findActiveLockUntil([keyHash], at(WINDOW_MS))).toBeNull();
+    await sut.recordFailure(counter(keyHash, 2), at(WINDOW_MS + 1));
+    expect(await sut.findActiveLockUntil([keyHash], at(WINDOW_MS + 2))).not.toBeNull();
+    await sut.deleteByKeyHashes([keyHash]);
+    expect(await sut.findActiveLockUntil([keyHash], at(WINDOW_MS + 2))).toBeNull();
   });
 });

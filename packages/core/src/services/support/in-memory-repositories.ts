@@ -2,6 +2,10 @@ import { randomUUID } from 'node:crypto';
 import { BANK_ACCOUNT_TYPE, type BankAccountRecord } from '../bank-accounts/bank-account';
 import type { BankAccountMembershipRepository } from '../bank-accounts/bank-account-membership-repository.port';
 import type { BankAccountRepository } from '../bank-accounts/bank-account-repository.port';
+import type {
+  LoginThrottleRepository,
+  ThrottleCounter,
+} from '../auth/login-throttle-repository.port';
 import type { PasswordHasher } from '../auth/password-hasher.port';
 import type {
   NewSession,
@@ -18,7 +22,15 @@ export const FAKE_HASH_PREFIX = 'fake-hash:';
 
 export type StoredSession = SessionRecord & Readonly<{ tokenHash: string }>;
 
+export type StoredThrottle = {
+  keyHash: string;
+  failures: number;
+  windowStartedAt: Date;
+  lockedUntil: Date | null;
+};
+
 export class InMemoryStore {
+  throttles: StoredThrottle[] = [];
   sessions: StoredSession[] = [];
   readonly users: UserRecord[] = [];
   readonly bankAccounts: BankAccountRecord[] = [];
@@ -142,6 +154,44 @@ export class InMemorySessionRepository implements SessionRepository {
     this.store.sessions = this.store.sessions.filter(
       (session) => now < session.expiresAt && now < session.absoluteExpiresAt,
     );
+  }
+}
+
+export class InMemoryLoginThrottleRepository implements LoginThrottleRepository {
+  private readonly store: InMemoryStore;
+
+  constructor(store: InMemoryStore) {
+    this.store = store;
+  }
+
+  async findActiveLockUntil(keyHashes: readonly string[], now: Date): Promise<Date | null> {
+    const lockedUntilTimes = this.store.throttles
+      .filter(({ keyHash }) => keyHashes.includes(keyHash))
+      .flatMap(({ lockedUntil }) => (lockedUntil !== null && lockedUntil > now ? [lockedUntil] : []));
+
+    return lockedUntilTimes.length === 0
+      ? null
+      : new Date(Math.max(...lockedUntilTimes.map((lockedUntil) => lockedUntil.getTime())));
+  }
+
+  async recordFailure({ keyHash, limit, windowMs, lockMs }: ThrottleCounter, now: Date): Promise<void> {
+    const existing = this.store.throttles.find((throttle) => throttle.keyHash === keyHash);
+    const isFresh = existing === undefined || now.getTime() - existing.windowStartedAt.getTime() >= windowMs;
+    const throttle: StoredThrottle = isFresh
+      ? { keyHash, failures: 0, windowStartedAt: now, lockedUntil: null }
+      : existing;
+
+    throttle.failures += 1;
+
+    if (throttle.failures >= limit) {
+      throttle.lockedUntil = new Date(now.getTime() + lockMs);
+    }
+
+    this.store.throttles = [...this.store.throttles.filter((stored) => stored.keyHash !== keyHash), throttle];
+  }
+
+  async deleteByKeyHashes(keyHashes: readonly string[]): Promise<void> {
+    this.store.throttles = this.store.throttles.filter(({ keyHash }) => !keyHashes.includes(keyHash));
   }
 }
 

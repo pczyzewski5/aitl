@@ -23,6 +23,7 @@ describe('parseEnv', () => {
       SESSION_SECRET,
       NODE_ENV: 'test',
       SESSION_COOKIE_SECURE: false,
+      TRUSTED_PROXY_HOPS: 0,
     };
 
     const actual = parseEnv({ ...VALID_SOURCE, NODE_ENV: 'test' });
@@ -53,6 +54,16 @@ describe('parseEnv', () => {
   });
 
   it.each([
+    { name: 'unset', value: undefined, expected: 0 },
+    { name: 'zero', value: '0', expected: 0 },
+    { name: 'a positive number', value: '2', expected: 2 },
+  ])('reads the trusted proxy hops when $name', ({ value, expected }) => {
+    const actual = parseEnv({ ...VALID_SOURCE, TRUSTED_PROXY_HOPS: value });
+
+    expect(actual.TRUSTED_PROXY_HOPS).toBe(expected);
+  });
+
+  it.each([
     { name: 'DATABASE_URL is missing', source: { SESSION_SECRET }, invalidKeys: ['DATABASE_URL'] },
     { name: 'DATABASE_URL is empty', source: { ...VALID_SOURCE, DATABASE_URL: '' }, invalidKeys: ['DATABASE_URL'] },
     { name: 'SESSION_SECRET is missing', source: { DATABASE_URL }, invalidKeys: ['SESSION_SECRET'] },
@@ -65,6 +76,11 @@ describe('parseEnv', () => {
       name: 'SESSION_COOKIE_SECURE is not a boolean word',
       source: { ...VALID_SOURCE, SESSION_COOKIE_SECURE: SECRET_LOOKING_VALUE },
       invalidKeys: ['SESSION_COOKIE_SECURE'],
+    },
+    {
+      name: 'TRUSTED_PROXY_HOPS is not a non-negative integer',
+      source: { ...VALID_SOURCE, TRUSTED_PROXY_HOPS: '-1' },
+      invalidKeys: ['TRUSTED_PROXY_HOPS'],
     },
     { name: 'NODE_ENV is unknown', source: { ...VALID_SOURCE, NODE_ENV: SECRET_LOOKING_VALUE }, invalidKeys: ['NODE_ENV'] },
     {
