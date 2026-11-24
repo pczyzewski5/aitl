@@ -1,0 +1,29 @@
+/* Mostek: nazwy, których używa pasek przeglądu i komentarze, podpięte pod tokeny
+   systemu projektowego @aitl/ui (packages/ui/src/tokens.css). Bez cieni (DS: brak cieni),
+   bez literałów kolorów. Z-indeksy to warstwa silnika, nie tokeny DS. */
+:root {
+  --font-geist-sans: var(--font-sans);
+  --font-geist-mono: var(--font-sans);
+  --font-size-overline: var(--font-size-sm);
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius-surface);
+  --radius-xl: var(--radius-surface);
+  --accent-indigo: var(--primary);
+  --accent-indigo-foreground: var(--primary-foreground);
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-xl: none;
+  --shadow-focus: 0 0 0 var(--ring-width) var(--ring);
+  /* DS nie ma tokenu ostrzeżenia: sukces = --income, ostrzeżenie = neutralny muted. */
+  --status-success-icon: var(--income);
+  --status-warning-icon: var(--muted-foreground);
+  --status-warning-border: var(--border);
+  --status-warning-bg: var(--muted);
+  --status-warning-text: var(--foreground);
+  --z-index-sticky: 100; --z-index-dropdown: 200; --z-index-overlay: 300;
+  --z-index-modal: 400; --z-index-toast: 500; --z-index-top: 600;
+  --z-index-product-overlay: calc(var(--z-index-top) + 100);
+  --z-index-product-modal: calc(var(--z-index-product-overlay) + 1);
+}
