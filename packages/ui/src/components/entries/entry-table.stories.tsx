@@ -266,6 +266,17 @@ export const NarrowScreen: Story = {
   name: 'Wąski ekran (320 px): przewijany kontener z podpowiedzią, strona nie przewija się',
   parameters: { ownSurface: true },
   decorators: [narrow],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    const region = canvas.getByRole('region');
+    const hiddenTexts = Array.from(region.querySelectorAll<HTMLElement>('.sr-only'));
+
+    expect(hiddenTexts.length).toBeGreaterThan(0);
+    hiddenTexts.forEach((hiddenText) => {
+      expect(hiddenText.offsetParent).toBe(region);
+    });
+  },
 };
 
 export const NarrowStates: Story = {

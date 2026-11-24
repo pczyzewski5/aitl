@@ -47,6 +47,7 @@ Nowy komponent wielokrotnego użytku ma jedno miejsce: prymityw shadcn w `ui/src
 - Brak magicznych liczb i stringów, brak pustych `catch`, brak martwego kodu i debugowych `console.log`.
 - Poprawka błędu i zmiana zachowania wymagają testu regresyjnego, który pada bez zmiany.
 - Przed prośbą o review: `npm run typecheck`, `npm run lint`, `npm run test:coverage`, `npm run build` oraz `npm audit --omit=dev --audit-level=high`.
+- Zmiana w `packages/ui` (komponent, token, wzorzec, ekran) wymaga w tym samym PR-ze aktualizacji `docs/design-system.md` (tabela komponentów, tokeny, przewodniki, lista luk), jeśli zmienia się któraś z opisanych tam rzeczy; jeśli nie, napisz w opisie PR-a, że plik nie wymagał zmian.
 
 ### System projektowy (`packages/ui`)
 
