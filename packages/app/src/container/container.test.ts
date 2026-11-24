@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ORM_GLOBAL_KEY, type EntityManager, type OrmInit } from '@aitl/db';
-import { logger } from '@aitl/core';
+import { logger, SessionTokens, systemClock } from '@aitl/core';
 import { DEVELOPMENT_ENVIRONMENT, container, createAppContainer } from './container';
 import { createAuthRegistrations } from './registrations/auth';
 import { createBankAccountsRegistrations } from './registrations/bank-accounts';
@@ -143,6 +143,32 @@ describe('container services', () => {
     expect(firstScope.cradle.userProvisioningService).not.toBe(
       secondScope.cradle.userProvisioningService,
     );
+  });
+});
+
+describe('container session services', () => {
+  it('shares one token hasher keyed with the session secret between scopes', () => {
+    const sut = createAppContainer(VALID_ENV, createFakeOrmInit());
+    const token = 'token';
+
+    const actual = sut.createScope().cradle.sessionTokens.hash(token);
+
+    expect(actual).toBe(new SessionTokens(SESSION_SECRET).hash(token));
+    expect(sut.createScope().cradle.sessionTokens).toBe(sut.createScope().cradle.sessionTokens);
+  });
+
+  it('resolves the session service as the session resolver of the same scope', () => {
+    const sut = createAppContainer(VALID_ENV, createFakeOrmInit());
+    const scope = sut.createScope();
+
+    expect(scope.cradle.sessionResolver).toBe(scope.cradle.sessionService);
+    expect(scope.cradle.sessionService).not.toBe(sut.createScope().cradle.sessionService);
+  });
+
+  it('gives the services the system clock', () => {
+    const sut = createAppContainer(VALID_ENV, createFakeOrmInit());
+
+    expect(sut.createScope().cradle.clock).toBe(systemClock);
   });
 });
 

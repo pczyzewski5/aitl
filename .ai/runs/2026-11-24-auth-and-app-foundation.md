@@ -135,3 +135,7 @@ Do zrobienia: zielone checki, merge po #73/#70/#72, SHA w track.md.
 ## 2026-11-24 (PR-7, krok 2.4a, commit 1)
 Baza: stos #73, #70, #72, #75 (gałąź `feature/auth-session-login` z `feature/auth-services-hasher`). Rdzeń sesji w `core`: `SESSION_SECRET` (>= 32 znaki) i `SESSION_COOKIE_SECURE` (domyślnie true przy `NODE_ENV=production`) w schemacie env, `SessionTokens` (token 32 B base64url, HMAC-SHA256 z prefiksem domeny `session:`/`throttle:`), `SessionService` (30 dni przesuwne, twardy limit 90 dni, przedłużanie najwyżej raz na godzinę, sprzątanie wygasłych przy logowaniu; implementuje port `SessionResolver`), `AuthService` (login z `verifyAgainstDecoy` dla nieznanego e-maila, logout), `requireCsrfHeader`, `parseJsonBody`; unity z fałszywym zegarem.
 Do zrobienia: adapter MikroORM sesji i rejestracje, route login/logout, ładowanie env z korzenia monorepo, testy integracyjne, BACKWARD_COMPATIBILITY, spec (nowe Q).
+
+## 2026-11-24 (PR-7, krok 2.4a, commit 2)
+Adapter `MikroOrmSessionRepository` (tworzenie, odczyt po hashu, `nativeUpdate` terminu, usuwanie po hashu i wygasłych jednym zapytaniem `$or`) oraz rejestracje w kontenerze: `clock`, `sessionTokens` (singleton z `SESSION_SECRET`), `sessionRepository`/`sessionService`/`authService` scoped, `sessionResolver` to ta sama usługa sesji (port z `core/http/auth.ts`, konsument dopiero w PR-8).
+Unity adaptera z fałszywym EM; integracja z Postgresem w commicie z testami HTTP.
