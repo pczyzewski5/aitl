@@ -216,3 +216,6 @@ Pitfalls: engine expects host classes (`.btn`, `.segmented`...) and its Back his
 ## 2026-11-24 (lesson 7, exercise 2b stage 2: states, roles and scenarios)
 Extended the clickable E01 prototype with a scenario panel (login outcome incl. lock after 5 tries and assumed 500 text, session expiry, list loading/empty/error with retry, long name, two shared accounts, two sessions side by side on s02, API-by-id indicator, demo users incl. a guest with no accounts), focus on the e-mail field after a failed login, and 27 new hand-run tests. Checked tsc, vite build, tests, lint, check:tokens and a Chrome walk of the scenarios (scripted clicks plus a two-session screenshot).
 Pitfalls: alphabetical order puts "Konto wspolne: wakacje" before the long name (space sorts first). Todo: stage 3 (screen notes, README polish, 320/768/1440, dark theme, keyboard, token scan on src).
+
+## 2026-11-24 (lint: ignore the untracked course materials)
+Added `lekcja-*/**` to the ESLint ignores: the untracked lesson 7 materials contain engine scripts (`.js`) that made `eslint .` fail in the main checkout (67 errors) and would have broken the pre-commit hook.
