@@ -71,3 +71,6 @@ Do zrobienia: przegląd Opusem po Fazie 1, potem PR-4 (kroki 2.0 + 2.1) i PR-5 (
 ## 2026-11-24 (PR-4, krok 2.0)
 Standardy: JWT zastąpione sesją serwerową (token >= 32 B, HMAC w DB, 30 dni przesuwne + 90 dni twardy limit), argon2id, `requireRole` usunięte (Q7), koncepty `auth`, `bank-accounts`, `users`; poprawione też AGENTS.md i CODE_REVIEW.md. Bez kodu.
 Do zrobienia: krok 2.1 (`core/http/auth.ts`, błędy, walidator).
+
+## 2026-11-24 (PR-4, krok 2.1)
+Dodane `core/http/auth.ts` (porty `SessionResolver`/`BankAccountMembershipLookup`, `requireSession`, `assertMemberOfBankAccount`, fail-closed: odpowiedz inna niz `true` -> 403), `InvalidCredentialsError`, `TooManyRequestsError`, `Retry-After` i `retryAfterSeconds` w `apiHandler`, `loginSchema` (e-mail trim + lower-case). Unity 100

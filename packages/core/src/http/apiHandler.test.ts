@@ -10,7 +10,9 @@ import {
 import {
   ConflictError,
   ForbiddenError,
+  InvalidCredentialsError,
   NotFoundError,
+  TooManyRequestsError,
   UnauthorizedError,
   ValidationError,
 } from './errors';
@@ -63,6 +65,7 @@ describe('createApiHandler', () => {
     { error: new NotFoundError('missing'), code: 'not_found', status: 404 },
     { error: new ConflictError('duplicate'), code: 'conflict', status: 409 },
     { error: new ValidationError('invalid'), code: 'validation_error', status: 400 },
+    { error: new InvalidCredentialsError('bad login'), code: 'invalid_credentials', status: 401 },
   ])('maps $code to status $status without logging', async ({ error, code, status }) => {
     const { log, lines } = createCapturingLog();
     const apiHandler = createApiHandler(() => ({}), log);
@@ -74,6 +77,35 @@ describe('createApiHandler', () => {
     expect(actual.status).toBe(status);
     expect(await actual.json()).toEqual({ ok: false, error: { code, message: error.message } });
     expect(lines).toEqual([]);
+  });
+
+  it('adds the retry delay to the body and the Retry-After header of a 429', async () => {
+    const { log, lines } = createCapturingLog();
+    const apiHandler = createApiHandler(() => ({}), log);
+    const retryAfterSeconds = 900;
+
+    const actual = await apiHandler(() => {
+      throw new TooManyRequestsError('slow down', retryAfterSeconds);
+    })(request);
+
+    expect(actual.status).toBe(429);
+    expect(actual.headers.get('Retry-After')).toBe('900');
+    expect(await actual.json()).toEqual({
+      ok: false,
+      error: { code: 'too_many_attempts', message: 'slow down', retryAfterSeconds },
+    });
+    expect(lines).toEqual([]);
+  });
+
+  it('does not set Retry-After on other errors', async () => {
+    const { log } = createCapturingLog();
+    const apiHandler = createApiHandler(() => ({}), log);
+
+    const actual = await apiHandler(() => {
+      throw new ForbiddenError('not yours');
+    })(request);
+
+    expect(actual.headers.get('Retry-After')).toBeNull();
   });
 
   it('includes field errors of a validation error', async () => {
