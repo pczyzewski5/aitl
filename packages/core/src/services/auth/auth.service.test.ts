@@ -111,6 +111,19 @@ describe('AuthService', () => {
       expect(decoy).not.toHaveBeenCalled();
     });
 
+    it('counts the attempt before the password is checked', async () => {
+      const countedAtVerification: number[] = [];
+      vi.spyOn(hasher, 'verify').mockImplementation(async () => {
+        countedAtVerification.push(...store.throttles.map(({ failures }) => failures));
+
+        return false;
+      });
+
+      await sut.login({ email, password }, clientIp).catch(() => undefined);
+
+      expect(countedAtVerification).toEqual([1, 1]);
+    });
+
     it('clears the failures after a successful login', async () => {
       await failTimes(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL - 1);
       await sut.login({ email, password }, clientIp);

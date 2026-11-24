@@ -217,20 +217,42 @@ describe('login throttling against PostgreSQL', () => {
       expect(fresh.status).toBe(429);
     });
 
-    it('counts every failure of ten parallel attempts without losing increments', async () => {
+    it('lets exactly the limit of attempts reach the password check when many arrive at once', async () => {
       const loginEmail = randomEmail();
+      await scope().userProvisioningService.provision({
+        mode: PROVISIONING_MODE.SharedOnly,
+        email: loginEmail,
+        displayName: randomText(),
+        password,
+        sharedAccountName: randomText(),
+      });
 
       const responses = await Promise.all(
         Array.from({ length: PARALLEL_ATTEMPTS }, () => attempt(app, { email: loginEmail, password: randomText() })),
       );
 
       const statuses = responses.map((response) => response.status);
-      const recordedFailures = statuses.filter((status) => status === 401).length;
-      const row = await findThrottle(keyHash(`ip:unknown|email:${loginEmail}`));
-      expect(statuses.every((status) => status === 401 || status === 429)).toBe(true);
-      expect(recordedFailures).toBeGreaterThanOrEqual(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL);
-      expect(row?.failures).toBe(recordedFailures);
-      expect((await attempt(app, { email: loginEmail, password: randomText() })).status).toBe(429);
+      const countOf = (status: number): number => statuses.filter((actual) => actual === status).length;
+      expect(countOf(401)).toBe(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL);
+      expect(countOf(429)).toBe(PARALLEL_ATTEMPTS - LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL);
+    });
+
+    it('refuses even the correct password after parallel attempts exhausted the limit', async () => {
+      const loginEmail = randomEmail();
+      await scope().userProvisioningService.provision({
+        mode: PROVISIONING_MODE.SharedOnly,
+        email: loginEmail,
+        displayName: randomText(),
+        password,
+        sharedAccountName: randomText(),
+      });
+      await Promise.all(
+        Array.from({ length: PARALLEL_ATTEMPTS }, () => attempt(app, { email: loginEmail, password: randomText() })),
+      );
+
+      const actual = await attempt(app, { email: loginEmail, password });
+
+      expect(actual.status).toBe(429);
     });
   });
 
@@ -242,72 +264,73 @@ describe('login throttling against PostgreSQL', () => {
       lockMs: LOGIN_THROTTLE_LOCK_MS,
     });
 
-    it('does not lose increments when many failures are recorded at once', async () => {
+    const reserveTimes = async (hash: string, times: number, now: Date) => {
+      const { loginThrottleRepository } = scope();
+      let reservation = await loginThrottleRepository.reserveAttempt(counterFor(hash), now);
+
+      for (let count = 1; count < times; count += 1) {
+        reservation = await loginThrottleRepository.reserveAttempt(counterFor(hash), now);
+      }
+
+      return reservation;
+    };
+
+    it('does not lose increments when many attempts are reserved at once', async () => {
       const { loginThrottleRepository } = scope();
       const hash = randomText();
       const now = new Date();
 
-      await Promise.all(
+      const reservations = await Promise.all(
         Array.from({ length: PARALLEL_ATTEMPTS * 2 }, () =>
-          loginThrottleRepository.recordFailure(counterFor(hash, PARALLEL_ATTEMPTS * 2), now),
+          loginThrottleRepository.reserveAttempt(counterFor(hash, PARALLEL_ATTEMPTS * 2), now),
         ),
       );
 
       const row = await findThrottle(hash);
+      expect(reservations.map(({ failures }) => failures).sort((left, right) => left - right)).toEqual(
+        Array.from({ length: PARALLEL_ATTEMPTS * 2 }, (_, index) => index + 1),
+      );
       expect(row?.failures).toBe(PARALLEL_ATTEMPTS * 2);
       expect(row?.locked_until).not.toBeNull();
     });
 
-    it('locks exactly at the limit and not before', async () => {
-      const { loginThrottleRepository } = scope();
+    it('locks exactly at the limit and keeps the same lock for later attempts', async () => {
       const hash = randomText();
       const now = new Date();
-      for (let count = 1; count < LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL; count += 1) {
-        await loginThrottleRepository.recordFailure(counterFor(hash), now);
-      }
-      const before = await loginThrottleRepository.findActiveLockUntil([hash], now);
+      const lockEnd = new Date(now.getTime() + LOGIN_THROTTLE_LOCK_MS);
 
-      await loginThrottleRepository.recordFailure(counterFor(hash), now);
+      const beforeLimit = await reserveTimes(hash, LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL - 1, now);
+      const atLimit = await reserveTimes(hash, 1, now);
+      const overLimit = await reserveTimes(hash, 1, new Date(now.getTime() + SECOND_MS));
 
-      const after = await loginThrottleRepository.findActiveLockUntil([hash], now);
-      expect(before).toBeNull();
-      expect(after).toEqual(new Date(now.getTime() + LOGIN_THROTTLE_LOCK_MS));
+      expect(beforeLimit).toEqual({ failures: LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL - 1, lockedUntil: null });
+      expect(atLimit).toEqual({ failures: LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL, lockedUntil: lockEnd });
+      expect(overLimit).toEqual({ failures: LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL + 1, lockedUntil: lockEnd });
     });
 
-    it('releases the lock after the lock time and starts a fresh window afterwards', async () => {
-      const { loginThrottleRepository } = scope();
+    it('keeps the lock past the window and starts a fresh window once the lock ended', async () => {
       const hash = randomText();
       const now = new Date();
-      for (let count = 0; count < LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL; count += 1) {
-        await loginThrottleRepository.recordFailure(counterFor(hash), now);
-      }
-      const justBeforeEnd = new Date(now.getTime() + LOGIN_THROTTLE_LOCK_MS - SECOND_MS);
-      const atEnd = new Date(now.getTime() + LOGIN_THROTTLE_LOCK_MS);
+      const lockEnd = new Date(now.getTime() + LOGIN_THROTTLE_LOCK_MS);
+      await reserveTimes(hash, LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL, now);
 
-      expect(await loginThrottleRepository.findActiveLockUntil([hash], justBeforeEnd)).not.toBeNull();
-      expect(await loginThrottleRepository.findActiveLockUntil([hash], atEnd)).toBeNull();
+      const justBeforeEnd = await reserveTimes(hash, 1, new Date(lockEnd.getTime() - SECOND_MS));
+      const atEnd = await reserveTimes(hash, 1, lockEnd);
 
-      await loginThrottleRepository.recordFailure(counterFor(hash), atEnd);
-
-      const row = await findThrottle(hash);
-      expect(row?.failures).toBe(1);
-      expect(row?.locked_until).toBeNull();
+      expect(justBeforeEnd).toEqual({ failures: LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL + 1, lockedUntil: lockEnd });
+      expect(atEnd).toEqual({ failures: 1, lockedUntil: null });
     });
 
     it('resets the count after the window without a lock', async () => {
-      const { loginThrottleRepository } = scope();
       const hash = randomText();
       const now = new Date();
-      await loginThrottleRepository.recordFailure(counterFor(hash), now);
-      await loginThrottleRepository.recordFailure(counterFor(hash), new Date(now.getTime() + MINUTE_MS));
-      expect((await findThrottle(hash))?.failures).toBe(2);
+      await reserveTimes(hash, 1, now);
+      const second = await reserveTimes(hash, 1, new Date(now.getTime() + MINUTE_MS));
 
-      await loginThrottleRepository.recordFailure(
-        counterFor(hash),
-        new Date(now.getTime() + LOGIN_THROTTLE_WINDOW_MS),
-      );
+      const afterWindow = await reserveTimes(hash, 1, new Date(now.getTime() + LOGIN_THROTTLE_WINDOW_MS));
 
-      expect((await findThrottle(hash))?.failures).toBe(1);
+      expect(second.failures).toBe(2);
+      expect(afterWindow).toEqual({ failures: 1, lockedUntil: null });
     });
 
     it('deletes the given counters only', async () => {
@@ -315,8 +338,8 @@ describe('login throttling against PostgreSQL', () => {
       const removed = randomText();
       const kept = randomText();
       const now = new Date();
-      await loginThrottleRepository.recordFailure(counterFor(removed), now);
-      await loginThrottleRepository.recordFailure(counterFor(kept), now);
+      await loginThrottleRepository.reserveAttempt(counterFor(removed), now);
+      await loginThrottleRepository.reserveAttempt(counterFor(kept), now);
 
       await loginThrottleRepository.deleteByKeyHashes([removed]);
 

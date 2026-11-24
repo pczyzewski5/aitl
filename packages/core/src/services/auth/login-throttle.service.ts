@@ -24,25 +24,24 @@ export class LoginThrottleService {
     this.clock = clock;
   }
 
-  async assertNotLocked(identity: LoginAttemptIdentity): Promise<void> {
+  async reserveAttempt(identity: LoginAttemptIdentity): Promise<void> {
     const now = this.clock();
-    const lockedUntil = await this.repository.findActiveLockUntil(this.keyHashes(identity), now);
+    const counters = this.counters(identity);
+    const reservations = await Promise.all(counters.map((counter) => this.repository.reserveAttempt(counter, now)));
 
-    if (lockedUntil === null) {
+    const lockEndTimes = reservations.flatMap(({ failures, lockedUntil }, index) => {
+      const { limit, lockMs } = counters[index] as ThrottleCounter;
+
+      return failures > limit ? [(lockedUntil ?? new Date(now.getTime() + lockMs)).getTime()] : [];
+    });
+
+    if (lockEndTimes.length === 0) {
       return;
     }
 
-    const retryAfterSeconds = Math.ceil((lockedUntil.getTime() - now.getTime()) / MILLISECONDS_PER_SECOND);
+    const retryAfterSeconds = Math.ceil((Math.max(...lockEndTimes) - now.getTime()) / MILLISECONDS_PER_SECOND);
 
     throw new TooManyRequestsError(TOO_MANY_ATTEMPTS_MESSAGE, retryAfterSeconds);
-  }
-
-  async recordFailure(identity: LoginAttemptIdentity): Promise<void> {
-    const now = this.clock();
-
-    await Promise.all(
-      this.counters(identity).map((counter) => this.repository.recordFailure(counter, now)),
-    );
   }
 
   reset(identity: LoginAttemptIdentity): Promise<void> {

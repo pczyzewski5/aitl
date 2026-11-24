@@ -35,20 +35,16 @@ export class AuthService {
 
   async login({ email, password }: LoginInput, clientIp: string): Promise<LoginResult> {
     const identity: LoginAttemptIdentity = { email, clientIp };
-    await this.loginThrottle.assertNotLocked(identity);
+    await this.loginThrottle.reserveAttempt(identity);
 
     const user = await this.users.findByEmail(email);
 
     if (user === null) {
       await this.passwordHasher.verifyAgainstDecoy(password);
-      await this.loginThrottle.recordFailure(identity);
-
       throw new InvalidCredentialsError(INVALID_CREDENTIALS_MESSAGE);
     }
 
     if (!(await this.passwordHasher.verify(password, user.passwordHash))) {
-      await this.loginThrottle.recordFailure(identity);
-
       throw new InvalidCredentialsError(INVALID_CREDENTIALS_MESSAGE);
     }
 

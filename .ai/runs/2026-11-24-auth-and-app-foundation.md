@@ -235,3 +235,7 @@ SB-I: po merge #76 padły 2 testy `seed.test.ts` (brak `SESSION_SECRET` wymagane
 ## 2026-11-24 (PR-11, krok 2.7, commit 3)
 Dopisek do commitu 2 (wpis urwał się na znaku procentu): coverage 100 procent, build, audit 0 podatności, integracyjne 105/105. PR #80 (base main, etykieta needs-qa, stos #70, #72, #73, #75, #76, #77, #78, #74, #71, #79); wiersz PR-11 uzupełniony numerem.
 Do zrobienia: zielone checki, merge po stosie, SHA w track.md.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 2, M1)
+Gałąź `feature/phase-2-review-fixes` z szczytu stosu (#80). Throttle: zamiast `assertNotLocked` + `recordFailure` jeden atomowy upsert `reserveAttempt` (`RETURNING`) przed weryfikacją hasła; próba ponad próg -> 429 bez argon2; aktywna blokada nie jest przesuwana, okno nie odnawia się w trakcie blokady. Test równoległy: 10 błędnych prób = dokładnie 5 x 401 i 5 x 429 (stary kod: 10 x 401).
+Pułapka: poprawne hasło w serii kasuje licznik `ip+email`, więc ścisłe "401 <= próg" w serii z poprawnym hasłem nie jest do utrzymania przy resecie po sukcesie (zgłoszone w PR). Do zrobienia: m4, m1, m2, m5-m8, nity.
