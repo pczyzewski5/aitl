@@ -194,3 +194,16 @@ Dostarczanie (Q22): jeden PR na Step (2.0 może iść z 2.1), każdy zielony i w
 Notatka (decyzja właściciela 2026-11-24, wyjątek od Q22): Step 2.6 realizujemy jako trzy PR-y: **2.6a** (`packages/ui`: rozszerzenie `AppShell` o `displayName` i wylogowanie jako przycisk, rozszerzenie `LoginForm`, `ui/backend/api/apiCall.ts`, `feedback/*`, `docs/design-system.md`), **2.6b** (Tailwind i style `@aitl/ui` w `app`), **2.6c** (strony `/login` i `/`, redirecty, wylogowanie, fokus, scenariusz E01-S01). `AppShell` i `LoginForm` rozszerzamy w `packages/ui`, nie dublujemy w `app`.
 
 Poprawka błędu w auth dodaje test regresyjny padający bez poprawki.
+
+## 📝 Odchylenia od specu w implementacji
+
+Stan na 2026-11-24 (PR-y #70-#80). Tekst powyżej zostaje jako zapis decyzji z chwili pisania; poniżej to, co w realizacji wygląda inaczej albo zostało doprecyzowane.
+
+- **Seed (Step 2.5).** Cienki wrapper leży w root `scripts/seed-user.ts` (nie w `packages/app/scripts/`), logika w `packages/app/src/seed/`; komenda `npm run seed:user -- --email <e> --name <n> [--shared-only]` uruchamiana z roota (`node --import tsx --env-file-if-exists=.env`). Hasło tylko z `SEED_PASSWORD`, bez wariantu stdin. Nazwy kont z opcji CLI `--shared-account-name` i `--personal-account-name` (domyślnie "Wspólne" i "Osobiste"), a nie z konfiguracji seeda. Kody wyjścia: 0 sukces, 1 inne hasło niż zapisane, 2 niepoprawne dane wejściowe.
+- **`seed:user` wymaga `SESSION_SECRET`.** Skrypt korzysta ze wspólnego schematu env i kontenera, więc bez poprawnego `SESSION_SECRET` odmawia startu (lekcja o równoległych PR-ach).
+- **`GET /api/auth/me`.** Dodana route spoza planu (Step 2.6c): nazwa zalogowanego na pasku musi przetrwać odświeżenie strony; `AuthService.getCurrentUser`, opis w `BACKWARD_COMPATIBILITY.md`.
+- **`loadEnvConfig` (Q39).** Env w Next ładowany przez `loadEnvConfig` w `next.config.ts` (z wymuszonym przeładowaniem), nie przez `--env-file`; Next czyta `.env` z katalogu pakietu `app`, więc root `.env` jest ładowany jawnie.
+- **CSRF (Q40).** Nagłówek CSRF jest wymagany na mutujących route'ach (login, logout); brak nagłówka -> 403 `forbidden`; klient (`apiCall`) dodaje go zawsze.
+- **Throttle: dwa liczniki.** `ip+email` z progiem 5 i sam `email` z progiem 20, okno i blokada po 15 min (stałe w `login-throttle.service.ts`); wiersze powstają także dla nieistniejących e-maili.
+- **`TRUSTED_PROXY_HOPS`.** Opcjonalne, domyślnie 0 (nagłówek `X-Forwarded-For` ignorowany, komponent adresu w kluczu stały); nie występuje w `.env.example`, bo pusta wartość byłaby niepoprawna.
+- **`GET /api/bank-accounts/{id}`.** `id` niebędące UUID -> 400 `validation_error`; nie-członek i nieistniejące konto -> to samo 403.

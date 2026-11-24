@@ -239,3 +239,7 @@ Do zrobienia: zielone checki, merge po stosie, SHA w track.md.
 ## 2026-11-24 (PR-12, close-out, commit 1)
 Baza: `feature/e01-closeout` z `origin/feature/second-user-isolation` (#80, stos #70, #72, #73, #75, #76, #77, #78, #74, #71, #79). Spec auth-and-app-foundation przeniesiony `git mv` do `.ai/specs/implemented/` (bez zmiany nazwy); poprawione linki w track.md, nagłówku tego dziennika, specach E02 i E03, mapie ekranów, README prototypu, RAPORT.md, POSTEP.md i plikach `.mdx` w `packages/ui`. Stare wpisy w `.ai/runs/2026-11-02-project-bootstrap.md` zostawione bez zmian (historia).
 Do zrobienia: sekcja odchyleń w specu, backlog, checkboxy monorepo-migration, track.md.
+
+## 2026-11-24 (PR-12, close-out, commit 2)
+Do speca (w `implemented/`) dopisana sekcja "Odchylenia od specu w implementacji": seed (wrapper w root `scripts/`, hasło tylko z `SEED_PASSWORD`, nazwy kont z opcji CLI, bez stdin, wymaga `SESSION_SECRET`), `GET /api/auth/me`, `loadEnvConfig` (Q39), CSRF (Q40), dwa liczniki throttla (5 i 20), `TRUSTED_PROXY_HOPS`, 400 dla nie-UUID w `/api/bank-accounts/{id}`. Wartości sprawdzone w kodzie (`seed-config.ts`, `login-throttle.service.ts`).
+Do zrobienia: backlog, checkboxy monorepo-migration, track.md, PR.
