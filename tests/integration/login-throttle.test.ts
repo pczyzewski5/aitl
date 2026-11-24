@@ -143,7 +143,7 @@ describe('login throttling against PostgreSQL', () => {
       });
     });
 
-    it('keeps failures below the limit harmless and a success clears them', async () => {
+    it('keeps failures below the limit harmless and a success clears the address counter only', async () => {
       const loginEmail = randomEmail();
       await scope().userProvisioningService.provision({
         mode: PROVISIONING_MODE.SharedOnly,
@@ -160,7 +160,8 @@ describe('login throttling against PostgreSQL', () => {
 
       expect(success.status).toBe(200);
       expect(again.status).toBe(200);
-      expect(await countThrottleRows([keyHash(`ip:unknown|email:${loginEmail}`), keyHash(`email:${loginEmail}`)])).toBe(0);
+      expect(await countThrottleRows([keyHash(`ip:unknown|email:${loginEmail}`)])).toBe(0);
+      expect((await findThrottle(keyHash(`email:${loginEmail}`)))?.failures).toBe(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL * 2);
     });
 
     it('answers an unknown e-mail like a known one: 401 first, 429 after the limit, with a row stored', async () => {

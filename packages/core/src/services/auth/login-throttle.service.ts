@@ -45,18 +45,19 @@ export class LoginThrottleService {
   }
 
   reset(identity: LoginAttemptIdentity): Promise<void> {
-    return this.repository.deleteByKeyHashes(this.keyHashes(identity));
+    return this.repository.deleteByKeyHashes([this.ipAndEmailCounter(identity).keyHash]);
   }
 
-  private keyHashes(identity: LoginAttemptIdentity): string[] {
-    return this.counters(identity).map(({ keyHash }) => keyHash);
+  private counters(identity: LoginAttemptIdentity): ThrottleCounter[] {
+    return [this.ipAndEmailCounter(identity), this.emailCounter(identity)];
   }
 
-  private counters({ email, clientIp }: LoginAttemptIdentity): ThrottleCounter[] {
-    return [
-      this.counter(`ip:${clientIp}|email:${email}`, LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL),
-      this.counter(`email:${email}`, LOGIN_FAILURE_LIMIT_PER_EMAIL),
-    ];
+  private ipAndEmailCounter({ email, clientIp }: LoginAttemptIdentity): ThrottleCounter {
+    return this.counter(`ip:${clientIp}|email:${email}`, LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL);
+  }
+
+  private emailCounter({ email }: LoginAttemptIdentity): ThrottleCounter {
+    return this.counter(`email:${email}`, LOGIN_FAILURE_LIMIT_PER_EMAIL);
   }
 
   private counter(key: string, limit: number): ThrottleCounter {

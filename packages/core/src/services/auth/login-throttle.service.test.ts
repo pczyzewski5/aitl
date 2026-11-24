@@ -105,12 +105,13 @@ describe('LoginThrottleService', () => {
     expect(keys).not.toContain(clientIp);
   });
 
-  it('removes both counters on reset', async () => {
+  it('removes only the address and e-mail counter on reset and keeps the e-mail counter', async () => {
     await reserve(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL);
 
     await sut.reset({ email, clientIp });
 
-    expect(store.throttles).toHaveLength(0);
+    expect(store.throttles).toHaveLength(1);
+    expect(store.throttles[0]?.failures).toBe(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL);
     await expect(sut.reserveAttempt({ email, clientIp })).resolves.toBeUndefined();
   });
 

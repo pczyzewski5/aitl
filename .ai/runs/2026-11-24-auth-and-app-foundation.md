@@ -239,3 +239,7 @@ Do zrobienia: zielone checki, merge po stosie, SHA w track.md.
 ## 2026-11-24 (poprawki po przeglądzie Fazy 2, M1)
 Gałąź `feature/phase-2-review-fixes` z szczytu stosu (#80). Throttle: zamiast `assertNotLocked` + `recordFailure` jeden atomowy upsert `reserveAttempt` (`RETURNING`) przed weryfikacją hasła; próba ponad próg -> 429 bez argon2; aktywna blokada nie jest przesuwana, okno nie odnawia się w trakcie blokady. Test równoległy: 10 błędnych prób = dokładnie 5 x 401 i 5 x 429 (stary kod: 10 x 401).
 Pułapka: poprawne hasło w serii kasuje licznik `ip+email`, więc ścisłe "401 <= próg" w serii z poprawnym hasłem nie jest do utrzymania przy resecie po sukcesie (zgłoszone w PR). Do zrobienia: m4, m1, m2, m5-m8, nity.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 2, m4)
+Sukces logowania kasuje tylko licznik `ip+email` (`reset`), licznik per e-mail zostaje do końca okna; testy jednostkowe i integracyjny zaktualizowane (e-mail: 10 prób po 2 seriach), opis w BC i specu.
+Do zrobienia: m1, m2, m5-m8, nity.
