@@ -30,7 +30,7 @@ Statusy: todo / in-progress / done. Kolumny PR, SHA i SB uzupełnia agent po zak
 | PR-10c | 2.6c | #19, #10 | strony `/login` i `/` (lista kont, `/?account=<id>`), redirecty, wylogowanie, fokus na h1; `needs-qa` | SB-I + SB-U | PR-8, PR-10a, PR-10b | in-progress | #79 | | SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, test:integration 87/87); weryfikacja w Chrome wykonana; nowa route `GET /api/auth/me`; PR leży na stosie #70-#78, #74, #71 |
 | PR-11 | 2.7 | #11 | izolacja i druga osoba, test API dwóch sesji, E2E tylko żony; `needs-qa` | SB-I | PR-8, PR-9, PR-10c | in-progress | #80 | | SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, integracyjne 105/105); E2E żony w Chrome wykonane; leży na stosie #70, #72, #73, #75, #76, #77, #78, #74, #71, #79 |
 | PR-3b | review Fazy 1 | #18 | poprawki po review Fazy 1 (apiHandler, logger, kontener) | SB-I | PR-3 | in-progress | #73 | | wiersz dodany w close-out; wynik SB w opisie PR #73; leży na stosie #70, #72 |
-| PR-12 | close-out | - | spec do `implemented/`, backlog, checkboxy monorepo-migration | SB-A | PR-11 | in-progress | | | SB-A zielone lokalnie; PR leży na stosie #70, #72, #73, #75, #76, #77, #78, #74, #71, #79, #80 |
+| PR-12 | close-out | - | spec do `implemented/`, backlog, checkboxy monorepo-migration | SB-A | PR-11 | in-progress | #81 | | SB-A zielone lokalnie; PR leży na stosie #70, #72, #73, #75, #76, #77, #78, #74, #71, #79, #80 |
 | PR-#2 | instalator | #2 | `npm run setup`, bez generowania sekretów (tylko instrukcja); follow-up o `seed:user` po PR-9 | SB-A | równolegle z Fazą 1 w osobnym worktree, merge przed PR-7 | done | #65 | a4f4a6f | SB-A zielone, instalator sprawdzony dwukrotnie (idempotentność) |
 
 ## Zasady pracy

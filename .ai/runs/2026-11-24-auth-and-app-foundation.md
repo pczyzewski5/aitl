@@ -255,3 +255,7 @@ Do zrobienia: track.md, PR.
 ## 2026-11-24 (PR-12, close-out, commit 5)
 track.md: numery PR-10a (#74) i PR-10b (#71), nowy wiersz PR-3b (#73, poprawki po review Fazy 1, nieujęty wcześniej w tabeli) i wiersz PR-12 (in-progress, bez SHA). Statusy wszystkich PR-ów z `gh pr list`: zmergowane tylko PR-1, PR-2, PR-3 i instalator #2; reszta otwarta. SB-A zielone lokalnie (typecheck, lint, coverage 100%, build, audit 0 podatności).
 Status dziennika zostaje `in-progress`: `done` dopiero po merge wszystkich PR-ów. Do zrobienia: PR, numer PR-12 w track.md, po merge stosu SHA i status done.
+
+## 2026-11-24 (PR-12, close-out, commit 6)
+PR #81 otwarty (base main, stos #70, #72, #73, #75, #76, #77, #78, #74, #71, #79, #80); numer w wierszu PR-12 w track.md.
+Do zrobienia: zielone checki, po merge stosu przestawić bazę, SHA w track.md, `Status: done` w dzienniku po merge wszystkich PR-ów.
