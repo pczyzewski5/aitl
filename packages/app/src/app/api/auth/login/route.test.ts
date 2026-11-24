@@ -11,7 +11,7 @@ import {
 import { container } from '../../../../container/container';
 import { POST } from './route';
 
-const sessionCookie = vi.hoisted(() => ({ setSessionCookie: vi.fn() }));
+const sessionCookie = vi.hoisted(() => ({ setSessionCookie: vi.fn(), readSessionToken: vi.fn() }));
 
 vi.mock('../../../../http/session-cookie', () => sessionCookie);
 
@@ -37,6 +37,7 @@ describe('POST /api/auth/login', () => {
     password = randomText();
     login.mockReset();
     sessionCookie.setSessionCookie.mockReset();
+    sessionCookie.readSessionToken.mockReset().mockResolvedValue(null);
     vi.spyOn(container, 'createScope').mockReturnValue({
       cradle: { authService: { login }, env: { SESSION_COOKIE_SECURE: true, TRUSTED_PROXY_HOPS: 1 } },
     } as never);
@@ -55,8 +56,18 @@ describe('POST /api/auth/login', () => {
 
     expect(actual.status).toBe(200);
     expect(await actual.json()).toEqual({ ok: true, data: { user } });
-    expect(login).toHaveBeenCalledWith({ email, password }, UNKNOWN_CLIENT_IP);
+    expect(login).toHaveBeenCalledWith({ email, password }, UNKNOWN_CLIENT_IP, null);
     expect(sessionCookie.setSessionCookie).toHaveBeenCalledWith(sessionToken, true);
+  });
+
+  it('passes the token of the existing session cookie so the service can replace that session', async () => {
+    const previousToken = randomText();
+    sessionCookie.readSessionToken.mockResolvedValue(previousToken);
+    login.mockResolvedValue({ user: { id: randomText(), email, displayName: randomText() }, sessionToken: randomText() });
+
+    await POST(createRequest({ email, password }, csrfHeaders), undefined);
+
+    expect(login).toHaveBeenCalledWith({ email, password }, UNKNOWN_CLIENT_IP, previousToken);
   });
 
   it('rejects a request without the CSRF header before touching the service', async () => {
@@ -95,7 +106,7 @@ describe('POST /api/auth/login', () => {
 
     await POST(createRequest({ email, password }, { ...csrfHeaders, 'X-Forwarded-For': `${randomText()}, ${clientIp}` }), undefined);
 
-    expect(login).toHaveBeenCalledWith({ email, password }, clientIp);
+    expect(login).toHaveBeenCalledWith({ email, password }, clientIp, null);
   });
 
   it('answers 429 with the retry time in the body and in the Retry-After header and sets no cookie', async () => {

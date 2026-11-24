@@ -251,3 +251,7 @@ Do zrobienia: m2, m5-m8, nity.
 ## 2026-11-24 (poprawki po przeglądzie Fazy 2, m2)
 `LoginThrottleRepository.deleteStale` kasuje wiersze `login_throttles` nietknięte (`updated_at`) dłużej niż max(okno, blokada); wołane na początku `reserveAttempt`, analogicznie do `deleteExpired` sesji, po istniejącym indeksie `updated_at`. Fake dostał `updatedAt`; test na prawdziwej bazie.
 Do zrobienia: m5-m8, nity.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 2, m5)
+Rotacja sesji: `AuthService.login` dostaje token z istniejącego cookie (route czyta go przez `readSessionToken`) i po utworzeniu nowej sesji usuwa starą; nieudane logowanie nie rusza starej sesji, logowanie bez cookie nie usuwa innych sesji (Q33). Opis w BC; test integracyjny na cookie ze starym tokenem.
+Do zrobienia: m6-m8, nity.

@@ -47,7 +47,7 @@ describe('AuthService', () => {
       const verify = vi.spyOn(hasher, 'verify');
       const decoy = vi.spyOn(hasher, 'verifyAgainstDecoy');
 
-      const actual = await sut.login({ email, password }, clientIp);
+      const actual = await sut.login({ email, password }, clientIp, null);
 
       expect(actual.user).toEqual({ id: store.users[0]?.id, email, displayName: store.users[0]?.displayName });
       expect(await sessionService.resolve(actual.sessionToken)).toEqual({ userId: store.users[0]?.id });
@@ -59,7 +59,7 @@ describe('AuthService', () => {
       const verify = vi.spyOn(hasher, 'verify');
       const decoy = vi.spyOn(hasher, 'verifyAgainstDecoy');
 
-      const actual = sut.login({ email, password: randomText() }, clientIp);
+      const actual = sut.login({ email, password: randomText() }, clientIp, null);
 
       await expect(actual).rejects.toThrow(new InvalidCredentialsError(INVALID_CREDENTIALS_MESSAGE));
       expect(store.sessions).toHaveLength(0);
@@ -72,7 +72,7 @@ describe('AuthService', () => {
       const decoy = vi.spyOn(hasher, 'verifyAgainstDecoy');
       const unknownPassword = randomText();
 
-      const actual = sut.login({ email: `${randomText()}@example.test`, password: unknownPassword }, clientIp);
+      const actual = sut.login({ email: `${randomText()}@example.test`, password: unknownPassword }, clientIp, null);
 
       await expect(actual).rejects.toThrow(new InvalidCredentialsError(INVALID_CREDENTIALS_MESSAGE));
       expect(store.sessions).toHaveLength(0);
@@ -82,10 +82,39 @@ describe('AuthService', () => {
     });
   });
 
+  describe('session rotation', () => {
+    it('ends the session of the previous token when a new login succeeds', async () => {
+      const previous = await sut.login({ email, password }, clientIp, null);
+
+      const actual = await sut.login({ email, password }, clientIp, previous.sessionToken);
+
+      expect(await sessionService.resolve(previous.sessionToken)).toBeNull();
+      expect(await sessionService.resolve(actual.sessionToken)).toEqual({ userId: previous.user.id });
+      expect(store.sessions).toHaveLength(1);
+    });
+
+    it('keeps the previous session when the new login fails', async () => {
+      const previous = await sut.login({ email, password }, clientIp, null);
+
+      const actual = sut.login({ email, password: randomText() }, clientIp, previous.sessionToken);
+
+      await expect(actual).rejects.toBeInstanceOf(InvalidCredentialsError);
+      expect(await sessionService.resolve(previous.sessionToken)).toEqual({ userId: previous.user.id });
+    });
+
+    it('keeps other sessions when the login comes without a previous token', async () => {
+      await sut.login({ email, password }, clientIp, null);
+
+      await sut.login({ email, password }, clientIp, null);
+
+      expect(store.sessions).toHaveLength(2);
+    });
+  });
+
   describe('login throttling', () => {
     const failTimes = async (times: number, loginEmail = email): Promise<void> => {
       for (let attempt = 0; attempt < times; attempt += 1) {
-        await sut.login({ email: loginEmail, password: randomText() }, clientIp).catch(() => undefined);
+        await sut.login({ email: loginEmail, password: randomText() }, clientIp, null).catch(() => undefined);
       }
     };
 
@@ -93,7 +122,7 @@ describe('AuthService', () => {
       await failTimes(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL);
       const verify = vi.spyOn(hasher, 'verify');
 
-      const actual = sut.login({ email, password }, clientIp);
+      const actual = sut.login({ email, password }, clientIp, null);
 
       await expect(actual).rejects.toBeInstanceOf(TooManyRequestsError);
       expect(verify).not.toHaveBeenCalled();
@@ -105,7 +134,7 @@ describe('AuthService', () => {
       await failTimes(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL, unknownEmail);
       const decoy = vi.spyOn(hasher, 'verifyAgainstDecoy');
 
-      const actual = sut.login({ email: unknownEmail, password: randomText() }, clientIp);
+      const actual = sut.login({ email: unknownEmail, password: randomText() }, clientIp, null);
 
       await expect(actual).rejects.toBeInstanceOf(TooManyRequestsError);
       expect(decoy).not.toHaveBeenCalled();
@@ -119,24 +148,24 @@ describe('AuthService', () => {
         return false;
       });
 
-      await sut.login({ email, password }, clientIp).catch(() => undefined);
+      await sut.login({ email, password }, clientIp, null).catch(() => undefined);
 
       expect(countedAtVerification).toEqual([1, 1]);
     });
 
     it('clears the failures after a successful login', async () => {
       await failTimes(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL - 1);
-      await sut.login({ email, password }, clientIp);
+      await sut.login({ email, password }, clientIp, null);
 
       await failTimes(LOGIN_FAILURE_LIMIT_PER_IP_AND_EMAIL - 1);
 
-      await expect(sut.login({ email, password }, clientIp)).resolves.toBeDefined();
+      await expect(sut.login({ email, password }, clientIp, null)).resolves.toBeDefined();
     });
   });
 
   describe('logout', () => {
     it('deletes the session of the token', async () => {
-      const { sessionToken } = await sut.login({ email, password }, clientIp);
+      const { sessionToken } = await sut.login({ email, password }, clientIp, null);
 
       await sut.logout(sessionToken);
 
@@ -145,7 +174,7 @@ describe('AuthService', () => {
     });
 
     it('does nothing without a token', async () => {
-      await sut.login({ email, password }, clientIp);
+      await sut.login({ email, password }, clientIp, null);
 
       await sut.logout(null);
 
@@ -155,7 +184,7 @@ describe('AuthService', () => {
 
   describe('getCurrentUser', () => {
     it('returns the user without the hash', async () => {
-      const { user } = await sut.login({ email, password }, clientIp);
+      const { user } = await sut.login({ email, password }, clientIp, null);
 
       const actual = await sut.getCurrentUser(user.id);
 

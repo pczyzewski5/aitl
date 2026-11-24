@@ -33,7 +33,11 @@ export class AuthService {
     this.loginThrottle = loginThrottle;
   }
 
-  async login({ email, password }: LoginInput, clientIp: string): Promise<LoginResult> {
+  async login(
+    { email, password }: LoginInput,
+    clientIp: string,
+    previousSessionToken: string | null,
+  ): Promise<LoginResult> {
     const identity: LoginAttemptIdentity = { email, clientIp };
     await this.loginThrottle.reserveAttempt(identity);
 
@@ -50,6 +54,7 @@ export class AuthService {
 
     await this.loginThrottle.reset(identity);
     const { token } = await this.sessionService.start(user.id);
+    await this.sessionService.end(previousSessionToken);
 
     return {
       user: { id: user.id, email: user.email, displayName: user.displayName },
