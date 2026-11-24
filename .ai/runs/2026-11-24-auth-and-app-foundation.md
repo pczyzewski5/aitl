@@ -198,3 +198,7 @@ Do zrobienia: PR, wiersz PR-10a w track.md, zielone checki.
 ## 2026-11-24 (PR-10a, krok 2.6a, commit 6)
 PR #74 (base `feature/core-auth-primitives`, bo #70 niezmergowany; CI odpala się na dowolnej bazie); wiersz PR-10a w track.md (in-progress, wynik SB).
 Do zrobienia: zielone checki, po merge #70 przestawić bazę na `main`, merge, SHA w track.md.
+## 2026-11-24 (PR-10b, krok 2.6b, commit 1)
+`app`: `postcss.config.mjs` (`@tailwindcss/postcss`), `src/app/globals.css` (import `@aitl/ui/src/styles.css` + `@source` na `ui/src`), import w root layout, pinowane `tailwindcss`/`@tailwindcss/postcss` 4.3.5; test integracyjny: strona linkuje CSS z tokenami i klasami `ui`.
+Pułapka: bez `@source` Tailwind nie widzi klas z `packages/ui` (poza bazą skanowania `app`); lekcja dodana. `packages/ui` bez zmian.
+Do zrobienia: PR, wiersz PR-10b w track.md.
