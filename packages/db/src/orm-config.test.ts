@@ -31,6 +31,12 @@ describe('createOrmConfig', () => {
     });
   });
 
+  it('leaves the migrations path to the ORM default when none is given', () => {
+    const actual = createOrmConfig({ databaseUrl: options.databaseUrl });
+
+    expect(actual.migrations).toEqual({ tableName: MIGRATIONS_TABLE_NAME, transactional: true });
+  });
+
   it('allows an empty entity list until the first domain entity exists', () => {
     const actual = createOrmConfig(options);
 

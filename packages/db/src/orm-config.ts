@@ -8,7 +8,7 @@ export const MIGRATIONS_TABLE_NAME = 'migrations';
 
 export type OrmConfigOptions = {
   databaseUrl: string;
-  migrationsPath: string;
+  migrationsPath?: string;
 };
 
 export function createOrmConfig({ databaseUrl, migrationsPath }: OrmConfigOptions): Options {
@@ -19,7 +19,7 @@ export function createOrmConfig({ databaseUrl, migrationsPath }: OrmConfigOption
     pool: { min: POOL_MIN_CONNECTIONS, max: POOL_MAX_CONNECTIONS },
     extensions: [Migrator],
     migrations: {
-      path: migrationsPath,
+      ...(migrationsPath === undefined ? {} : { path: migrationsPath }),
       tableName: MIGRATIONS_TABLE_NAME,
       transactional: true,
     },

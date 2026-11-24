@@ -18,7 +18,7 @@ Statusy: todo / in-progress / done. Kolumny PR, SHA i SB uzupełnia agent po zak
 |----|------|-------|--------|--------|------------|--------|------|-----|----------|
 | PR-1 | 1.1 | #18 | env Zod, logger pino z redakcją, `instrumentation.ts` (core/app) | SB-I | - | done | #64 | c05b1bc | SB-I zielone (typecheck, lint, coverage 100%, build, audit, integracyjne); `process.exit(1)` w `register()` nie dodane (decyzja właściciela: zostaje 500) |
 | PR-2 | 1.2 | #18 | `createApiHandler` + health | SB-I | PR-1 | in-progress | #67 | | SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, integracyjne) |
-| PR-3 | 1.3 | #17 | Awilix, leniwy ORM, `serverExternalPackages` | SB-I | PR-1 | todo | | | |
+| PR-3 | 1.3 | #17 | Awilix, leniwy ORM, `serverExternalPackages` | SB-I | PR-1 | in-progress | #68 | | SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, integracyjne) |
 | PR-4 | 2.0 + 2.1 | #18 | standardy (JWT -> sesja serwerowa, także AGENTS.md i CODE_REVIEW.md gdzie dotyczy), `core/http/auth.ts`, `InvalidCredentialsError`, `TooManyRequestsError`, walidator login | SB-A | PR-2 | todo | | | |
 | PR-5 | 2.2 | #20 | encje users/bank-accounts/auth + migracja up/down z CHECK-ami | SB-I | może równolegle z Fazą 1 | todo | | | |
 | PR-6 | 2.3 | #18/#20 | hasher argon2id (`@node-rs/argon2`), repozytoria, serwisy, kontener | SB-I | PR-3, PR-4, PR-5 | todo | | | |
