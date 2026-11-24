@@ -228,3 +228,6 @@ Do zrobienia: wiersz PR-9 w track.md, SB-I, PR.
 Baza: gałąź `feature/second-user-isolation` z `feature/login-and-accounts-pages` (#79) plus merge `feature/seed-accounts` (#76); konflikty (`.env.example`, lessons, dziennik, track) rozwiązane zachowaniem obu stron. Nowy `tests/integration/second-user-isolation.test.ts` (16 testów): żona `shared-only` ma jedno członkostwo, widzi tylko wspólne konto (API i strona `/`, także z `?account=<cudze>`), 403 bez danych na cudze konta osobiste, 401 przed decyzją dostępu, brak handlerów POST/PUT/PATCH/DELETE na `[id]`, niezależne sesje dwóch różnych użytkowników (wylogowanie jednej nie rusza drugiej) i 10 równoległych rund bez mieszania danych.
 Pułapka: HTML strony `/?account=<id>` zawiera echo parametru w payloadzie Next, więc nie asertuję id, tylko nazwy.
 Do zrobienia: E2E w przeglądarce dla żony, SB-I, PR, track.md.
+
+## 2026-11-24 (PR-11, krok 2.7, commit 2)
+SB-I: po merge #76 padły 2 testy `seed.test.ts` (brak `SESSION_SECRET` wymaganego od #77); test ustawia teraz losowy sekret, README wymienia `SESSION_SECRET` przed `seed:user` (lekcja). Przeglądarka (Chrome, seedowana aplikacja z testu przejściowego, usunięty): żona loguje się, widzi tylko "Konto wspolne", wylogowanie wraca na `/login`, ponowne wejście na `/` też. Typecheck, lint, coverage 100
