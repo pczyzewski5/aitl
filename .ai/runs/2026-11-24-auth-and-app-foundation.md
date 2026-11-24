@@ -206,3 +206,7 @@ Do zrobienia: PR, wiersz PR-10b w track.md.
 ## 2026-11-24 (PR-10c, krok 2.6c, commit 1)
 Strony `/login` i `/` w `app` (redirecty po stronie serwera przez `loadCurrentUser`, ekrany klienckie z `apiCall`, adapter wyniku na `LoginResult`, fokus na h1 w odroczonym efekcie). Dodana route `GET /api/auth/me` i `AuthService.getCurrentUser` (nazwa w pasku musi przetrwać odświeżenie; opis w `BACKWARD_COMPATIBILITY.md`). Testy jednostkowe 100% i integracyjne (redirecty, nazwa, dwie sesje, Q33).
 Do zrobienia: weryfikacja w przeglądarce, SB-U, PR, wiersz PR-10c w track.md.
+
+## 2026-11-24 (PR-10c, krok 2.6c, commit 2)
+Weryfikacja w prawdziwym Chrome na seedowanej aplikacji: `/` -> `/login`, zły login (komunikat, dane zostają, fokus na e-mailu), poprawny (fokus na h1, nazwa w pasku, wspólne przed osobistymi, linki `/?account=<id>`), `/login` zalogowanego -> `/`, wylogowanie (fokus na h1 `/login`, `/` przekierowuje). Lekcja o seedowaniu aplikacji do testu przeglądarkowego i stabilnym mocku `useRouter`. SB-I zielone (typecheck, lint, coverage 100%, build, audit, test:integration 87/87); `packages/ui` bez zmian, więc SB-U nie dotyczy.
+Do zrobienia: PR, checki, wiersz PR-10c w track.md.
