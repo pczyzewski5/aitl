@@ -1,5 +1,7 @@
 import type { ApiCallResult, LoginResult } from '@aitl/ui';
-import { HTTP_TOO_MANY_REQUESTS, HTTP_UNAUTHORIZED } from '../routes';
+import { HTTP_BAD_REQUEST, HTTP_TOO_MANY_REQUESTS, HTTP_UNAUTHORIZED } from '../routes';
+
+const INVALID_CREDENTIALS_STATUSES: readonly number[] = [HTTP_BAD_REQUEST, HTTP_UNAUTHORIZED];
 
 export function toLoginResult(result: ApiCallResult<unknown>): LoginResult {
   if (result.ok) {
@@ -10,7 +12,7 @@ export function toLoginResult(result: ApiCallResult<unknown>): LoginResult {
     return { ok: false, kind: 'network' };
   }
 
-  if (result.kind === 'api-error' && result.status === HTTP_UNAUTHORIZED) {
+  if (result.kind === 'api-error' && INVALID_CREDENTIALS_STATUSES.includes(result.status)) {
     return { ok: false, kind: 'invalid-credentials' };
   }
 

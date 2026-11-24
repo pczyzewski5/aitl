@@ -25,7 +25,7 @@ describe('toLoginResult', () => {
       expected: { ok: false, kind: 'too-many-attempts', retryAfterSeconds: undefined },
     },
     { name: '500', result: apiError(500), expected: { ok: false, kind: 'server-error' } },
-    { name: '400', result: apiError(400), expected: { ok: false, kind: 'server-error' } },
+    { name: '400', result: apiError(400), expected: { ok: false, kind: 'invalid-credentials' } },
     {
       name: 'an invalid response',
       result: { ok: false, kind: 'invalid-response', status: 502 },

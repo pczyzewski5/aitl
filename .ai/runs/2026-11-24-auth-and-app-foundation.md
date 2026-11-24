@@ -255,3 +255,7 @@ Do zrobienia: m5-m8, nity.
 ## 2026-11-24 (poprawki po przeglądzie Fazy 2, m5)
 Rotacja sesji: `AuthService.login` dostaje token z istniejącego cookie (route czyta go przez `readSessionToken`) i po utworzeniu nowej sesji usuwa starą; nieudane logowanie nie rusza starej sesji, logowanie bez cookie nie usuwa innych sesji (Q33). Opis w BC; test integracyjny na cookie ze starym tokenem.
 Do zrobienia: m6-m8, nity.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 2, m6)
+`toLoginResult` mapuje 400 (np. pusty lub nieprawidłowy e-mail, który ominął walidację klienta) tak jak 401 na `invalid-credentials`, zamiast pokazywać "błąd serwera"; stała `HTTP_BAD_REQUEST` w `routes.ts`, test 400 zmieniony.
+Do zrobienia: m7, m8, nity.
