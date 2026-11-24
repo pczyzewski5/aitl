@@ -1,0 +1,46 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="System projektowy/Czego brakuje" />
+
+# Czego brakuje
+
+Strona uczciwie pokazuje, co system pokrywa i czego nie ma. Brakującego komponentu nie wymyślamy: składamy z istniejących elementów i tokenów, a gdy się nie da, zapisujemy lukę tutaj. Szczegółowe sekcje "Czego brakuje" są też na stronie każdego komponentu.
+
+## Pokrycie backlogu
+
+Źródło: `.ai/specs/backlog.md`. Epiki E04 (Later) i E05 (Gotowość produkcyjna) są zaparkowane i nie mają historii, więc nie mają ekranów.
+
+| Historia | Opis | Ekran i elementy w Storybooku | Stan |
+|---|---|---|---|
+| E01-S01 | logowanie i lista własnych kont bankowych | [Logowanie](?path=/docs/ekrany-e01-dostęp-i-logowanie-logowanie-login--docs), [Strona główna](?path=/docs/ekrany-e01-dostęp-i-logowanie-strona-główna--docs): `LoginForm`, `BankAccountList`, `AppShell` | zbudowane w Storybooku, strony w `packages/app` jeszcze nie |
+| E01-S02 | żona widzi tylko wspólne konto | ta sama lista; story "tylko wspólne" | j.w. |
+| E02-S01 | wydatek jednorazowy | [Konto z wpisami](?path=/docs/ekrany-e02-wpisy-konto-z-wpisami-account-…-month-…--docs): `EntryForm`, `EntryTable` | j.w. |
+| E02-S02 | wpływ jednorazowy | j.w. (typ wpisu w `EntryForm`) | j.w. |
+| E02-S03 | wpis cykliczny, zakończenie, zmiana kwoty, usunięcie | `SeriesActions`, `ConfirmDialog`, [Potwierdzenie usunięcia](?path=/docs/wzorce-potwierdzenie-usunięcia--docs) | j.w. |
+| E02-S04 | oznaczenie wydatku jako zapłaconego | kolumna "Zapłacone" w `EntryTable` (`Checkbox`) | j.w. |
+| E03-S01 | ile zostanie, osobno per konto | [Przegląd miesiąca](?path=/docs/ekrany-e03-ile-zostanie-przegląd-miesiąca-month-…--docs): `AccountRemainderCard`, `MonthSwitcher` | j.w. |
+
+## Świadome luki
+
+| Luka | Stan | Co robić do czasu decyzji |
+|---|---|---|
+| **L3: ciemny motyw** | jest tylko struktura (`[data-theme='dark']` i przełącznik), brak wartości i policzonego kontrastu; wybór "Ciemny" wygląda jak jasny | nie dopisywać stylów ciemnych; wartości i kontrast policzyć od nowa po decyzji właściciela |
+| **L4: marka** | brak logo i wyróżnika AITL; w interfejsie jest sam tekst "AITL" | bez wymyślania; nie dodawać logotypu |
+| **L5: zestaw ikon** | `lucide-react` tylko tam, gdzie komponent wymaga ikony (`Check`, `Minus`, `ChevronDown`, `X`, `Ellipsis`); `Alert`, `Badge`, `EmptyState`, `ErrorState` i `Toast` bez ikon | nie dodawać ikon ozdobnych |
+| **L6: zrzuty ekranu** | brak referencji graficznych; obserwacje pochodzą z kodu makiety i pomiarów | porównywać ze Storybookiem |
+| **Textarea** | świadomie niezbudowany (decyzja 2026-11-18): żaden ekran nie ma pola wielowierszowego | opis wpisu to `Input`; gdy ekran zażąda, zgłoś potrzebę |
+| **Tabs** | świadomie niezbudowane (decyzja 2026-11-18): żaden ekran nie ma zakładek | nawigacja przez `TextLink`; gdy ekran zażąda, zgłoś potrzebę |
+| **Tooltip, Popover, Avatar** | brak ekranu, który ich potrzebuje; `Menu` pokazuje powód zablokowania tekstem w pozycji | tekst w interfejsie zamiast podpowiedzi |
+
+## Inne luki
+
+- Pole daty: brak komponentu, data to `Input` z podpowiedzią formatu RRRR-MM-DD.
+- Ogólna tabela danych: jest tylko `EntryTable`; bez sortowania, filtrowania, zaznaczania wielu wierszy i wirtualizacji.
+- Wybór konta, gdy karta wyniku jest w stanie błędu: konto zmienia się wtedy tylko adresem (do decyzji właściciela).
+- Błąd operacji wewnątrz okna `ConfirmDialog`: komunikat przekazuje się jako `children`; osobny wzorzec nie powstał.
+- Widok szczegółów i osobna strona konta: poza zakresem (jedna strona, stan w adresie).
+- Pokaż hasło i reset hasła: poza zakresem (E01).
+- Przewijanie do alertu błędu serwera na wąskim ekranie w długim formularzu: propozycja bez decyzji.
+- Sprawdzenia na rzeczywistych czytnikach ekranu, w Safari i na urządzeniach dotykowych: nie wykonane (tylko Chromium, klawiatura i mysz).
+- Strony w `packages/app` budujące się na tych ekranach: kolejny etap.
+- Maksymalna długość linii tekstu ciągłego, obramowania poza `--border` i `--input` oraz cienie: brak tokenów (cień celowo wyłączony).

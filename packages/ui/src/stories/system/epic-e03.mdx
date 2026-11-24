@@ -1,0 +1,37 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="System projektowy/Epik E03: Ile zostanie w miesiącu" />
+
+# Epik E03: Ile zostanie w miesiącu
+
+Użytkownik widzi, ile zostanie w wybranym miesiącu, osobno dla każdego konta bankowego, i może przejść do wpisów wybranego konta. Źródło: `.ai/specs/2026-11-17-monthly-remainder.md`, backlog `.ai/specs/backlog.md` (E03-S01).
+
+## Ekran
+
+| Ekran | Adres | Co pokazuje |
+|---|---|---|
+| [Przegląd miesiąca](?path=/docs/ekrany-e03-ile-zostanie-przegląd-miesiąca-month-…--docs) | `/?month=…` | dwa konta, jedno konto, wynik ujemny, miesiąc bez wpisów, ładowanie, błąd kart, błąd listy kont, brak kont, 768 i 320 px, testy: zmiana miesiąca odświeża karty i adres, wybór konta w adresie, wynik ujemny nie tylko kolorem |
+
+To ta sama strona co [Konto z wpisami (E02)](?path=/docs/system-projektowy-epik-e02-zapis-wpływów-i-wydatków--docs): E03 opisuje sekcję kart wyniku, E02 listę wpisów.
+
+## Elementy i wzorce
+
+| Element | Strona |
+|---|---|
+| `AccountRemainderCard` | [AccountRemainderCard](?path=/docs/elementy-produktu-accountremaindercard--docs) |
+| `MonthSwitcher` | [MonthSwitcher](?path=/docs/elementy-produktu-monthswitcher--docs) |
+| `AppShell` | [AppShell](?path=/docs/elementy-produktu-appshell--docs) |
+| Wzorzec przeglądu | [Przegląd miesiąca per konto](?path=/docs/wzorce-przegląd-miesiąca-per-konto--docs) |
+
+## Najważniejsze reguły
+
+- Wynik jest zawsze osobno per konto. Nigdy jednej łącznej liczby (A4, R01.8).
+- Karta pokazuje wpływy, wydatki i wynik; kwota wyniku ma 28 px i wagę 700 (jedyne miejsce z tą wagą).
+- Wynik dodatni ma kolor `--income`, ujemny `--expense`, ale znak i etykieta niosą znaczenie (A3).
+- Aktywne konto ma `aria-pressed` i znacznik tekstowy; karta w stanie błędu nie jest przyciskiem.
+- Każda sekcja ma własne ładowanie i błąd: karty i lista wpisów to osobne żądania, a po zapisie odświeżają się obie.
+- Zmiana miesiąca aktualizuje wszystkie karty i adres.
+
+## Luki
+
+Strona w `packages/app` jeszcze nie istnieje. Karta nie jest linkiem do strony konta: jedna strona, stan w adresie. Gdy karta jest w stanie błędu, konto zmienia się tylko adresem (do decyzji właściciela). Więcej: [Czego brakuje](?path=/docs/system-projektowy-czego-brakuje--docs).

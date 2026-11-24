@@ -1,0 +1,46 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="System projektowy/Start: jak zbudować ekran" />
+
+# System projektowy AITL: start
+
+## Charakter produktu w trzech zdaniach
+
+AITL to praktyczne, czytelne, spokojne i rzeczowe narzędzie, w którym dwie osoby zapisują wpływy i wydatki oraz widzą, ile zostanie w miesiącu, zawsze osobno dla każdego konta bankowego. Wygląd jest stonowany: jasne tło, białe powierzchnie oddzielone ramką, jeden niebieski kolor akcji i prawie bez ruchu. Treść jest po polsku, w trybie rozkazującym, bez ozdobników, a kolor nigdy nie jest jedynym nośnikiem informacji.
+
+Antycharakter: generyczny, korporacyjny lub bankowy, efekciarski, ciasny i nieczytelny, chaotyczny. Źródło: `.ai/specs/design/2026-11-17-referencje.md`.
+
+## Pięć kroków budowy ekranu
+
+1. **Znajdź ekran w specyfikacji i w Storybooku.** Specyfikacje są w `.ai/specs/`. W sekcji "Ekrany" Storybooka sprawdź, czy istnieje podobny ekran, i zacznij od niego. Epiki: [E01](?path=/docs/system-projektowy-epik-e01-dostęp-i-logowanie--docs), [E02](?path=/docs/system-projektowy-epik-e02-zapis-wpływów-i-wydatków--docs), [E03](?path=/docs/system-projektowy-epik-e03-ile-zostanie-w-miesiącu--docs).
+2. **Wybierz elementy.** Najpierw element produktu, potem wzorzec, na końcu element bazowy. Pomocą jest [katalog komponentów](?path=/docs/system-projektowy-komponenty-katalog--docs) i strona [Jak wybrać komponent](?path=/docs/system-projektowy-jak-wybrać-komponent--docs).
+3. **Dobierz tokeny.** Tylko tokeny znaczeniowe (`--card`, `--muted-foreground`, `--space-panel`, ...), nigdy wartości surowe. Zobacz [Fundamenty](?path=/docs/fundamenty-kolory--docs).
+4. **Obsłuż wszystkie stany.** Ładowanie, pusto, błąd, dużo danych, długie teksty i trzy szerokości: 320, 768 i 1440 px. Zasady: [Użycie i dostępność](?path=/docs/system-projektowy-użycie-i-dostępność--docs), [Treść i komunikaty](?path=/docs/system-projektowy-treść-i-komunikaty--docs).
+5. **Sprawdź.** `npm run test:storybook` (dostępność blokuje), `npm run check:tokens`, klawiatura i fokus. Przed zgłoszeniem przeczytaj [Czego unikać](?path=/docs/system-projektowy-czego-unikać--docs). Czego brakuje, opisuje [ta strona](?path=/docs/system-projektowy-czego-brakuje--docs); brakującego komponentu nie wymyślamy.
+
+## Komponenty: czego użyć
+
+| Potrzebujesz | Użyj | Strona |
+|---|---|---|
+| wykonać akcję na stronie | `Button` | [Button](?path=/docs/elementy-bazowe-button--docs) |
+| przejść do innej strony | `TextLink` | [TextLink](?path=/docs/elementy-bazowe-textlink--docs) |
+| pole tekstu, e-mail, hasło, kwota | `Input` w `Field` | [Input](?path=/docs/elementy-bazowe-input--docs), [Label i Field](?path=/docs/elementy-bazowe-label-i-field--docs) |
+| wybrać jedną wartość z listy | `Select` | [Select](?path=/docs/elementy-bazowe-select--docs) |
+| wybrać jedną z kilku opcji | `RadioGroup` | [RadioGroup](?path=/docs/elementy-bazowe-radiogroup--docs) |
+| zaznaczyć niezależną opcję | `Checkbox` | [Checkbox](?path=/docs/elementy-bazowe-checkbox--docs) |
+| pogrupować treść w powierzchnię | `Card` | [Card](?path=/docs/elementy-bazowe-card--docs) |
+| oznaczyć typ konta | `Badge` | [Badge](?path=/docs/elementy-bazowe-badge--docs) |
+| pokazać komunikat w formularzu | `Alert` | [Alert](?path=/docs/elementy-bazowe-alert--docs) |
+| pokazać krótkie potwierdzenie po zapisie | `ToastProvider` i `useToast` | [Toast](?path=/docs/elementy-bazowe-toast--docs) |
+| otworzyć osobną krótką interakcję | `Dialog` | [Dialog](?path=/docs/elementy-bazowe-dialog--docs) |
+| potwierdzić akcję nieodwracalną | `ConfirmDialog` | [ConfirmDialog](?path=/docs/elementy-bazowe-confirmdialog--docs) |
+| udostępnić akcje wiersza | `Menu` | [Menu](?path=/docs/elementy-bazowe-menu--docs) |
+| pokazać ładowanie, pustą sekcję, błąd wczytania | `Skeleton`, `EmptyState`, `ErrorState` | [Skeleton](?path=/docs/elementy-bazowe-skeleton--docs), [EmptyState](?path=/docs/elementy-bazowe-emptystate--docs), [ErrorState](?path=/docs/elementy-bazowe-errorstate--docs) |
+| zbudować ramę strony | `AppShell` | [AppShell](?path=/docs/elementy-produktu-appshell--docs) |
+| zalogować | `LoginForm` | [LoginForm](?path=/docs/elementy-produktu-e01-loginform--docs) |
+| pokazać konta, wynik miesiąca, wpisy | `BankAccountList`, `AccountRemainderCard`, `MonthSwitcher`, `EntryTable` | [katalog](?path=/docs/system-projektowy-komponenty-katalog--docs) |
+| dodać, edytować, usunąć wpis | `EntryForm`, `SeriesActions`, `ConfirmDialog` | [EntryForm](?path=/docs/elementy-produktu-entryform--docs), [SeriesActions](?path=/docs/elementy-produktu-seriesactions--docs) |
+
+## Dla agentów
+
+Skrót zasad w jednym pliku, z oznaczeniem reguł i przykładów, jest w repozytorium: `docs/design-system.md`. Agent budujący ekran czyta go jako pierwszy.

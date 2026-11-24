@@ -14,6 +14,9 @@ const preview: Preview = {
   parameters: {
     a11y: { test: 'error' },
     docs: { toc: true },
+    options: {
+      storySort: { order: ['System projektowy', 'Fundamenty', 'Elementy bazowe', 'Elementy produktu', 'Wzorce', 'Ekrany'] },
+    },
   },
   globalTypes: {
     theme: {

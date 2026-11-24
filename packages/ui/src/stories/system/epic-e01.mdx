@@ -1,0 +1,37 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="System projektowy/Epik E01: Dostęp i logowanie" />
+
+# Epik E01: Dostęp i logowanie
+
+Użytkownik loguje się własnym kontem i widzi swoje konta bankowe: właściciel wspólne i osobiste, żona tylko wspólne. Źródło: `.ai/specs/2026-11-17-auth-and-app-foundation.md`, backlog `.ai/specs/backlog.md` (E01-S01, E01-S02).
+
+## Ekrany
+
+| Ekran | Adres | Co pokazuje |
+|---|---|---|
+| [Logowanie](?path=/docs/ekrany-e01-dostęp-i-logowanie-logowanie-login--docs) | `/login` | formularz, błąd pola, kilka błędów, ładowanie, złe dane, blokada po zbyt wielu próbach, błąd sieci, 768 i 320 px, kolejność fokusu |
+| [Strona główna](?path=/docs/ekrany-e01-dostęp-i-logowanie-strona-główna--docs) | `/` | lista kont: wczytane, tylko wspólne, ładowanie, brak kont, błąd, długa nazwa na 320 px, link "Wyloguj" na tle `--primary` |
+
+## Elementy użyte
+
+| Element | Strona |
+|---|---|
+| `AppShell` | [AppShell](?path=/docs/elementy-produktu-appshell--docs) |
+| `LoginForm` | [LoginForm](?path=/docs/elementy-produktu-e01-loginform--docs) |
+| `BankAccountList` | [BankAccountList](?path=/docs/elementy-produktu-e01-bankaccountlist--docs) |
+| `Field`, `Input`, `Button`, `Alert`, `Badge`, `Card` | [katalog](?path=/docs/system-projektowy-komponenty-katalog--docs) |
+| `ErrorSummary`, `useFormValidation` | [Formularz](?path=/docs/wzorce-formularz--docs) |
+| `EmptyState`, `ErrorState`, `Skeleton` | stany listy kont |
+
+## Najważniejsze reguły
+
+- Błąd logowania nie zdradza, czy zły jest adres, czy hasło: "Nie udało się zalogować. Sprawdź adres e-mail i hasło, a potem spróbuj ponownie."
+- Blokada po zbyt wielu próbach pokazuje czas ("Spróbuj ponownie za 30 sekund") z poprawną polską odmianą (`formatSeconds`).
+- Formularz ma `noValidate`, widoczne etykiety i podsumowanie błędów, które prowadzi do pól.
+- Konto wspólne i osobiste odróżnia tekst plakietki ("Wspólne", "Osobiste"), nie sam kolor.
+- Strona logowania nie ma "pokaż hasło" ani resetu hasła (poza zakresem).
+
+## Luki
+
+Strony w `packages/app` korzystające z tych ekranów jeszcze nie istnieją. Ciemny motyw czeka na L3. Pozostałe luki: [Czego brakuje](?path=/docs/system-projektowy-czego-brakuje--docs).

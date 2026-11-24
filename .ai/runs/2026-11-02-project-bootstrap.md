@@ -187,3 +187,8 @@ Left: issue #14/#15 text updated on GitHub (not part of this commit); implementa
 ## 2026-11-24 (design system, PR T: AppShell and full-page screens)
 Added `AppShell` (banner with "AITL" and an optional "Wyloguj" link, one shared `max-w-240` content column for header and main, texts in `app-shell.messages.ts`) and moved the E01 stories onto it; added the screen stories `screens/e02` (account with entries) and `screens/e03` (month overview) as one page with state in the URL (`?account=&month=`), a state map, and all list/save/delete/series failure states. After deleting an entry focus goes to the list heading.
 Pitfalls: Radix FocusScope overwrote a synchronous `focus()` after the row unmounted (deferred in an effect), money expectations must come from `formatMoneyMinor`, cards under `h1` needed a hidden `h2` for axe, a shared story harness needs `excludeStories`. Todo: owner review; stage 4 (teaching pages, agent file) and stage 5 (real pages in `packages/app`).
+
+## 2026-11-24 (design system, PR U: stage 4 teaching pages and agent file)
+Added eleven Storybook pages under "System projektowy" (start, components catalogue, how to choose, usage and accessibility, content, what to avoid, what is missing, contributing, epics E01 to E03) with a `storySort` order, replaced the old introduction page, wrote `docs/design-system.md` for agents (rules marked REGUŁA, PRZYKŁAD, LUKA) and added a short pointer section to the local `AGENTS.md`; POSTEP.md updated.
+Pitfall: `check:tokens` scans `.mdx`, so docs cannot quote forbidden values literally (hex, palette classes, arbitrary values); link ids were verified against the built `index.json`. Todo: owner review; stage 5 (checks, report, agent test preparation).
+

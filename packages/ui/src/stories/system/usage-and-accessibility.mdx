@@ -1,0 +1,59 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="System projektowy/Użycie i dostępność" />
+
+# Użycie i dostępność
+
+Zasady wspólne dla wszystkich komponentów i ekranów. Szczegóły danego komponentu są na jego stronie, w sekcji "Zachowanie i dostępność".
+
+## Import i kompozycja
+
+- Komponenty importujemy z `@aitl/ui`, np. `import { Button, Field, Input } from '@aitl/ui'`. Nie importujemy z głębokich ścieżek pakietu.
+- Składamy z gotowych elementów: najpierw element produktu, potem wzorzec, potem element bazowy. Nie kopiujemy kodu komponentu do strony.
+- Teksty widoczne dla użytkownika mieszkają w plikach `messages` komponentów i są nadpisywane propsem `messages`. Nie wpisujemy ich na sztywno w stronie.
+- Kwoty zawsze przez `formatMoneyMinor`, a wartości wpisane w polu przez `parseAmountToMinor`.
+
+## Tokeny
+
+- Kolory, odstępy, promienie i rozmiary tekstu pochodzą wyłącznie z tokenów znaczeniowych. Klasy Tailwinda są dostępne tylko dla znaczeń (`bg-card`, `text-muted-foreground`, `rounded-card`, `gap-(--space-panel)`).
+- Domyślna paleta Tailwinda jest wyzerowana. Klasy kolorów z nazwą palety i stopniem, biały i czarny tekst oraz wartości arbitralne w nawiasach kwadratowych nie istnieją, a `npm run check:tokens` kończy się błędem, gdy je znajdzie.
+- Pola formularza leżą na `--card` albo `--form-surface`, nigdy bezpośrednio na `--background` (ramka pola ma tam 2,89:1, poniżej progu 3:1).
+
+## Klawiatura i fokus
+
+- Fokus jest zawsze widoczny: obrys 2 px w kolorze `--ring`, ustawiony globalnie. Nie usuwamy go.
+- Cały interfejs da się obsłużyć klawiaturą. `RadioGroup`: strzałki przenoszą fokus i wybierają, `Tab` wchodzi i wychodzi raz. `Menu`: strzałki i `Enter`. Okna: `Escape` zamyka, fokus wraca do elementu, który je otworzył.
+- Okno otwarte z pozycji menu zwraca fokus do przycisku menu dopiero po jego zamknięciu (patrz lekcja w `.ai/lessons/`).
+- Po usunięciu wiersza fokus idzie na nagłówek listy, w efekcie z `setTimeout(0)`, bo Radix `FocusScope` nadpisuje fokus ustawiony synchronicznie.
+- `ConfirmDialog` ustawia fokus domyślny na "Anuluj", a nie na akcji nieodwracalnej.
+
+## Cele i rozmiary
+
+- Minimalny cel kliknięcia to 24 px (WCAG 2.5.8). Przyciski i pola mają 36 px (`--control-height`). Pole `Checkbox` i `RadioGroup` ma 20 px, ale jego celem jest cała etykieta (36 px).
+- Tekst w polach ma 16 px poniżej 768 px (iOS nie powiększa wtedy strony) i 14 px od 768 px.
+- Układ działa od 320 px: bez poziomego przewijania strony, a długi tekst zawija się (`wrap-anywhere`). Tabela wpisów przewija się wewnątrz własnego, nazwanego i fokusowalnego kontenera.
+
+## Czytnik ekranu i ARIA
+
+- Każde pole ma widoczną etykietę (`Field`). Błąd pola jest pod polem i powiązany przez `aria-describedby` oraz `aria-invalid`. Formularze mają `noValidate`, a błędy zbiera `ErrorSummary`.
+- Pole wymagane oznaczamy przez `aria-required`; opcjonalne tekstem "(opcjonalne)", nie gwiazdką.
+- Ładowanie ogłasza `aria-busy` na kontenerze (bez osobnego `role="status"`). Błąd dynamiczny ogłasza `ErrorState` z `announce`. `Alert` `neutral` ma `role="status"`, `error` ma `role="alert"`. `Toast` ogłasza `polite` albo `assertive`.
+- Ikona bez tekstu (`Button` `size="icon"`) wymaga `aria-label`. Ikony dekoracyjne mają `aria-hidden`.
+- Nagłówki mają poprawną hierarchię: pod `h1` najpierw `h2`. Karty z tytułami `h3` pod `h1` wymagają ukrytego `h2` sekcji (inaczej axe zgłasza `heading-order`).
+- Aktywne konto na karcie wyniku ma `aria-pressed` i znacznik tekstowy.
+
+## Kolor i kontrast
+
+- Tekst ma kontrast co najmniej 4,5:1, elementy interfejsu co najmniej 3:1. Tabela kontrastu liczona z tokenów jest na stronie [Kolory](?path=/docs/fundamenty-kolory--docs).
+- Kolor nigdy nie jest jedynym nośnikiem: kwota ma znak "+" lub "-", wynik ma etykietę, aktywne konto ma znacznik, błąd ma tekst.
+- Wyjątek świadomy: `--border` (1,47:1 na bieli) i `Skeleton` to dekoracja, nie nośnik informacji.
+- Ciemny motyw nie ma jeszcze wartości (L3): przełącznik istnieje, ale wygląda jak jasny. Patrz [Motyw](?path=/docs/fundamenty-motyw--docs).
+
+## Ruch
+
+Prawie bez ruchu: hover (150 ms) i potwierdzenie po zapisie. Reguła `prefers-reduced-motion: reduce` zeruje czasy przejść i animacji. `Skeleton` jest statyczny.
+
+## Testy dostępności
+
+- Każda story przechodzi axe bez naruszeń (`a11y: { test: 'error' }`). Wyjątek wymaga opisu na stronie komponentu.
+- Uruchomienie: `npm run test:storybook` z korzenia repozytorium. W CI to osobny, wymagany job.

@@ -48,6 +48,10 @@ Nowy komponent wielokrotnego użytku ma jedno miejsce: prymityw shadcn w `ui/src
 - Poprawka błędu i zmiana zachowania wymagają testu regresyjnego, który pada bez zmiany.
 - Przed prośbą o review: `npm run typecheck`, `npm run lint`, `npm run test:coverage`, `npm run build` oraz `npm audit --omit=dev --audit-level=high`.
 
+### System projektowy (`packages/ui`)
+
+Przed zbudowaniem lub zmianą ekranu lub komponentu przeczytaj `docs/design-system.md`: charakter produktu, tabela komponentów (import, kiedy, kiedy nie), tokeny znaczeniowe, przewodniki "jeśli... to...", lista rzeczy do uniknięcia i komendy Storybooka. Reguły są tam oznaczone **[REGUŁA]**, przykłady **[PRZYKŁAD]**, a brak odpowiedzi systemu **[LUKA]**: luki zgłaszasz userowi zamiast zgadywać. Pełna dokumentacja jest w Storybooku (`npm run storybook --workspace @aitl/ui`), a decyzje i postęp w `packages/ui/POSTEP.md`.
+
 ## Workflow git
 
 - Gałąź `main` jest chroniona na GitHubie: zmiany wchodzą wyłącznie przez PR, z zielonymi checkami (Build, Lint, Unit tests, Integration tests, Storybook tests, Check tokens) i aktualną gałęzią. Bezpośredni push na `main` jest zablokowany (także dla administratorów), force-push i usuwanie zabronione.

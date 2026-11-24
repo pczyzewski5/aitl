@@ -1,0 +1,67 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="System projektowy/Współtworzenie" />
+
+# Współtworzenie
+
+Jak dodać lub zmienić element systemu. Zasada nadrzędna: **najpierw potrzeba z ekranu, potem komponent**. Niczego nie budujemy "na zapas" (stąd brak `Textarea` i `Tabs`).
+
+## Gdzie co leży
+
+| Co | Gdzie |
+|---|---|
+| Tokeny (surowe, znaczenia, komponentów) | `packages/ui/src/tokens.css`; mapowanie na Tailwinda w `packages/ui/src/styles.css` |
+| Źródło i uzasadnienie tokenów | `.ai/specs/design/2026-11-17-tokeny.md` |
+| Referencje, antyreferencje, luki | `.ai/specs/design/2026-11-17-referencje.md` |
+| Element bazowy | `packages/ui/src/components/ui/<nazwa>.tsx` (prymitywy shadcn tylko przez `npx shadcn@latest add`, potem dopasowane do tokenów) |
+| Element produktu | `packages/ui/src/components/<koncept>/` |
+| Wzorzec i helpery formularza | `packages/ui/src/backend/` |
+| Ekran | `packages/ui/src/screens/<epik>/` |
+| Strony systemowe (te, które czytasz) | `packages/ui/src/stories/system/` |
+| Postęp, decyzje, notatki z PR-ów | `packages/ui/POSTEP.md` |
+| Skrót dla agentów | `docs/design-system.md` |
+
+## Dodanie komponentu
+
+1. Sprawdź, czy ekran z backlogu go wymaga i czy nie da się złożyć z istniejących elementów ([Jak wybrać komponent](?path=/docs/system-projektowy-jak-wybrać-komponent--docs)). Brak potrzeby oznacza wpis w [Czego brakuje](?path=/docs/system-projektowy-czego-brakuje--docs), nie komponent.
+2. Zbuduj komponent wyłącznie z tokenów znaczeniowych. Nowy token, nowa zależność albo nowy wariant to propozycja: opisz ją w PR i zapisz po decyzji właściciela w pliku tokenów (z pochodzeniem i policzonym kontrastem).
+3. Teksty widoczne dla użytkownika trafiają do pliku `<nazwa>.messages.ts` i są nadpisywane propsem `messages`.
+4. Napisz testy jednostkowe `*.test.tsx` obok kodu. Pokrycie musi wynosić 100% (statements, branches, functions, lines), bez wyłączania plików.
+5. Napisz `<nazwa>.stories.tsx`: `Playground`, warianty i rozmiary, macierz stanów (hover i fokus jako zamrożony podgląd przez `data-preview-state`), długi tekst i 320 px oraz test interakcji w `play`. Story, która nie jest scenariuszem (wspólny harness), idzie do `excludeStories`.
+6. Napisz stronę `<nazwa>.mdx` po polsku z sekcjami: do czego służy, kiedy używać, kiedy nie, anatomia, warianty, stany, zachowanie i dostępność, treść, responsywność (320, 768, 1440 px), API, kod, dobrze i źle, powiązane oraz "Czego brakuje".
+7. Wyeksportuj komponent i jego typy na końcu `packages/ui/src/index.ts`.
+8. Dopisz element do [katalogu](?path=/docs/system-projektowy-komponenty-katalog--docs), do `docs/design-system.md` i, jeśli trzeba, do tabel [Jak wybrać komponent](?path=/docs/system-projektowy-jak-wybrać-komponent--docs).
+
+## Zmiana tokenu
+
+1. Zmień wartość w `tokens.css`, nigdy surową wartość w komponencie.
+2. Przelicz kontrast WCAG przed zapisem (strona [Kolory](?path=/docs/fundamenty-kolory--docs) liczy go z tokenów, a test `contrast-pairs.test.ts` pilnuje par).
+3. Zaktualizuj `.ai/specs/design/2026-11-17-tokeny.md` (pochodzenie, użycie, kontrast).
+
+## Zasady kodu
+
+- TypeScript bez `any` bez uzasadnienia; bez komentarzy w kodzie, martwego kodu i `console.log`.
+- Brak magicznych liczb i napisów: stałe nazwane, teksty w `messages`.
+- `packages/ui` nie importuje `@aitl/*` ani Next.js.
+- Dostępność: każda story przechodzi axe (`a11y: { test: 'error' }`).
+
+## Sprawdzenia przed PR
+
+Z korzenia repozytorium:
+
+```bash
+npm run typecheck
+npm run lint
+npm run test:coverage
+npm run build
+npm run build-storybook
+npm run test:storybook
+npm run check:tokens
+npm audit --omit=dev --audit-level=high
+```
+
+## Dziennik i lekcje
+
+- Każdy commit zadania dopisuje wpis do dziennika w `.ai/runs/` (nie zmieniamy wcześniejszych wpisów).
+- Napotkana pułapka to lekcja w `.ai/lessons/` plus linia w `.ai/lessons.md`.
+- Zmiany wchodzą wyłącznie przez PR z zielonymi checkami; gałąź `feature/<opis>`.
