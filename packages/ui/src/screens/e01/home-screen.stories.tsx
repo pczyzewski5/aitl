@@ -10,6 +10,7 @@ const MOBILE_VIEWPORT = { value: 'mobile1', isRotated: false };
 const TABLET_VIEWPORT = { value: 'tablet', isRotated: false };
 const PRODUCT_NAME = 'AITL';
 const LOGOUT_LABEL = 'Wyloguj';
+const DISPLAY_NAME = 'Jan Kowalski (przykład)';
 
 const SHARED_ACCOUNT: BankAccountListItem = { id: 'a1', name: 'Konto wspólne (przykład)', type: 'shared', href: '#konto-wspolne' };
 const PERSONAL_ACCOUNT: BankAccountListItem = { id: 'a2', name: 'Konto osobiste Pawła (przykład)', type: 'personal', href: '#konto-osobiste' };
@@ -32,7 +33,7 @@ function preventNavigationOnLink(event: MouseEvent<HTMLElement>): void {
 
 function HomeScreen({ status, accounts, retrying, emptyAction, onRetry }: HomeScreenProps) {
   return (
-    <AppShell logoutHref="#wyloguj" onClickCapture={preventNavigationOnLink}>
+    <AppShell displayName={DISPLAY_NAME} onLogout={fn()} onClickCapture={preventNavigationOnLink}>
       <BankAccountList
         status={status}
         accounts={accounts}
@@ -62,7 +63,7 @@ export const Loaded: Story = {
     const canvas = within(canvasElement);
 
     await expect(canvas.getByRole('banner')).toHaveTextContent(PRODUCT_NAME);
-    await expect(within(canvas.getByRole('banner')).getByRole('link', { name: LOGOUT_LABEL })).toBeVisible();
+    await expect(within(canvas.getByRole('banner')).getByRole('button', { name: LOGOUT_LABEL })).toBeVisible();
     await expect(canvas.getByRole('main')).toBeVisible();
     await expect(canvas.getByRole('heading', { level: 1, name: 'Twoje konta bankowe' })).toBeVisible();
     await expect(within(canvas.getByRole('list')).getAllByRole('listitem')).toHaveLength(2);
@@ -140,10 +141,12 @@ export const NarrowScreenLongName: Story = {
 };
 
 export const HeaderLinkOnPrimary: Story = {
-  name: 'Test: link "Wyloguj" na pasku --primary ma kolor --primary-foreground i cel co najmniej 24 px',
+  name: 'Test: przycisk "Wyloguj" na pasku --primary ma kolor --primary-foreground i cel co najmniej 24 px; pasek pokazuje nazwę użytkownika',
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const link = canvas.getByRole('link', { name: LOGOUT_LABEL });
+    const link = canvas.getByRole('button', { name: LOGOUT_LABEL });
+
+    await expect(canvas.getByRole('banner')).toHaveTextContent(DISPLAY_NAME);
 
     const styles = getComputedStyle(link);
 
@@ -159,7 +162,7 @@ export const FocusOrder: Story = {
     const canvas = within(canvasElement);
 
     await userEvent.tab();
-    await expect(canvas.getByRole('link', { name: LOGOUT_LABEL })).toHaveFocus();
+    await expect(canvas.getByRole('button', { name: LOGOUT_LABEL })).toHaveFocus();
     await userEvent.tab();
     await expect(canvas.getByRole('link', { name: 'Konto wspólne (przykład)' })).toHaveFocus();
     await userEvent.tab();

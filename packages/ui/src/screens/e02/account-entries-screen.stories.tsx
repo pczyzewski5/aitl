@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { type MouseEvent, useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { AccountRemainderCard, type AccountType } from '../../components/bank-accounts/account-remainder-card';
 import type { EntryActionResult } from '../../components/entries/entry-failure';
@@ -30,6 +30,7 @@ const MONTH_PARAM = 'month';
 const ADD_ENTRY_LABEL = 'Dodaj wpis';
 const MENU_TRIGGER = /^Akcje wpisu/;
 const PAGE_TITLE = 'Ile zostanie w miesiącu';
+const DISPLAY_NAME = 'Jan Kowalski (przykład)';
 const NO_ACCOUNTS_TITLE = 'Nie masz dostępu do żadnego konta bankowego';
 const NO_ACCOUNTS_DESCRIPTION = 'Poproś właściciela konta o dostęp, a potem odśwież stronę.';
 const ACCOUNTS_ERROR_TITLE = 'Nie udało się wczytać kont bankowych';
@@ -417,7 +418,7 @@ function MonthPageContent({ overview = 'ready', list = 'ready', initialSearch = 
   };
 
   return (
-    <AppShell logoutHref="#wyloguj" onClickCapture={preventNavigationOnLink}>
+    <AppShell displayName={DISPLAY_NAME} onLogout={fn()}>
       <div className="flex flex-col gap-(--space-between-groups)">
         <h1 className="text-2xl font-semibold leading-base">{PAGE_TITLE}</h1>
         <MonthSwitcher month={month} onMonthChange={(next) => navigate({ accountId: selected?.id, month: next })} min={MIN_MONTH} max={MAX_MONTH} />
@@ -461,12 +462,6 @@ function MonthPageContent({ overview = 'ready', list = 'ready', initialSearch = 
       />
     </AppShell>
   );
-}
-
-function preventNavigationOnLink(event: MouseEvent<HTMLElement>): void {
-  if ((event.target as HTMLElement).closest('a')) {
-    event.preventDefault();
-  }
 }
 
 function MonthPage(props: MonthPageProps) {
@@ -854,14 +849,15 @@ export const PaidFlagNeverChangesTheSums: Story = {
 };
 
 export const OnePageFrame: Story = {
-  name: 'Test: jedna rama strony: jeden pasek, jeden obszar główny, jeden h1 i jeden link (Wyloguj)',
+  name: 'Test: jedna rama strony: jeden pasek, jeden obszar główny, jeden h1 i jeden przycisk Wyloguj',
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
     await expect(canvas.getAllByRole('banner')).toHaveLength(1);
     await expect(canvas.getAllByRole('main')).toHaveLength(1);
     await expect(canvas.getAllByRole('heading', { level: 1 })).toHaveLength(1);
-    await expect(canvas.getAllByRole('link')).toHaveLength(1);
+    await expect(canvas.queryAllByRole('link')).toHaveLength(0);
+    await expect(canvas.getAllByRole('button', { name: 'Wyloguj' })).toHaveLength(1);
   },
 };
 
@@ -871,7 +867,7 @@ export const FocusOrder: Story = {
     const canvas = within(canvasElement);
 
     await userEvent.tab();
-    await expect(canvas.getByRole('link', { name: 'Wyloguj' })).toHaveFocus();
+    await expect(canvas.getByRole('button', { name: 'Wyloguj' })).toHaveFocus();
     await userEvent.tab();
     await expect(canvas.getByRole('button', { name: 'Poprzedni miesiąc' })).toHaveFocus();
     await userEvent.tab();

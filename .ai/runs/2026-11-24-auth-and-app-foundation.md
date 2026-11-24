@@ -76,3 +76,7 @@ Do zrobienia: krok 2.1 (`core/http/auth.ts`, błędy, walidator).
 Dodane `core/http/auth.ts` (porty `SessionResolver`/`BankAccountMembershipLookup`, `requireSession`, `assertMemberOfBankAccount`, fail-closed: odpowiedz inna niz `true` -> 403), `InvalidCredentialsError`, `TooManyRequestsError`, `Retry-After` i `retryAfterSeconds` w `apiHandler`, `loginSchema` (e-mail trim + lower-case). Unity 100% pokrycia, SB-A zielone.
 Decyzja: bledy resolvera/lookupu propaguja sie (500, dostep nie przyznany) zamiast mapowania na 403, bo spec wymaga 500 przy niedostepnej bazie.
 Do zrobienia: PR, wiersz PR-4 w track.md.
+
+## 2026-11-24 (PR-10a, krok 2.6a, commit 1)
+Gałąź `feature/ui-appshell-loginform` z `origin/feature/core-auth-primitives` (zależność od PR #70). `AppShell`: `logoutHref` zastąpione przez `onLogout` (przycisk wyglądający jak link, Q24) i `displayName` (Q25); stories i dokumentacja ekranów E01/E02 przepięte, stories testują przycisk, klawiaturę i długą nazwę na 320 px.
+Do zrobienia: LoginForm (500, fokus), `apiCall`, `LoadingMessage`, stan pusty, `docs/design-system.md`, PR.
