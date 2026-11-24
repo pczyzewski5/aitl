@@ -153,6 +153,10 @@ Do zrobienia: PR, wiersz PR-7 w track.md, zielone checki.
 PR #77 (base `main`, leży na stosie #73, #70, #72, #75); wiersz PR-7 w track.md (in-progress, wynik SB-I).
 Do zrobienia: zielone checki, merge po #73/#70/#72/#75, SHA w track.md.
 
+## 2026-11-24 (PR-7, sprzątanie snapshotu migracji)
+Usunięty przypadkowo wersjonowany `.snapshot-migrations_<hash>.json` (artefakt testów integracyjnych) i dodany wzorzec do `.gitignore`; `.snapshot-aitl.json` zostaje.
+Do zrobienia: nic w tym zakresie.
+
 ## 2026-11-24 (PR-8, krok 2.4b, commit 1)
 Baza: stos #73, #70, #72, #75, #77 (gałąź `feature/login-throttle-accounts-api` z `feature/auth-session-login`). Rdzeń throttla w `core`: port `LoginThrottleRepository`, `LoginThrottleService` (dwa liczniki: adres+e-mail próg 5, sam e-mail próg 20; okno i blokada 15 min; klucze to HMAC z domeną `throttle:`), `resolveClientIp` (`TRUSTED_PROXY_HOPS`: 0 ignoruje `X-Forwarded-For`, N bierze wpis N-ty od prawej), env `TRUSTED_PROXY_HOPS` (nieobecne w `.env.example`, bo pusta wartość nie przeszłaby walidacji), repozytorium w pamięci i unity z fałszywym zegarem.
 Do zrobienia: adapter `ON CONFLICT`, `AuthService.login`, route, API kont, BACKWARD_COMPATIBILITY.
