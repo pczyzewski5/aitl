@@ -84,6 +84,7 @@ describe('EntryTable', () => {
 
     expect(actual.getAttribute('tabindex')).toBe('0');
     expect(actual.className).toContain('overflow-x-auto');
+    expect(actual.className).toContain('relative');
     expect(actual.getAttribute('aria-describedby')).toBe(hint.id);
     expect(hint.className).toContain('@xl:hidden');
   });

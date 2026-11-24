@@ -105,7 +105,7 @@ function EntryTable({
             aria-labelledby={captionId}
             aria-describedby={hintId}
             tabIndex={0}
-            className="max-w-full overflow-x-auto rounded-card border border-border bg-card"
+            className="relative max-w-full overflow-x-auto rounded-card border border-border bg-card"
           >
             <table data-slot="entry-table-table" className="w-full min-w-xl border-collapse text-sm leading-base">
               <caption id={captionId} className={captionVisible ? 'p-(--space-panel) text-left text-base font-semibold' : 'sr-only'}>
