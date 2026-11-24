@@ -5,7 +5,7 @@ Cele:
 - PR B: konfiguracja sandboxa w `.claude/settings.json` (domeny sieciowe, odczyt plików, wyjątki), do ręcznej weryfikacji przez właściciela
 
 Spec: brak
-Status: in-progress
+Status: done
 
 ---
 
@@ -18,3 +18,7 @@ Do zrobienia: właściciel włącza "Require review from Code Owners" w ochronie
 Dodane: blok `sandbox` w `.claude/settings.json` (denyRead, allowedDomains github/api.github/npm, deniedDomains metadanych, `allowLocalBinding`, `excludedCommands: ["docker"]`) i sekcja o sandboxie w `docs/security-notes.md`.
 Pułapka: zachowania sandboxa nie da się zweryfikować z subagenta; PR ma etykietę `needs-qa` i listę kontrolną. Gałąź B jest oparta o gałąź A (PR A musi wejść pierwszy).
 Do zrobienia: ręczny test właściciela (curl/git clone/npm/cat ~/.ssh oraz `npm run test:integration`).
+
+## 2026-11-24 (zamknięcie zadania)
+PR #84 i #85 zmergowane do `main`. Status `done`.
+Do zrobienia przez właściciela: skan `~/.claude/projects/` z rotacją, menedżer sekretów, testy z laboratorium, test ręczny sandboxa, "Require review from Code Owners".
