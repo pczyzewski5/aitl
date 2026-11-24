@@ -2,6 +2,7 @@ export const packageName = '@aitl/ui';
 
 export { Alert, AlertDescription, AlertTitle, alertVariants, type AlertProps, type AlertVariant } from './components/ui/alert';
 export { apiCall, type ApiCallOptions, type ApiCallResult, type ApiErrorBody, type ApiFieldErrors, type ApiMethod } from './backend/api/apiCall';
+export { DEFAULT_LOADING_MESSAGE, LoadingMessage, type LoadingMessageProps } from './backend/feedback/loading-message';
 export { ErrorSummary, type ErrorSummaryItem, type ErrorSummaryProps } from './backend/forms/error-summary';
 export { type AmountFailureReason, type AmountParseResult, parseAmountToMinor } from './backend/forms/parse-amount';
 export {
@@ -55,6 +56,7 @@ export {
   type BankAccountListStatus,
   type BankAccountType,
 } from './components/bank-accounts/bank-account-list';
+export { ACCOUNT_QUERY_PARAM, buildAccountHref } from './components/bank-accounts/account-href';
 export { DEFAULT_BANK_ACCOUNT_LIST_MESSAGES, type BankAccountListMessages } from './components/bank-accounts/messages';
 export { formatMoneyMinor, type FormatMoneyOptions, type MoneySign } from './lib/format-money-minor';
 export {

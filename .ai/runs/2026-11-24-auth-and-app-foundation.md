@@ -88,3 +88,7 @@ Do zrobienia: `apiCall`, `LoadingMessage`, stan pusty (Q35), `docs/design-system
 ## 2026-11-24 (PR-10a, krok 2.6a, commit 3)
 `ui/backend/api/apiCall.ts`: jedyny `fetch` do `/api/*`, zawsze `X-Requested-With: aitl`, wynik `ok` / `api-error` / `invalid-response` / `network` (nigdy nie rzuca z powodu sieci ani niepoprawnego JSON; ścieżka spoza `/api/` rzuca `TypeError`). Testy 100%, strona `Wzorce/Wywołania API`, przykład adaptera w `login-form.mdx`.
 Do zrobienia: `LoadingMessage`, stan pusty (Q35), `docs/design-system.md`, PR.
+
+## 2026-11-24 (PR-10a, krok 2.6a, commit 4)
+Feedback bez duplikatów: `EmptyState` i `ErrorState` zostają w `components/ui/`, dodany tylko `LoadingMessage` (`ui/backend/feedback`, `role="status"`). Stan pusty listy kont: opis "Skontaktuj się z administratorem aplikacji." (Q35). Helper `buildAccountHref` (`/?account=<id>`, Q26) wyeksportowany z `@aitl/ui`.
+Do zrobienia: `docs/design-system.md`, AGENTS.md (miejsce feedback), POSTEP.md, track.md, PR.

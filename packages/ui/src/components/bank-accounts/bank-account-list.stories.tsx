@@ -134,7 +134,7 @@ export const Empty: Story = {
     const canvas = within(canvasElement);
 
     await expect(canvas.getByRole('heading', { level: 3, name: 'Nie masz jeszcze żadnego konta bankowego' })).toBeVisible();
-    await expect(canvas.getByText('Gdy konto zostanie Ci przypisane, zobaczysz je tutaj.')).toBeVisible();
+    await expect(canvas.getByText('Skontaktuj się z administratorem aplikacji.')).toBeVisible();
     await expect(canvas.queryByRole('button')).toBeNull();
     await expect(canvas.queryByRole('list')).toBeNull();
   },
