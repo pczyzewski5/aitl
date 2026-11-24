@@ -3,8 +3,9 @@ import { GET } from './route';
 
 describe('GET /api/health', () => {
   it('reports the application as up', async () => {
-    const actual = await GET().json();
+    const actual = await GET(new Request('http://localhost/api/health'));
 
-    expect(actual).toEqual({ ok: true, data: { status: 'up' } });
+    expect(actual.status).toBe(200);
+    expect(await actual.json()).toEqual({ ok: true, data: { status: 'up' } });
   });
 });
