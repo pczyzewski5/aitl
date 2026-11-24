@@ -95,3 +95,12 @@ Do zrobienia: dopisy w specu i BACKWARD_COMPATIBILITY.md.
 ## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 7)
 Spec: dopisane Q36-Q38 (fail-fast bez zakończenia procesu, 200 przy sukcesie i plan na 201/Retry-After, `params` w handlerze); `BACKWARD_COMPATIBILITY.md` §2 opisuje kod `internal` (500). Istniejące decyzje bez zmian.
 Świadomie odłożone: cache ORM po zmianie URL, `orm.close()`, zmiana `serverExternalPackages`.
+
+## 2026-11-24 (PR-4, krok 2.0)
+Standardy: JWT zastąpione sesją serwerową (token >= 32 B, HMAC w DB, 30 dni przesuwne + 90 dni twardy limit), argon2id, `requireRole` usunięte (Q7), koncepty `auth`, `bank-accounts`, `users`; poprawione też AGENTS.md i CODE_REVIEW.md. Bez kodu.
+Do zrobienia: krok 2.1 (`core/http/auth.ts`, błędy, walidator).
+
+## 2026-11-24 (PR-4, krok 2.1)
+Dodane `core/http/auth.ts` (porty `SessionResolver`/`BankAccountMembershipLookup`, `requireSession`, `assertMemberOfBankAccount`, fail-closed: odpowiedz inna niz `true` -> 403), `InvalidCredentialsError`, `TooManyRequestsError`, `Retry-After` i `retryAfterSeconds` w `apiHandler`, `loginSchema` (e-mail trim + lower-case). Unity 100% pokrycia, SB-A zielone.
+Decyzja: bledy resolvera/lookupu propaguja sie (500, dostep nie przyznany) zamiast mapowania na 403, bo spec wymaga 500 przy niedostepnej bazie.
+Do zrobienia: PR, wiersz PR-4 w track.md.
