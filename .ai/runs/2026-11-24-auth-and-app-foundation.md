@@ -166,3 +166,7 @@ Do zrobienia: API kont, BACKWARD_COMPATIBILITY, SB-I, PR.
 `GET /api/bank-accounts` (lista w kolejności z Q26: wspólne przed osobistymi, potem po nazwie) i `GET /api/bank-accounts/{id}` (wzorzec: `requireSession` -> `assertMemberOfBankAccount` -> odczyt; Q20), `BankAccountService.getSummary`, schemat `bankAccountIdSchema` (UUID; nie-UUID -> 400). Nie-członek i nieistniejące konto dają identyczne 403, więc nie ma wycieku istnienia; 401 wyprzedza walidację id. Spec nie przewiduje `GET /api/auth/session`, więc go nie dodano.
 Pułapka: pliki route Next nie mogą eksportować stałych (stąd komunikat id w `core`); test integracyjny zostawia `.snapshot-migrations_*.json` (lekcja).
 Do zrobienia: BACKWARD_COMPATIBILITY, SB-I, PR, track.md.
+
+## 2026-11-24 (PR-8, krok 2.4b, commit 4)
+SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit 0 podatności, integracyjne 12 plików/78 testów; testy throttla uruchomione trzykrotnie bez flaky). Wiersz PR-8 w track.md.
+Do zrobienia: PR (base main, stos #73, #70, #72, #75, #77), zielone checki, merge po stosie, SHA w track.md.
