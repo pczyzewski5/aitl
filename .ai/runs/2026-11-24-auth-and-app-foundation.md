@@ -96,3 +96,7 @@ Do zrobienia: `docs/design-system.md`, AGENTS.md (miejsce feedback), POSTEP.md, 
 ## 2026-11-24 (PR-10a, krok 2.6a, commit 5)
 Dokumentacja: `docs/design-system.md` (AppShell, LoginForm, LoadingMessage, `apiCall`, `buildAccountHref`, reguły błędów, fokusu i stanu pustego), `AGENTS.md` (feedback: tylko `LoadingMessage`, bez dublowania `EmptyState`/`ErrorState`), `POSTEP.md`. SB-A + SB-U zielone lokalnie (typecheck, lint, coverage 100%, build, audit, test:storybook 619/619, check:tokens, build-storybook).
 Do zrobienia: PR, wiersz PR-10a w track.md, zielone checki.
+
+## 2026-11-24 (PR-10a, krok 2.6a, commit 6)
+PR #74 (base `feature/core-auth-primitives`, bo #70 niezmergowany; CI odpala się na dowolnej bazie); wiersz PR-10a w track.md (in-progress, wynik SB).
+Do zrobienia: zielone checki, po merge #70 przestawić bazę na `main`, merge, SHA w track.md.
