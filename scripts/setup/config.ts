@@ -11,3 +11,6 @@ export const INSTALLED_LOCKFILE = 'node_modules/.package-lock.json';
 export const APPLIED_MIGRATION_MARKER = "Applied '";
 export const CREDENTIALS_REJECTED_MARKERS = ['password authentication failed', 'role "aitl" does not exist'];
 export const DEV_COMMAND = 'npm run dev -w @aitl/app';
+export const SEED_PASSWORD_VARIABLE = 'SEED_PASSWORD';
+export const SEED_COMMAND = 'npm run seed:user -- --email <e-mail> --name <nazwa>';
+export const SEED_SHARED_ONLY_FLAG = '--shared-only';

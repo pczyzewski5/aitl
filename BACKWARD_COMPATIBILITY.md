@@ -43,6 +43,7 @@ Powierzchnia: zmienne środowiskowe w `.env.example` (`DATABASE_URL`, `SESSION_S
 - Plik `.env` leży w korzeniu repozytorium; `packages/app/next.config.ts` ładuje go przez `@next/env` (zmienne z procesu mają pierwszeństwo). `.env` w `packages/app` nie jest czytany.
 - **Zmiana łamiąca**: usunięcie lub zmiana nazwy zmiennej, zmiana jej formatu, dodanie nowej wymaganej zmiennej bez wartości domyślnej.
 - **Wymagana ścieżka**: nowa wymagana zmienna trafia do `.env.example`, a PR opisuje, co operator musi ustawić przed wdrożeniem; zmiana nazwy przez okres, w którym działa stara i nowa nazwa, z ostrzeżeniem o przestarzałej. Aplikacja musi się zbudować i wystartować bez dostępnej bazy.
+- `SEED_PASSWORD` (puste w `.env.example`) jest czytane wyłącznie przez komendę `npm run seed:user`, nie przez aplikację; kontrakt komendy to opcje `--email`, `--name`, `--shared-only`, `--shared-account-name`, `--personal-account-name` oraz kody wyjścia 0 (sukces), 1 (istniejący użytkownik z innym hasłem), 2 (błędne dane wejściowe), więc ich zmiana jest zmianą łamiącą dla skryptów operatora.
 
 ## 4. API pakietów wewnętrznych (`@aitl/*`)
 

@@ -1,4 +1,4 @@
-import { DEV_COMMAND, ENV_FILE } from './config.ts';
+import { DEV_COMMAND, ENV_FILE, SEED_COMMAND, SEED_PASSWORD_VARIABLE, SEED_SHARED_ONLY_FLAG } from './config.ts';
 import {
   applyMigrations,
   checkPrerequisites,
@@ -14,8 +14,8 @@ export const formatNextSteps = (): string =>
   [
     '',
     'Następne kroki:',
-    `  1. Uzupełnij w ${ENV_FILE} wartości sekretów (SESSION_SECRET oraz hasło konta seedowego), gdy pojawią się w .env.example.`,
-    '  2. Seed konta użytkownika: komenda pojawi się wraz z seedem.',
+    `  1. Uzupełnij w ${ENV_FILE} wartości sekretów: ${SEED_PASSWORD_VARIABLE} (hasło konta, min. 8 znaków) oraz pozostałe puste zmienne z .env.example. Instalator nie generuje sekretów.`,
+    `  2. Utwórz konto użytkownika: ${SEED_COMMAND} (hasło z ${SEED_PASSWORD_VARIABLE}). Dla drugiej osoby dodaj ${SEED_SHARED_ONLY_FLAG}. Instalator sam nie uruchamia seeda.`,
     `  3. Uruchom aplikację: ${DEV_COMMAND}`,
     '',
   ].join('\n');

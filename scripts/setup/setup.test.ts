@@ -316,6 +316,16 @@ describe('applyMigrations', () => {
   });
 });
 
+describe('formatNextSteps', () => {
+  it('points to the seed command and the password variable without running or generating anything', () => {
+    const actual = formatNextSteps();
+
+    expect(actual).toContain('npm run seed:user -- --email <e-mail> --name <nazwa>');
+    expect(actual).toContain('SEED_PASSWORD');
+    expect(actual).toContain('--shared-only');
+  });
+});
+
 describe('runSetup', () => {
   it('sets up a fresh clone and prints next steps', async () => {
     const { dependencies, commands, out, copies } = createFake(freshWorld());
