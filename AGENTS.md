@@ -60,7 +60,7 @@ Przed zbudowaniem lub zmianą ekranu lub komponentu przeczytaj `docs/design-syst
 
 ## Baza danych (lokalnie)
 
-- `docker compose up -d postgres` startuje PostgreSQL, a `.env` (kopia `.env.example`, ignorowany przez git) przekazuje `DATABASE_URL`.
+- `docker compose up -d postgres` startuje PostgreSQL, a `.env` w korzeniu repo (kopia `.env.example`, ignorowany przez git, ładowany w `packages/app/next.config.ts` przez `@next/env`) przekazuje `DATABASE_URL` i `SESSION_SECRET` (>= 32 znaki, losowy).
 - Migracje: `npm run migration:create|migration:up|migration:down -w @aitl/db`. Pliki migracji są generowane do `packages/db/migrations` (poza `src`, więc poza progiem pokrycia); ich poprawność sprawdza test integracyjny `tests/integration/migrations.test.ts`.
 
 ## Testy i CI

@@ -16,7 +16,7 @@ Powierzchnia: `packages/db/migrations/` (np. `Migration20261102112044_initial.ts
 
 ## 2. Powierzchnia HTTP (`/api/*`)
 
-Powierzchnia: route w `packages/app/src/app/api/<concept>/route.ts` (obecnie `GET /api/health`), koperta odpowiedzi z `packages/core/src/http/`.
+Powierzchnia: route w `packages/app/src/app/api/<concept>/route.ts` (obecnie `GET /api/health`, `POST /api/auth/login`, `POST /api/auth/logout`), koperta odpowiedzi z `packages/core/src/http/`.
 
 - Kształt koperty to kontrakt: `{ ok: true, data }` oraz `{ ok: false, error: { code, message, fieldErrors? } }`. Przykład: `GET /api/health` zwraca `{ ok: true, data: { status: 'up' } }`.
 - Kody statusu i kody błędów (`error.code`) mapowane z hierarchii `AppError` są częścią kontraktu.
@@ -24,12 +24,18 @@ Powierzchnia: route w `packages/app/src/app/api/<concept>/route.ts` (obecnie `GE
 - **Zmiana zgodna**: nowa route, nowe opcjonalne pole żądania, nowe pole odpowiedzi, nowy kod błędu dla nowego przypadku.
 - **Wymagana ścieżka**: dla zmiany łamiącej najpierw wprowadź nową wersję obok starej (nowa route lub nowe pole), oznacz starą jako przestarzałą w opisie PR-a i zachowaj ją co najmniej do momentu, gdy wszyscy konsumenci w repozytorium (`packages/ui/src/backend/api`, strony w `packages/app`) przejdą na nową; usunięcie starej w osobnym PR-ze. Klient (`apiCall`) i serwer (`apiHandler`) deklarują własne typy koperty, więc zmiana kształtu wymaga równoległej zmiany po obu stronach.
 - Dane użytkownika zwracane z API nie mogą ujawniać sekretów, haszy haseł ani stack trace.
+- `POST /api/auth/login` (publiczna, wymaga nagłówka CSRF): żądanie `{ email, password }` (e-mail jest przycinany i zamieniany na małe litery po stronie serwera), odpowiedź 200 `{ ok: true, data: { user: { id, email, displayName } } }` i cookie sesji; błędy: 400 `validation_error` (z `fieldErrors`), 401 `invalid_credentials` (ten sam status, kod i komunikat dla nieznanego e-maila i złego hasła), 403 `forbidden` (brak nagłówka CSRF), 500 `internal`. Odpowiedź nigdy nie zawiera hasha, hasła ani tokena. Kody 429 `too_many_attempts` i `error.retryAfterSeconds` dochodzą w PR z throttlem i tam trafią do tego dokumentu.
+- `POST /api/auth/logout` (publiczna, wymaga nagłówka CSRF): zawsze 200 `{ ok: true, data: null }` i wygaszone cookie, także bez sesji lub z nieznanym tokenem; usuwa rekord sesji z cookie.
+- Nagłówek CSRF: każda mutująca route wymaga `X-Requested-With: aitl` (dokładna wartość); brak lub inna wartość daje 403 `forbidden`. Zmiana nazwy lub wartości nagłówka jest zmianą łamiącą (klient `apiCall` ustawia go zawsze).
+- Cookie sesji `aitl_session`: `httpOnly`, `sameSite=lax`, `path=/`, `maxAge` 90 dni, `secure` wg `SESSION_COOKIE_SECURE`. Nazwa cookie, flagi i okresy ważności (30 dni przesuwne, 90 dni twardy limit) są częścią kontraktu; zmiana skraca lub wylogowuje istniejące sesje.
 - Kod błędu `internal` (status 500, komunikat `Internal server error`) zwraca `apiHandler` dla każdego błędu spoza hierarchii `AppError` oraz dla błędu przy tworzeniu scope; ma zawsze stały komunikat bez szczegółów, a przyczyna trafia tylko do logu serwera. Klienci mogą polegać na tym kodzie i statusie; zmiana kodu, statusu albo ujawnienie szczegółów w odpowiedzi jest zmianą łamiącą.
 
 ## 3. Konfiguracja środowiska
 
-Powierzchnia: zmienne środowiskowe w `.env.example` (m.in. `DATABASE_URL`), walidowane Zodem; `docker-compose.yml` (lokalny PostgreSQL).
+Powierzchnia: zmienne środowiskowe w `.env.example` (`DATABASE_URL`, `SESSION_SECRET`), walidowane Zodem; opcjonalne `SESSION_COOKIE_SECURE`; `docker-compose.yml` (lokalny PostgreSQL).
 
+- `SESSION_SECRET` (wymagane, >= 32 znaki, klucz HMAC tokenów sesji): rotacja wylogowuje wszystkich (zamierzone); brak lub za krótki -> start odmawia z błędem walidacji bez wypisania wartości. `SESSION_COOKIE_SECURE` (opcjonalne, `true`/`false`): domyślnie `true` przy `NODE_ENV=production`, inaczej `false`; lokalny build produkcyjny bez HTTPS ustawia `false`. `NODE_ENV` nie jest w `.env.example`.
+- Plik `.env` leży w korzeniu repozytorium; `packages/app/next.config.ts` ładuje go przez `@next/env` (zmienne z procesu mają pierwszeństwo). `.env` w `packages/app` nie jest czytany.
 - **Zmiana łamiąca**: usunięcie lub zmiana nazwy zmiennej, zmiana jej formatu, dodanie nowej wymaganej zmiennej bez wartości domyślnej.
 - **Wymagana ścieżka**: nowa wymagana zmienna trafia do `.env.example`, a PR opisuje, co operator musi ustawić przed wdrożeniem; zmiana nazwy przez okres, w którym działa stara i nowa nazwa, z ostrzeżeniem o przestarzałej. Aplikacja musi się zbudować i wystartować bez dostępnej bazy.
 

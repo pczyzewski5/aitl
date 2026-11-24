@@ -139,3 +139,8 @@ Do zrobienia: adapter MikroORM sesji i rejestracje, route login/logout, ładowan
 ## 2026-11-24 (PR-7, krok 2.4a, commit 2)
 Adapter `MikroOrmSessionRepository` (tworzenie, odczyt po hashu, `nativeUpdate` terminu, usuwanie po hashu i wygasłych jednym zapytaniem `$or`) oraz rejestracje w kontenerze: `clock`, `sessionTokens` (singleton z `SESSION_SECRET`), `sessionRepository`/`sessionService`/`authService` scoped, `sessionResolver` to ta sama usługa sesji (port z `core/http/auth.ts`, konsument dopiero w PR-8).
 Unity adaptera z fałszywym EM; integracja z Postgresem w commicie z testami HTTP.
+
+## 2026-11-24 (PR-7, krok 2.4a, commit 3)
+Route `POST /api/auth/login` i `POST /api/auth/logout` (CSRF `X-Requested-With: aitl`, `parseJsonBody` + `loginSchema`, cookie `aitl_session` httpOnly/lax/path `/`/maxAge 90 dni, `secure` z env; logout zawsze 200 i wygaszone cookie), helper `http/session-cookie.ts`. `next.config.ts` ładuje `.env` z korzenia repo przez `@next/env` z wymuszonym przeładowaniem (nowe Q39); `.env.example` ma `SESSION_SECRET=`.
+Pułapka: bez `forceReload` `loadEnvConfig` zwraca wynik z `packages/app` (lekcja). Testy integracyjne (`auth-session`, `env-loading`): poprawny login, ten sam wynik dla złego hasła i e-maila, flagi cookie (także `Secure` w produkcji), wygaśnięcie przesuwne i twarde, logout usuwa rekord, brak CSRF -> 403, logi bez haseł/tokenów/sekretu (także przy awarii bazy). `ci.yml` bez zmian (Q40).
+Do zrobienia: SB-I, PR, wiersz PR-7 w track.md. Throttle i API kont to PR-8.
