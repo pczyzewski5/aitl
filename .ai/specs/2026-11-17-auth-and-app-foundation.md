@@ -15,7 +15,7 @@ Stan dziś: `core/http` ma tylko `errors.ts` (kody snake_case: `validation_error
 
 ## 📝 Decisions
 
-Wybory właściciela produktu, 2026-11-17.
+Wybory właściciela produktu, 2026-11-17; Q23-Q28 z 2026-11-24 wynikają z zatwierdzonej mapy ekranów E01 (PR #55, `.ai/specs/design/2026-11-24-mapa-ekranow-e01.md`, luki P1-P17).
 
 | Id | Decyzja | Właściciel | Data |
 |---|---|---|---|
@@ -41,6 +41,12 @@ Wybory właściciela produktu, 2026-11-17.
 | Q20 | Minimalna `GET /api/bank-accounts/{id}` w 2.4b jako konsument `assertMemberOfBankAccount` i test izolacji z #10 przez HTTP; wzorzec dla E02/E03 | właściciel produktu | 2026-11-17 |
 | Q21 | Hasła w testach losowe (`randomBytes`), nigdy literały; unity z fake'iem `PasswordHasher`; adapter argon2id z parametrami z konstruktora; jeden test integracyjny z parametrami produkcyjnymi | właściciel produktu | 2026-11-17 |
 | Q22 | Dostarczanie: jeden PR na Krok (2.0 może iść z 2.1), każdy zielony i wdrażalny osobno, numer issue w opisie PR | właściciel produktu | 2026-11-17 |
+| Q23 | Stany logowania i listy kont dostają kryteria (P1-P3): pusta lista kont (obronny stan, bo seed zawsze tworzy członkostwo, P15), blokada 429 z komunikatem i czasem, błędy walidacji/sieci/500 bez utraty wpisanych danych i bez ujawniania szczegółów; e-mail normalizowany do małych liter po stronie serwera, bez komunikatu | właściciel produktu | 2026-11-24 |
+| Q24 | Zalogowany użytkownik na `/login` jest przekierowany na `/` (P5); wylogowanie to przycisk wykonujący `POST /api/auth/logout` z nagłówkiem CSRF, wyglądający jak link, po sukcesie przekierowanie na `/login` (P6) | właściciel produktu | 2026-11-24 |
+| Q25 | Pasek aplikacji pokazuje `displayName` zalogowanego (P7) | właściciel produktu | 2026-11-24 |
+| Q26 | Lista kont: link konta prowadzi na `/?account=<id>`, bez parametru `account` `/` pokazuje listę (P8); kolejność: wspólne przed osobistymi, potem alfabetycznie po nazwie (P9); UI listy nie zakłada jednego konta wspólnego (P10) | właściciel produktu | 2026-11-24 |
+| Q27 | "Bez UI żony" (Q13) oznacza brak odrębnych ekranów: żona używa tych samych ekranów (P12); Step 2.7 zawiera scenariusz w przeglądarce dla żony; ryzyko A02 dla E01-S02 odnotowane, materiał z rozmowy z żoną do zebrania przed wdrożeniem (P16) | właściciel produktu | 2026-11-24 |
+| Q28 | Odmowa dostępu do istniejącego cudzego konta bankowego to zawsze 403 (kryteria #10 i #11 ujednolicone, P13); E01 nie ma ekranu odmowy dostępu, ekran "brak dostępu" definiują E02/E03 (P14) | właściciel produktu | 2026-11-24 |
 
 Powiązane: D01, D02, R01 (brak kwot w tym zakresie), R03. Spec ich nie zmienia.
 
@@ -108,17 +114,17 @@ flowchart LR
 
 ## 📝 API Contracts
 
-Koperta wg `BACKWARD_COMPATIBILITY.md` §2; body parsowane Zodem z `core/validators/auth/`.
+Koperta wg `BACKWARD_COMPATIBILITY.md` §2; body parsowane Zodem z `core/validators/auth/`; e-mail jest normalizowany do małych liter po stronie serwera przed walidacją i wyszukaniem, bez osobnego komunikatu (Q8, Q23).
 
 - `POST /api/auth/login` (publiczna): `{ email, password }` -> 200 `{ ok:true, data:{ user:{ id, email, displayName } } }` + cookie. Błędy: 400 `validation_error`, 401 `invalid_credentials` (ten sam komunikat dla nieznanego e-maila i złego hasła), 429 `too_many_attempts` z `error.retryAfterSeconds` (nowe pole koperty błędu, zmiana kontraktu zapisywana w `BACKWARD_COMPATIBILITY.md` w Step 2.4b) i nagłówkiem `Retry-After`.
 - `POST /api/auth/logout` (publiczna, tylko CSRF): usuwa sesję po tokenie, jeśli istnieje; zawsze czyści cookie i zwraca 200.
-- `GET /api/bank-accounts` (sesja): `{ ok:true, data:{ bankAccounts:[{ id, type, name }] } }` tylko z członkostwa.
+- `GET /api/bank-accounts` (sesja): `{ ok:true, data:{ bankAccounts:[{ id, type, name }] } }` tylko z członkostwa, w kolejności: konta wspólne przed osobistymi, potem alfabetycznie po nazwie (Q26).
 - `GET /api/bank-accounts/{id}` (sesja): `{ ok:true, data:{ id, type, name } }`; cudze konto -> 403 przez `assertMemberOfBankAccount` (wzorzec dla E02/E03).
 - Mutujące route wymagają nagłówka CSRF, inaczej 403. Strony chronione czytają `await cookies()` (to czyni je dynamicznymi, bez dodatkowej konfiguracji) i przekierowują na `/login`.
 
 ## 📝 UI/UX
 
-`/login` (Tailwind): e-mail, hasło, przycisk; stany: wysyłanie, błąd ogólny, blokada z czasem. Teksty jako nazwane stałe. `/`: lista kont bankowych użytkownika (`EmptyState` gdy pusta), wylogowanie. Etykiety pól, `autocomplete`, fokus na błędzie. Prototype: brak zaakceptowanej wersji.
+`/login` (Tailwind): e-mail, hasło, przycisk; stany: wysyłanie, błąd ogólny, błędy walidacji pól, brak sieci i błąd serwera (500), w każdym wpisane dane zostają w formularzu, a komunikat nie ujawnia szczegółów, blokada z czasem (czas statyczny, bez odliczania na żywo) (Q23). Zalogowany użytkownik na `/login` jest przekierowany na `/` (Q24). Teksty jako nazwane stałe. `/`: lista kont bankowych użytkownika (`EmptyState` gdy pusta, stan obronny: Q23), każde konto jako link `/?account=<id>`, bez parametru `account` `/` pokazuje listę (Q26); UI listy nie zakłada jednego konta wspólnego (Q26, Q19); pasek pokazuje `displayName` zalogowanego (Q25); wylogowanie jako przycisk wykonujący `POST /api/auth/logout` z nagłówkiem CSRF, wyglądający jak link, po sukcesie przekierowanie na `/login` (Q24). Żona używa tych samych ekranów (Q27). Odmowa dostępu do cudzego konta istnieje w E01 tylko w API (403); ekran "brak dostępu" poza zakresem E01 (Q28). Etykiety pól, `autocomplete`, fokus na błędzie. Prototype: brak zaakceptowanej wersji.
 
 ## 📝 Edge Cases & Failure Scenarios
 
@@ -126,9 +132,11 @@ Koperta wg `BACKWARD_COMPATIBILITY.md` §2; body parsowane Zodem z `core/validat
 - **Algorytm.** Przed weryfikacją zwykły odczyt obu wierszy; `locked_until > now` -> 429 bez weryfikacji hasła. Po nieudanej weryfikacji atomowy `INSERT ... ON CONFLICT DO UPDATE ... RETURNING` zwiększa licznik, resetuje okno po wygaśnięciu i ustawia `locked_until` po przekroczeniu progu, poza transakcją z weryfikacją hasła. Udane logowanie usuwa oba wiersze użytkownika. Test współbieżny: równoległe nieudane próby liczą się bez gubienia inkrementów.
 - **Stały koszt.** Dla nieznanego e-maila weryfikacja względem hasha-wabika z tymi samymi parametrami argon2id, liczonego raz (cache w adapterze hashera).
 - Sesja wygasła, usunięta albo po 90 dniach -> 401 i redirect; wylogowanie powtórne -> 200.
-- Baza niedostępna -> 500 `internal`; start i build bez DB działają. Brak/zbyt krótki `SESSION_SECRET` -> start odmawia z błędem walidacji bez wypisania wartości.
+- Blokada logowania (429): komunikat podaje czas z `retryAfterSeconds` i nie ujawnia, czy użytkownik istnieje (Q23).
+- Baza niedostępna -> 500 `internal`, UI pokazuje ogólny komunikat bez szczegółów i bez utraty wpisanych danych; start i build bez DB działają. Brak/zbyt krótki `SESSION_SECRET` -> start odmawia z błędem walidacji bez wypisania wartości.
 - **Seed.** Idempotentny po e-mailu użytkownika i `(type, name)` konta wspólnego, w transakcji; hasło < 8 znaków odrzucone zawsze, przy `NODE_ENV=production` wymagane >= 12; ponowne uruchomienie z innym hasłem: ostrzeżenie, kod wyjścia != 0, hasło bez zmian (zmiana hasła poza zakresem, Q9).
-- Żona: tylko członkostwo konta wspólnego; `GET /api/bank-accounts` nie zwraca konta osobistego właściciela; asercja na nim -> 403.
+- Żona: tylko członkostwo konta wspólnego; `GET /api/bank-accounts` nie zwraca konta osobistego właściciela; asercja na nim -> 403 (Q28).
+- Użytkownik bez żadnego członkostwa (nieosiągalny przez seed, np. po ręcznym usunięciu członkostwa): `/` pokazuje `EmptyState` bez błędu (Q23).
 - Hasło/token w logu: redakcja z testem na zagnieżdżonym obiekcie.
 
 ## 📝 Risks & Impact Review
@@ -166,7 +174,7 @@ Dostarczanie (Q22): jeden PR na Step (2.0 może iść z 2.1), każdy zielony i w
 - **Step 2.4a (#18)** Sesja: `AuthService.login/logout`, adapter `SessionResolver` (przesuwanie `expires_at`, limit 90 dni, sprzątanie), `SESSION_SECRET` i `SESSION_COOKIE_SECURE` w env, `.env.example`, `ci.yml`, `app-server.ts` (false w testach); route `login` (bez throttla) i `logout`. Testy: sukces, jednakowe 401, wygaśnięcie idle i po 90 dniach, stary token po logout -> 401, logout bez sesji -> 200 i czyszczenie cookie, brak CSRF -> 403, flagi cookie (`secure` true/false wg env, domyślnie true przy `NODE_ENV=production`), domeny HMAC.
 - **Step 2.4b (#18)** Throttle (adapter z `ON CONFLICT`, `TRUSTED_PROXY_HOPS`, dwa liczniki, stały koszt dla nieznanego e-maila), `GET /api/bank-accounts` i `GET /api/bank-accounts/{id}`, `retryAfterSeconds` w kopercie, aktualizacja `BACKWARD_COMPATIBILITY.md` (nowe route, kody, pole, env). Testy: 429 po 5 próbach, osobna blokada per e-mail po 20, reset po sukcesie, równoległe próby (integracja), wiersze dla nieznanych e-maili; `GET /api/bank-accounts/{id}`: własne konto 200, cudze 403 przez HTTP (kryterium izolacji #10).
 - **Step 2.5 (#18)** Seed: `UserProvisioningService` przez cienki wrapper `packages/app/scripts/seed-user.ts`, uruchamiany `npm run seed:user -w @aitl/app -- --email <e> --name <n> [--shared-only]` (skrypt: `node --import tsx --env-file-if-exists=../../.env scripts/seed-user.ts`; `tsx` dodany do `app`). Hasło tylko z `SEED_PASSWORD` (w `.env.example` puste, wartość w lokalnym `.env`) lub stdin, nigdy z argumentów; < 8 znaków odrzucone, przy `NODE_ENV=production` < 12 odrzucone. Nazwa konta wspólnego z konfiguracji seeda (domyślnie "Wspólne"). Testy: idempotencja (też `(type, name)`), długość hasła, inne hasło -> ostrzeżenie i kod != 0, żona tylko we wspólnym, hasło nie w logu.
-- **Step 2.6 (#19, #10)** `ui/backend/api/apiCall.ts` + `feedback/*`, strona `/login`, widok kont na `/`, redirecty, wylogowanie. Testy komponentów i `apiCall` (niepoprawny JSON); scenariusz E01-S01 w przeglądarce (login -> wspólne i osobiste -> wyloguj -> `/` przekierowuje).
-- **Step 2.7 (#11 przygotowanie)** Test własności przez route: żona (seed `--shared-only`) widzi tylko wspólne, `GET /api/bank-accounts/{id}` konta osobistego właściciela -> 403. Dziennik/lekcje.
+- **Step 2.6 (#19, #10)** `ui/backend/api/apiCall.ts` + `feedback/*`, strona `/login`, widok kont na `/`, redirecty, wylogowanie. Testy komponentów i `apiCall` (niepoprawny JSON); stany z Q23-Q26 (pusta lista, blokada z czasem, walidacja/sieć/500 z zachowaniem danych, przekierowanie zalogowanego z `/login`, `displayName` na pasku, kolejność i linki kont, wylogowanie przyciskiem); scenariusz E01-S01 w przeglądarce (login -> wspólne i osobiste -> wyloguj -> `/` przekierowuje).
+- **Step 2.7 (#11 przygotowanie)** Test własności przez route: żona (seed `--shared-only`) widzi tylko wspólne, `GET /api/bank-accounts/{id}` konta osobistego właściciela -> 403; niezależne sesje żony i właściciela (kryterium #11). Scenariusz w przeglądarce dla żony na tych samych ekranach (Q27): login -> tylko wspólne konto na liście -> wyloguj. Dziennik/lekcje.
 
 Poprawka błędu w auth dodaje test regresyjny padający bez poprawki.
