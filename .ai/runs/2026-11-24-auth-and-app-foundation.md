@@ -148,3 +148,7 @@ Do zrobienia: SB-I, PR, wiersz PR-7 w track.md. Throttle i API kont to PR-8.
 ## 2026-11-24 (PR-7, krok 2.4a, commit 4)
 SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, integracyjne). Pulapka: `migrations.test.ts` zakladal, ze migruje wspolna baze jako pierwszy; po dodaniu plikow testowych kolejnosc sie zmienila, wiec test dostal wlasna baze (lekcja).
 Do zrobienia: PR, wiersz PR-7 w track.md, zielone checki.
+
+## 2026-11-24 (PR-7, krok 2.4a, commit 5)
+PR #77 (base `main`, leży na stosie #73, #70, #72, #75); wiersz PR-7 w track.md (in-progress, wynik SB-I).
+Do zrobienia: zielone checki, merge po #73/#70/#72/#75, SHA w track.md.
