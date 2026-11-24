@@ -23,7 +23,7 @@ Logowanie (E01) i wyniki bez wpisów (E03 bez wybranego konta nie istnieje: zaws
 
 ## 4. Anatomia
 
-1. AppShell: pasek "AITL" i "Wyloguj", kolumna 960 px.
+1. AppShell: pasek "AITL", nazwa zalogowanej osoby i przycisk "Wyloguj", kolumna 960 px.
 2. `h1` "Ile zostanie w miesiącu" (tytuł strony, wspólny dla E02 i E03).
 3. MonthSwitcher (jeden miesiąc dla wszystkich kart i listy).
 4. Sekcja kart (`section`, nazwa z ukrytego `h2` "Wyniki kont w wybranym miesiącu"): jedna AccountRemainderCard na konto, wybrana karta ma `aria-pressed="true"`.
@@ -127,7 +127,7 @@ Teksty komponentów to stałe w `*.messages.ts` (nadpisywalne propem). Teksty st
 
 ```tsx
 <ToastProvider closeLabel="Zamknij" viewportLabel="Powiadomienia ({hotkey})" announcementLabel="Powiadomienie">
-  <AppShell logoutHref="/logout">
+  <AppShell displayName={user.displayName} onLogout={logOut}>
     <h1>Ile zostanie w miesiącu</h1>
     <MonthSwitcher month={month} onMonthChange={goToMonth} min="2000-01" max="2100-12" />
     <section aria-labelledby={cardsHeadingId}>
