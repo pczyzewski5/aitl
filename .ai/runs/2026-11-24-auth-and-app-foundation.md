@@ -113,3 +113,7 @@ Do zrobienia: PR, wiersz PR-5 w track.md, zielone checki.
 ## 2026-11-24 (PR-5, krok 2.2, commit 2)
 PR #72; wiersz PR-5 w track.md (in-progress, wynik SB).
 Do zrobienia: zielone checki, merge, SHA w track.md.
+
+## 2026-11-24 (PR-6, krok 2.3, commit 1)
+Baza: stos #73 + #70 + #72 (merge'e; konflikty tylko w dzienniku i track.md, a w testach `apiHandler` #70 dostosowane do `(request, context)` z #73). Port `PasswordHasher` (`hash`, `verify`, `verifyAgainstDecoy`), adapter `Argon2PasswordHasher` w `app/src/adapters` (parametry z konstruktora, produkcyjne 19456 KiB / 2 / 1, wabik liczony raz), porty repozytoriów i `ProvisioningUnitOfWork`, `BankAccountService` (`listForUser`, `addMember`), `UserProvisioningService`, regula `assertCanBeMember` (niezmiennik konta osobistego).
+Do zrobienia: adaptery MikroORM w `db`, rejestracje w kontenerze, test integracyjny.
