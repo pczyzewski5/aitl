@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { entities } from './entities';
 import {
   MIGRATIONS_TABLE_NAME,
   POOL_MAX_CONNECTIONS,
@@ -37,10 +38,10 @@ describe('createOrmConfig', () => {
     expect(actual.migrations).toEqual({ tableName: MIGRATIONS_TABLE_NAME, transactional: true });
   });
 
-  it('allows an empty entity list until the first domain entity exists', () => {
+  it('registers the entities and does not warn about missing ones', () => {
     const actual = createOrmConfig(options);
 
-    expect(actual.entities).toEqual([]);
+    expect(actual.entities).toBe(entities);
     expect(actual.discovery?.warnWhenNoEntities).toBe(false);
   });
 });

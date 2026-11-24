@@ -1,6 +1,7 @@
 import { MikroORM, type Options } from '@mikro-orm/postgresql';
 import { afterAll, describe, expect, inject, it } from 'vitest';
 import { createAppContainer } from '../../packages/app/src/container/container.ts';
+import { createSessionSecret } from './support/app-server.ts';
 
 describe('application container against PostgreSQL', () => {
   const orms: MikroORM[] = [];
@@ -17,7 +18,7 @@ describe('application container against PostgreSQL', () => {
   });
 
   it('gives each scope an entity manager that queries the database', async () => {
-    const sut = createAppContainer({ DATABASE_URL: inject('databaseUrl') }, initTrackedOrm);
+    const sut = createAppContainer({ DATABASE_URL: inject('databaseUrl'), SESSION_SECRET: createSessionSecret() }, initTrackedOrm);
     const firstManager = await sut.createScope().cradle.entityManagerProvider.getEntityManager();
     const secondManager = await sut.createScope().cradle.entityManagerProvider.getEntityManager();
 

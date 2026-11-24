@@ -55,7 +55,7 @@ describe('BankAccountList', () => {
     renderList({ accounts: [] });
 
     expect(screen.getByRole('heading', { level: 3, name: 'Nie masz jeszcze żadnego konta bankowego' })).toBeTruthy();
-    expect(screen.getByText('Gdy konto zostanie Ci przypisane, zobaczysz je tutaj.')).toBeTruthy();
+    expect(screen.getByText('Skontaktuj się z administratorem aplikacji.')).toBeTruthy();
     expect(screen.queryByRole('button')).toBeNull();
     expect(screen.queryByRole('list')).toBeNull();
   });

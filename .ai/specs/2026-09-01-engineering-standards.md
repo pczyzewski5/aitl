@@ -9,7 +9,7 @@ Status: active
 - **zostaje `awilix`** jako kontener DI,
 - **zostaje kierunek zależności `db → core`** (`app` zależy od wszystkich; `core` nie zna Next.js ani MikroORM). Różni się to od oryginalnej wersji speca (`app → core → db`); konsekwencje opisane w sekcji "Architektura".
 
-Przykładowe koncepty domenowe AITL (zakres do potwierdzenia, nie tworzymy ich z góry): `auth`, `expenses`, `categories`, `budgets`, `reports`.
+Przykładowe koncepty domenowe AITL (zakres do potwierdzenia, nie tworzymy ich z góry): `auth`, `bank-accounts`, `users`, `expenses`, `categories`, `budgets`, `reports`.
 
 ---
 
@@ -20,7 +20,7 @@ Przykładowe koncepty domenowe AITL (zakres do potwierdzenia, nie tworzymy ich z
 | Element | Konwencja | Przykład |
 |---|---|---|
 | Pakiet | `packages/<name>`, scope `@aitl/<name>` | `@aitl/core` |
-| Folder konceptu | liczba mnoga, jedno słowo, zgodne z przestrzenią nazw zdarzeń | `expenses`, `budgets` |
+| Folder konceptu | liczba mnoga (wyjątek: `auth`), kebab-case, zgodne z przestrzenią nazw zdarzeń | `expenses`, `budgets`, `auth`, `bank-accounts`, `users` |
 | Encja | klasa PascalCase w liczbie pojedynczej, plik `<name>.entity.ts` w folderze konceptu | `Expense` → `db/src/entities/expenses/expense.entity.ts` |
 | Tabela DB | snake_case, liczba mnoga | `expenses` |
 | Kolumna DB | snake_case (mapowana z camelCase) | `created_at` ← `createdAt` |
@@ -46,7 +46,7 @@ Dodawanie kolejnych konceptów po jednym grozi tym, że każda route i strona za
 - `errors.ts`: typowana hierarchia (`AppError`; `NotFoundError`, `ForbiddenError`, `UnauthorizedError`, `ValidationError`, `ConflictError`). Serwisy rzucają wyłącznie te błędy i nigdy nie budują odpowiedzi HTTP.
 - `apiHandler.ts`: opakowuje handler route. Mapuje `AppError` na status i spójną kopertę JSON (`{ ok: true, data }` / `{ ok: false, error: { code, message, fieldErrors? } }`), loguje nieoczekiwane błędy przez wspólny logger i nigdy nie zwraca stack trace. Żadna route nie ma własnego `try/catch`.
 - `makeCrudRoute.ts`: dla zasobu będącego zwykłym list/create/update/delete (np. `categories`) przyjmuje schematy Zod i referencje do metod serwisu, zwraca `{ GET, POST, PUT, DELETE }`. Workflow niepasujące do CRUD używają `apiHandler`.
-- `auth.ts`: `requireSession(req)` (rzuca `UnauthorizedError`), `requireRole`, asercje własności (np. `assertOwnsExpense`, rzucają `ForbiddenError`). Każda route niepubliczna wywołuje je pierwsza.
+- `auth.ts`: `requireSession(token, resolver)` (rzuca `UnauthorizedError`), asercje własności i członkostwa (np. `assertMemberOfBankAccount`, `assertOwnsExpense`, rzucają `ForbiddenError`); bez ról (Q7). Każda route niepubliczna wywołuje je pierwsza.
 
 **Klient, `packages/ui/src/backend/`:**
 
@@ -92,16 +92,16 @@ W razie konfliktu zasad wybieramy tę, która daje **mniejszą i bardziej jawną
 
 ### Bezpieczeństwo i walidacja (minimum)
 
-- **Hasła**: `bcrypt`/`bcryptjs`, koszt **≥ 12**. Ewentualna ścieżka: `argon2id` (pamięć ≥ 19 MiB, iteracje ≥ 2, równoległość 1), bez trzeciej opcji.
-- **JWT**: min. `HS256`, sekret ≥ 32 losowe bajty z `env.ts` (walidowany Zodem), nigdy w kodzie ani w repo. Krótka ważność (np. 24h), brak refresh tokenów w MVP (znane ograniczenie, nie wydłużamy tokenu).
-- **Cookies**: `httpOnly`, `secure` na produkcji, `sameSite=lax` (lub `strict` dla tras auth), ograniczony `path`. Nigdy JWT w `localStorage` ani w cookie bez HttpOnly.
+- **Hasła**: `argon2id` (pamięć ≥ 19 MiB, iteracje ≥ 2, równoległość 1) jako wybór projektu (Q4), bez drugiej opcji.
+- **Sesje**: losowy token ≥ 32 B w cookie httpOnly, w DB tylko HMAC tokenu (klucz: sekret ≥ 32 losowe bajty z `env.ts`, walidowany Zodem, nigdy w kodzie ani w repo), ważność przesuwna 30 dni nieaktywności i twardy limit 90 dni od logowania, wylogowanie usuwa rekord sesji.
+- **Cookies**: `httpOnly`, `secure` na produkcji, `sameSite=lax` (lub `strict` dla tras auth), ograniczony `path`. Nigdy token sesji w `localStorage` ani w cookie bez HttpOnly.
 - **CSRF**: dla tras zmieniających stan `sameSite` plus wymagany własny nagłówek (`apiCall` zawsze go ustawia).
-- **Rate limiting**: `login`, `register` i reset hasła mają kontrolę brute-force (licznik per IP+email z cooldownem na MVP).
+- **Rate limiting**: `login` oraz `register` i reset hasła (jeśli istnieją) mają kontrolę brute-force (licznik per IP+email z cooldownem na MVP).
 - **Własność ponad rola**: bez RBAC, ale każda mutacja sprawdza własność (użytkownik edytuje tylko swoje wydatki, kategorie i budżety). Brak sprawdzenia własności to blocker tak samo jak brak auth.
 - **Mass assignment**: route nigdy nie przekazuje surowego body do `em.create()`/`em.assign()`, tylko sparsowany, jawnie typowany wynik schematu Zod.
 - **Injection**: persystencja wyłącznie przez API encji/zapytań MikroORM, bez sklejania SQL i `Knex.raw` z danymi użytkownika.
 - **Poprawność kwot**: kwoty jako liczby całkowite w jednostce podstawowej (np. grosze) plus waluta, nigdy `float`. Sumy i salda zawsze liczone po stronie serwera; kwota od klienta jest parsowana, ale sumy od klienta nie są ufane.
-- **Sekrety i logi**: wszystkie sekrety z env walidowanego Zodem, `.env` w `.gitignore`; `pino` nie loguje haseł, tokenów ani pełnych JWT (jawna redakcja w konfiguracji loggera).
+- **Sekrety i logi**: wszystkie sekrety z env walidowanego Zodem, `.env` w `.gitignore`; `pino` nie loguje haseł ani tokenów sesji (jawna redakcja w konfiguracji loggera).
 - **Komunikaty auth**: ogólne ("invalid credentials"), bez ujawniania, czy e-mail jest zarejestrowany.
 - **ID**: UUID (domyślnie w `base.entity.ts`), co utrudnia enumerację zasobów.
 - **Higiena zależności**: `npm audit` w bramce walidacji; bez nowej zależności dla czegoś, co zastąpi 20 linii kodu.
@@ -133,13 +133,13 @@ W razie konfliktu zasad wybieramy tę, która daje **mniejszą i bardziej jawną
 - [ ] Auth wymuszane **po stronie serwera** na każdej niepublicznej route. (blocker)
 - [ ] Autoryzacja sprawdza **konkretny rekord**, nie tylko "zalogowany" (brak IDOR). (blocker)
 - [ ] Check-then-act na współdzielonym zasobie chroniony transakcją i/lub unikalnym ograniczeniem. (blocker)
-- [ ] Żaden sekret, token, hasło ani pełny JWT w logu, błędzie czy payloadzie dla klienta. (blocker)
+- [ ] Żaden sekret, token sesji ani hasło w logu, błędzie czy payloadzie dla klienta. (blocker)
 - [ ] Brak niezparametryzowanych danych w zapytaniu, komendzie shell czy ścieżce pliku. (blocker)
 - [ ] Endpoint zapisu parsuje jawny kształt Zod, bez spread surowego body. (blocker)
 - [ ] Flagi cookie (`httpOnly`, `secure`, `sameSite`) zachowane przy zmianach w kodzie auth. (major)
 - [ ] Błąd wokół decyzji bezpieczeństwa kończy się odmową. (blocker)
 - [ ] Poprawka błędu w przepływie istotnym dla bezpieczeństwa ma test regresyjny, który bez niej pada. (major)
-- [ ] Rate limiting na login/register/reset hasła, których dotyka zmiana. (major)
+- [ ] Rate limiting na login (oraz register/reset hasła, jeśli istnieją), których dotyka zmiana. (major)
 
 **Poprawność i testy**
 

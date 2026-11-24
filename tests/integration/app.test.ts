@@ -23,4 +23,15 @@ describe('temporary application instance', () => {
 
     expect(await response.text()).toContain('AITL');
   });
+
+  it('serves the design system stylesheet linked from the home page', async () => {
+    const html = await (await fetch(app.url)).text();
+    const stylesheetPath = /<link[^>]+rel="stylesheet"[^>]+href="([^"]+\.css)"/.exec(html)?.[1];
+
+    const css = await (await fetch(`${app.url}${stylesheetPath}`)).text();
+
+    expect(stylesheetPath).toBeDefined();
+    expect(css).toContain('--raw-blue-600');
+    expect(css).toContain('.bg-primary');
+  });
 });

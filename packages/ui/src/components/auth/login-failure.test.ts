@@ -37,6 +37,10 @@ describe('describeLoginFailure', () => {
       failure: { ok: false, kind: 'network' },
       expected: DEFAULT_LOGIN_MESSAGES.network,
     },
+    {
+      failure: { ok: false, kind: 'server-error' },
+      expected: 'Coś poszło nie tak po naszej stronie. Spróbuj ponownie za chwilę; wpisane dane zostały w formularzu.',
+    },
   ])('describes $failure', ({ failure, expected }) => {
     const actual = describeLoginFailure(failure, DEFAULT_LOGIN_MESSAGES);
 

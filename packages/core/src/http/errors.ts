@@ -41,3 +41,20 @@ export class ConflictError extends AppError {
   readonly code = 'conflict';
   readonly statusCode = 409;
 }
+
+export class InvalidCredentialsError extends AppError {
+  readonly code = 'invalid_credentials';
+  readonly statusCode = 401;
+}
+
+export class TooManyRequestsError extends AppError {
+  readonly code = 'too_many_attempts';
+  readonly statusCode = 429;
+
+  readonly retryAfterSeconds: number;
+
+  constructor(message: string, retryAfterSeconds: number) {
+    super(message);
+    this.retryAfterSeconds = retryAfterSeconds;
+  }
+}

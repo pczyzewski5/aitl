@@ -11,7 +11,7 @@ describe('db package', () => {
   });
 
   it('re-exports the public API', () => {
-    expect(entities).toEqual([]);
+    expect(entities).toHaveLength(5);
     expect(readDatabaseUrl({ DATABASE_URL: 'postgres://x' })).toBe('postgres://x');
   });
 });
