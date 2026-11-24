@@ -243,3 +243,7 @@ Pułapka: poprawne hasło w serii kasuje licznik `ip+email`, więc ścisłe "401
 ## 2026-11-24 (poprawki po przeglądzie Fazy 2, m4)
 Sukces logowania kasuje tylko licznik `ip+email` (`reset`), licznik per e-mail zostaje do końca okna; testy jednostkowe i integracyjny zaktualizowane (e-mail: 10 prób po 2 seriach), opis w BC i specu.
 Do zrobienia: m1, m2, m5-m8, nity.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 2, m1)
+Wabik argon2 liczony w konstruktorze hashera, odrzucony promise nie jest cache'owany (kolejne wywołanie liczy od nowa), a `register()` w `instrumentation.ts` rozgrzewa singleton `passwordHasher` przy starcie, więc pierwsze logowanie nieistniejącego e-maila nie płaci za wabik.
+Do zrobienia: m2, m5-m8, nity.
