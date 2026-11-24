@@ -2,6 +2,43 @@
 
 Aplikacja webowa do śledzenia oraz analizy wydatków.
 
+## Getting started
+
+Wymagania: Node >= 22.17 (CI używa 24) z npm oraz Docker z działającym demonem. Dla macOS i Linuksa.
+
+### Ścieżka 1: `npm run setup`
+
+```bash
+npm run setup
+```
+
+Skrypt `scripts/setup.ts` wykonuje kolejno poniższe kroki i dla każdego wypisuje `[done]` albo `[skipped]`:
+
+1. sprawdza prerekwizyty (wersja Node, npm, Docker i jego demon); przy braku kończy się od razu błędem,
+2. instaluje zależności (`npm install`), pomija, gdy `node_modules` jest aktualne względem `package-lock.json`,
+3. kopiuje `.env.example` do `.env`, pomija, gdy `.env` istnieje (nigdy go nie nadpisuje),
+4. uruchamia PostgreSQL (`docker compose up -d postgres`), pomija start, gdy kontener już działa, i czeka na gotowość (`pg_isready`, limit 60 s),
+5. stosuje migracje (`npm run migration:up -w @aitl/db`), przy aktualnej bazie nic nie zmienia.
+
+Ponowne uruchomienie jest bezpieczne. Skrypt nie generuje sekretów i nigdy nie usuwa wolumenów Dockera. Jeśli PostgreSQL odrzuci dane logowania (stary wolumen), skrypt podpowie `docker compose down -v`, ale musisz to wykonać sam, wiedząc, że usuwa lokalne dane.
+
+Po instalacji uzupełnij w `.env` sekrety (gdy pojawią się w `.env.example`: `SESSION_SECRET` i hasło konta seedowego), a następnie uruchom aplikację: `npm run dev -w @aitl/app`.
+
+### Ścieżka 2: ręcznie
+
+To samo, krok po kroku:
+
+```bash
+npm install
+cp .env.example .env
+docker compose up -d postgres
+docker compose exec -T postgres pg_isready -U aitl -d aitl
+npm run migration:up -w @aitl/db
+npm run dev -w @aitl/app
+```
+
+Przed `cp` sprawdź, czy `.env` już nie istnieje (nie nadpisuj go). Polecenie `pg_isready` powtarzaj, aż zwróci sukces. Pozostałe kroki są idempotentne.
+
 ## Stack technologiczny
 
 - **TypeScript** – język po stronie serwera i przeglądarki

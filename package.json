@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "typecheck": "npm run typecheck --workspaces --if-present && tsc -p tests/tsconfig.json",
+    "typecheck": "npm run typecheck --workspaces --if-present && tsc -p tests/tsconfig.json && tsc -p scripts/tsconfig.json",
     "build": "npm run build --workspace @aitl/app",
     "build-storybook": "npm run build-storybook --workspace @aitl/ui",
     "lint": "eslint .",
@@ -15,6 +15,7 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:integration:app": "node tests/integration/support/serve.ts",
     "test:storybook": "npm run test:storybook --workspace @aitl/ui",
+    "setup": "node scripts/setup.ts",
     "prepare": "git config core.hooksPath .githooks",
     "check:tokens": "npm run check:tokens --workspace @aitl/ui"
   },

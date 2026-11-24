@@ -30,7 +30,7 @@ Statusy: todo / in-progress / done. Kolumny PR, SHA i SB uzupełnia agent po zak
 | PR-10c | 2.6c | #19, #10 | strony `/login` i `/` (lista kont, `/?account=<id>`), redirecty, wylogowanie, fokus na h1; `needs-qa` | SB-I + SB-U | PR-8, PR-10a, PR-10b | todo | | | |
 | PR-11 | 2.7 | #11 | izolacja i druga osoba, test API dwóch sesji, E2E tylko żony; `needs-qa` | SB-I | PR-8, PR-9, PR-10c | todo | | | |
 | PR-12 | close-out | - | spec do `implemented/`, backlog, checkboxy monorepo-migration | SB-A | PR-11 | todo | | | |
-| PR-#2 | instalator | #2 | `npm run setup`, bez generowania sekretów (tylko instrukcja); follow-up o `seed:user` po PR-9 | SB-A | równolegle z Fazą 1 w osobnym worktree, merge przed PR-7 | todo | | | |
+| PR-#2 | instalator | #2 | `npm run setup`, bez generowania sekretów (tylko instrukcja); follow-up o `seed:user` po PR-9 | SB-A | równolegle z Fazą 1 w osobnym worktree, merge przed PR-7 | in-progress | | | |
 
 ## Zasady pracy
 
