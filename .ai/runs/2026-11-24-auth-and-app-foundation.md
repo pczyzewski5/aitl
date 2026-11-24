@@ -49,3 +49,8 @@ Do zrobienia: PR, uzupełnienie wiersza PR-3 w track.md.
 ## 2026-11-24 (PR-3, krok 1.3, commit 3)
 PR #68; wiersz PR-3 w track.md (in-progress, wynik SB).
 Do zrobienia: zielone checki, merge, SHA w track.md.
+
+## 2026-11-24 (track.md po merge PR-1 i instalatora)
+Wiersze PR-1 (#64, c05b1bc) i PR-#2 (#65, a4f4a6f) oznaczone jako done.
+Decyzja właściciela: `process.exit(1)` w `register()` nie dodajemy (serwer bez konfiguracji zwraca 500).
+Do zrobienia: PR-2 (krok 1.2) i PR-3 (krok 1.3) równolegle.
