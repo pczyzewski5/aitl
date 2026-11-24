@@ -92,3 +92,7 @@ Do zrobienia: `LoadingMessage`, stan pusty (Q35), `docs/design-system.md`, PR.
 ## 2026-11-24 (PR-10a, krok 2.6a, commit 4)
 Feedback bez duplikatów: `EmptyState` i `ErrorState` zostają w `components/ui/`, dodany tylko `LoadingMessage` (`ui/backend/feedback`, `role="status"`). Stan pusty listy kont: opis "Skontaktuj się z administratorem aplikacji." (Q35). Helper `buildAccountHref` (`/?account=<id>`, Q26) wyeksportowany z `@aitl/ui`.
 Do zrobienia: `docs/design-system.md`, AGENTS.md (miejsce feedback), POSTEP.md, track.md, PR.
+
+## 2026-11-24 (PR-10a, krok 2.6a, commit 5)
+Dokumentacja: `docs/design-system.md` (AppShell, LoginForm, LoadingMessage, `apiCall`, `buildAccountHref`, reguły błędów, fokusu i stanu pustego), `AGENTS.md` (feedback: tylko `LoadingMessage`, bez dublowania `EmptyState`/`ErrorState`), `POSTEP.md`. SB-A + SB-U zielone lokalnie (typecheck, lint, coverage 100%, build, audit, test:storybook 619/619, check:tokens, build-storybook).
+Do zrobienia: PR, wiersz PR-10a w track.md, zielone checki.
