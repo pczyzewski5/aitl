@@ -53,3 +53,7 @@ Notatki przy ekranach (`.notes > .note` w `app.tsx`), panel scenariuszy w zwini�
 ## Luki DS (z mapy i nowe)
 
 LDS1/LDS2 (pasek sesji lokalny: `SessionShell`), LDS4 (500: tekst z szarego prototypu przez nadpisanie komunikatu sieci, założenie), LDS6 (ciemny motyw bez wartości: przełącznik działa, wygląd taki sam), N1 (dwie sesje obok siebie: siatka z tokenów w `home-screen.tsx`), N2 (`AppShell` zakłada pełną stronę: nadpisano `min-height` przez CSS), N3 (brak kontrolek paska przeglądu w DS: klasy `.btn`, `.segmented`, `.toast` w `src/chrome.css`; brak tokenu ostrzeżenia dla `--status-warning-*` w moście).
+
+## Adnotacja 2026-11-24
+
+Decyzje wprowadzone do speca w PR #62 (Q29-Q35 w specyfikacji auth, notatka w specyfikacji E02). Prototyp zaakceptowany przez właściciela.

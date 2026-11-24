@@ -116,6 +116,7 @@ Dostępność: `MonthSwitcher` z `aria-label` przycisków i `aria-live="polite"`
 - **Kwota.** JSON `12.5`, `"1200"`, `-1`, `0`, `1e100`, powyżej maksimum -> 400, nic nie zapisane; `1e2` jest liczbą całkowitą 100.
 - **Wyścigi.** Operacje na serii (revision, end, PUT opisu, delete serii, PATCH paid) biorą blokadę serii i sprawdzają `expectedUpdatedAt`; dwie równoległe zmiany: druga dostaje 409. Test integracyjny równoległy: po próbach każdy miesiąc ma dokładnie jedną aktywną definicję serii (brak nakładania i luk). Wpis jednorazowy: ostatni zapis wygrywa (dwóch użytkowników, zaakceptowane).
 - **Usunięcie serii w przeszłości jest niemożliwe** (Q15): seria z miesiącem `<=` bieżący tylko się kończy. Twarde usunięcie wpisu jednorazowego z miesiąca historycznego zmienia wynik tego miesiąca (świadomy skutek Q8, ryzyko niżej).
+- Sesja wygasła w trakcie formularza: zapis zwraca 401, formularz pokazuje komunikat "Zaloguj się ponownie", wpisane dane zostają (decyzja Q34 ze specyfikacji auth; szczegóły, w tym zachowanie po ponownym zalogowaniu, do ustalenia przy E02).
 - Dostęp: wpis konta B pod `{id}` konta A -> 404; brak członkostwa -> 403; brak sesji -> 401; żona na koncie osobistym -> 403 (HTTP).
 - Baza niedostępna -> 500 `internal`; migracja nieudana -> `down` usuwa nową strukturę (poza przypadkiem z danymi: patrz Data Model).
 - Usuwanie konta bankowego poza zakresem; `RESTRICT` blokuje je przy wpisach.

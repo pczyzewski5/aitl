@@ -94,3 +94,7 @@ Zadanie domowe: test z prawdziwą osobą i eksport uwag.
 3. Na koniec "Export Markdown": powstaje `prototype-feedback.md` pogrupowany po ekranach (wklej go do zadania lub do rozmowy z Claude'em). Opcjonalnie "Export for repository": podmień `engine/comments.js` i zrób commit przez PR.
 4. Komentarze są tylko w przeglądarce, w której je napisano, i tylko dla `http://localhost:5180`. Po zmianie adresu lub przeglądarki ich nie zobaczysz.
 5. "Delete" pyta natywnym oknem potwierdzenia i usuwa wątek; używaj świadomie.
+
+## Adnotacja 2026-11-24
+
+Decyzje właściciela z sekcji 5 (kandydaci 1-5, 7 i 10) wprowadzone do specyfikacji w PR #62 jako Q29-Q35 w `.ai/specs/2026-11-17-auth-and-app-foundation.md`; kandydaci 6, 8 i 9 były już rozstrzygnięte w Q23-Q28. Prototyp zaakceptowany przez właściciela (s01, s02 i atrapa s03).
