@@ -247,3 +247,7 @@ Do zrobienia: backlog, checkboxy monorepo-migration, track.md, PR.
 ## 2026-11-24 (PR-12, close-out, commit 3)
 `.ai/specs/backlog.md`: sekcja "Status implementacji E01" (E01, S01, S02, #17-#20) według stanu PR-ów z `gh pr list`; tabela backlogu i issues na GitHubie bez zmian, bo tabela nie ma kolumny statusu.
 Do zrobienia: checkboxy monorepo-migration, track.md, PR.
+
+## 2026-11-24 (PR-12, close-out, commit 4)
+`2026-11-02-monorepo-migration.md`: odhaczone tylko to, co istnieje w kodzie: Faza 4 (kontener Awilix, rejestracje `core`/`db`, test `container.test.ts`), w 4b `apiHandler`, `auth`, `env`, `logger` oraz w Fazie 5 Tailwind w `app` (#71, jeszcze niezmergowany). Linie rozdzielone, bo `makeCrudRoute`, `ui/backend/{tables}` i shadcn dla panelu admina nie powstały i zostają niezaznaczone.
+Do zrobienia: track.md, PR.
