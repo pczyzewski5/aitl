@@ -223,3 +223,8 @@ Do zrobienia: instalator, README, BACKWARD_COMPATIBILITY, PR, wiersz PR-9 w trac
 ## 2026-11-24 (PR-9, krok 2.5, commit 2)
 Instalator: "Następne kroki" wskazują `seed:user` i `SEED_PASSWORD` (bez generowania sekretów i bez uruchamiania seeda), stałe w `scripts/setup/config.ts`; README (Getting started i sekcja "Konta użytkowników"); BACKWARD_COMPATIBILITY §3 o `SEED_PASSWORD` i kontrakcie komendy.
 Do zrobienia: wiersz PR-9 w track.md, SB-I, PR.
+
+## 2026-11-24 (PR-11, krok 2.7, commit 1)
+Baza: gałąź `feature/second-user-isolation` z `feature/login-and-accounts-pages` (#79) plus merge `feature/seed-accounts` (#76); konflikty (`.env.example`, lessons, dziennik, track) rozwiązane zachowaniem obu stron. Nowy `tests/integration/second-user-isolation.test.ts` (16 testów): żona `shared-only` ma jedno członkostwo, widzi tylko wspólne konto (API i strona `/`, także z `?account=<cudze>`), 403 bez danych na cudze konta osobiste, 401 przed decyzją dostępu, brak handlerów POST/PUT/PATCH/DELETE na `[id]`, niezależne sesje dwóch różnych użytkowników (wylogowanie jednej nie rusza drugiej) i 10 równoległych rund bez mieszania danych.
+Pułapka: HTML strony `/?account=<id>` zawiera echo parametru w payloadzie Next, więc nie asertuję id, tylko nazwy.
+Do zrobienia: E2E w przeglądarce dla żony, SB-I, PR, track.md.
