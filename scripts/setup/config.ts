@@ -1,0 +1,13 @@
+export const MIN_NODE_VERSION = { major: 22, minor: 17 };
+export const POSTGRES_SERVICE = 'postgres';
+export const POSTGRES_USER = 'aitl';
+export const POSTGRES_DATABASE = 'aitl';
+export const READINESS_TIMEOUT_MS = 60_000;
+export const READINESS_INTERVAL_MS = 1_000;
+export const ENV_FILE = '.env';
+export const ENV_EXAMPLE_FILE = '.env.example';
+export const LOCKFILE = 'package-lock.json';
+export const INSTALLED_LOCKFILE = 'node_modules/.package-lock.json';
+export const APPLIED_MIGRATION_MARKER = "Applied '";
+export const CREDENTIALS_REJECTED_MARKERS = ['password authentication failed', 'role "aitl" does not exist'];
+export const DEV_COMMAND = 'npm run dev -w @aitl/app';
