@@ -259,3 +259,7 @@ Do zrobienia: m6-m8, nity.
 ## 2026-11-24 (poprawki po przeglądzie Fazy 2, m6)
 `toLoginResult` mapuje 400 (np. pusty lub nieprawidłowy e-mail, który ominął walidację klienta) tak jak 401 na `invalid-credentials`, zamiast pokazywać "błąd serwera"; stała `HTTP_BAD_REQUEST` w `routes.ts`, test 400 zmieniony.
 Do zrobienia: m7, m8, nity.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 2, m7)
+`SESSION_SECRET`: walidacja zostaje na min. 32 znaki (zaostrzenie byłoby zmianą łamiącą istniejących `.env` i testów), a zalecenie "losowy, np. `openssl rand -hex 32` (64 znaki hex)" trafiło do README, BC §3 i specu; sekcja "Algorytm" i "Stały koszt" w specu opisuje już rezerwację próby, `deleteStale` i wabik z M1, m1, m2, m4.
+Do zrobienia: m3, nity.
