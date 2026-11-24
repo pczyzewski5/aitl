@@ -16,15 +16,16 @@ body {
   padding: var(--space-within-group) var(--space-panel);
   background: var(--card); border-bottom: 1px solid var(--border);
 }
+.proto-toolbar { flex-wrap: wrap; min-width: 0; }
 .screen-nav { display: flex; flex-wrap: wrap; gap: var(--space-within-group); }
 .screen-nav a {
   display: inline-flex; align-items: center; min-height: var(--control-height); padding: 0 var(--space-within-group);
   color: var(--primary); border-radius: var(--radius);
 }
-.scenario-control { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-1); min-width: 0; font-size: var(--font-size-sm); }
+.scenario-control { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-label-field); min-width: 0; font-size: var(--font-size-sm); }
 .scenario-control label { font-weight: var(--font-weight-semibold); }
 .scenario-panel {
-  margin: 0 var(--space-panel); padding: var(--space-panel);
+  margin: 0; padding: var(--space-panel);
   display: flex; flex-direction: column; gap: var(--space-between-groups);
   background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-surface);
 }
@@ -35,6 +36,16 @@ body {
 .scenario-status, .scenario-hint { margin: 0; font-size: var(--font-size-sm); color: var(--muted-foreground); flex: 1 1 100%; }
 .proto-banner { margin: var(--space-within-group) var(--space-panel); }
 
+.notes { margin-top: var(--space-within-group); display: flex; flex-direction: column; gap: var(--space-within-group); }
+.note { margin: 0; font-size: var(--font-size-sm); color: var(--muted-foreground); max-width: calc(var(--space-12) * 20); }
+.scenario-details { margin: 0 var(--space-panel); }
+.scenario-details > summary {
+  display: inline-flex; align-items: center; min-height: var(--control-height); padding: 0 var(--space-within-group);
+  font-weight: var(--font-weight-semibold); cursor: pointer; border-radius: var(--radius);
+}
+.scenario-details > summary:focus-visible { outline: var(--ring-width) solid var(--ring); outline-offset: var(--ring-width); }
+.scenario-details[open] > summary { margin-bottom: var(--space-within-group); }
+.scenario-details > .scenario-panel { margin: 0; }
 .doc { padding: var(--space-panel); }
 .doc-head h1 { margin: 0 0 var(--space-between-groups); font-size: var(--font-size-lg); }
 .screen { margin-top: var(--space-section); }

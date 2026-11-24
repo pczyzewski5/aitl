@@ -109,7 +109,6 @@ function ScenarioPanel() {
 
   return (
     <section className="scenario-panel" aria-label="Scenariusze (symulacja)">
-      <p className="scenario-title">Scenariusze (symulacja), osobno od nawigacji produktu</p>
       <div className="scenario-grid">
         <ScenarioSelect
           label="Kto się loguje"
@@ -212,7 +211,10 @@ function ReviewBar() {
           {DEMO_NOW_LABEL}.
         </AlertDescription>
       </Alert>
-      <ScenarioPanel />
+      <details className="scenario-details">
+        <summary>Scenariusze (symulacja), osobno od nawigacji produktu: rozwiń, żeby przełączać stany</summary>
+        <ScenarioPanel />
+      </details>
     </>
   );
 }

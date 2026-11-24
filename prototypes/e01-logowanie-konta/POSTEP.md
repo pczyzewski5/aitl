@@ -7,7 +7,9 @@ Prompt i plan etapu 0 są poza repozytorium (scratchpad sesji); najważniejsze d
 - [x] Etap 0: plan (zatwierdzony przez właściciela wg rekomendacji).
 - [x] Etap 1: szkielet i ścieżka bez błędów (s01 -> s02 -> s03 -> wylogowanie).
 - [x] Etap 2: wszystkie stany z mapy, konta demo z przełączaniem, bramki, scenariusze (błędy logowania, blokada, brak sieci, 500, sesja wygasła, lista: ładowanie/pusta/błąd, długa nazwa, dwa konta wspólne, dwie sesje obok siebie na s02, wskaźnik żądania konta po id).
-- [ ] Etap 3: notatki przy ekranach, README (konta demo, scenariusze, "Ograniczenia symulacji"), rozszerzone testy, sprawdzenie 320/768/1440, ciemny motyw, klawiatura, każda kontrolka; jednorazowy skan tokenów na `src/`.
+- [x] Etap 3: notatki przy ekranach, README, 45 testów, sprawdzenie w Chrome (320 w iframe, 768, 1440), jednorazowy skan tokenów na `src/` (0 naruszeń). Szczegóły i czego nie sprawdzono: `RAPORT.md`.
+
+Prototyp jest ukończony. Zostaje: test z prawdziwą osobą i eksport uwag (instrukcja w `RAPORT.md`), decyzje do specyfikacji z listy w `RAPORT.md`, ewentualnie podłączenie do Storybooka po zgodzie właściciela.
 
 ## Decyzje właściciela (obowiązują)
 
@@ -38,9 +40,9 @@ Prompt i plan etapu 0 są poza repozytorium (scratchpad sesji); najważniejsze d
 - "Ponów" na liście kończy się powodzeniem po 0,6 s (scenariusz wraca na "wczytane", jak w szarym prototypie).
 - Testy: `src/states.test.tsx` (27 testów) + 4 z etapu 1.
 
-## Do zrobienia w etapie 3
+## Etap 3: co zrobiono
 
-Notatki przy ekranach (historie, symulacje, czego nie rozstrzyga), README z kontami demo i "Ograniczenia symulacji" (częściowo już jest), sprawdzenie 320/768/1440 (panel scenariuszy nie był oglądany w wąskim oknie), ciemny motyw, klawiatura, każda kontrolka, skan tokenów na `src/`. Nie sprawdzono jeszcze: widok stosu bez prezentacji, tryb komentarzy z panelem scenariuszy.
+Notatki przy ekranach (`.notes > .note` w `app.tsx`), panel scenariuszy w zwiniętym `<details>`, README z "Ograniczeniami symulacji", 14 nowych testów nawigacji, `flex-wrap` dla `.proto-toolbar` (przy 320 px pasek silnika wychodził poza ekran), `--space-1` zamieniony na `--space-label-field`, sprawdzenie w Chrome i raport końcowy `RAPORT.md`.
 
 ## Znane ograniczenia i pułapki
 
