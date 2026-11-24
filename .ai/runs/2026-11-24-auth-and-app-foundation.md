@@ -243,3 +243,7 @@ Do zrobienia: sekcja odchyleń w specu, backlog, checkboxy monorepo-migration, t
 ## 2026-11-24 (PR-12, close-out, commit 2)
 Do speca (w `implemented/`) dopisana sekcja "Odchylenia od specu w implementacji": seed (wrapper w root `scripts/`, hasło tylko z `SEED_PASSWORD`, nazwy kont z opcji CLI, bez stdin, wymaga `SESSION_SECRET`), `GET /api/auth/me`, `loadEnvConfig` (Q39), CSRF (Q40), dwa liczniki throttla (5 i 20), `TRUSTED_PROXY_HOPS`, 400 dla nie-UUID w `/api/bank-accounts/{id}`. Wartości sprawdzone w kodzie (`seed-config.ts`, `login-throttle.service.ts`).
 Do zrobienia: backlog, checkboxy monorepo-migration, track.md, PR.
+
+## 2026-11-24 (PR-12, close-out, commit 3)
+`.ai/specs/backlog.md`: sekcja "Status implementacji E01" (E01, S01, S02, #17-#20) według stanu PR-ów z `gh pr list`; tabela backlogu i issues na GitHubie bez zmian, bo tabela nie ma kolumny statusu.
+Do zrobienia: checkboxy monorepo-migration, track.md, PR.
