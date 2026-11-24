@@ -71,3 +71,7 @@ Do zrobienia: przegląd Opusem po Fazie 1, potem PR-4 (kroki 2.0 + 2.1) i PR-5 (
 ## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 1)
 `apiHandler` przekazuje kontekst route jako trzeci argument `(request, scope, context)`; typ `ApiRouteParams<TParams>` opisuje `{ params: Promise<TParams> }` z Next 16. Test jednostkowy na typowane `params`.
 Do zrobienia: redakcja logów, serializer `err`, rejestracje kontenera, moduł `api-handler` w `app`, stałe i dokumentacja.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 2)
+Redakcja logów generowana z listy `SENSITIVE_KEYS` na głębokościach 0-2 (np. `password`, `*.password`, `*.*.password`), z wariantami wielkości liter nagłówków; sprawdzone empirycznie z pino, także dla tablic obiektów (`items[].password` łapie ścieżka głębokości 2).
+Głębokość 3+ nie jest redagowana (świadome ograniczenie kosztu ścieżek).
