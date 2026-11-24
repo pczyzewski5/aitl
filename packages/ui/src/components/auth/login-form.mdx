@@ -146,17 +146,23 @@ Typowy przykład z produktu (adapter w `app`):
 ```tsx
 'use client';
 
-import { LoginForm, type LoginResult } from '@aitl/ui';
+import { apiCall, LoginForm, type LoginResult } from '@aitl/ui';
 
 async function signIn(values: { email: string; password: string }): Promise<LoginResult> {
-  const response = await apiCall('/api/auth/login', { method: 'POST', body: values });
+  const response = await apiCall<{ displayName: string }>('/api/auth/login', { method: 'POST', body: values });
   if (response.ok) {
     return { ok: true };
   }
-  if (response.error.code === 'too_many_attempts') {
+  if (response.kind === 'network') {
+    return { ok: false, kind: 'network' };
+  }
+  if (response.kind === 'api-error' && response.status === 401) {
+    return { ok: false, kind: 'invalid-credentials' };
+  }
+  if (response.kind === 'api-error' && response.status === 429) {
     return { ok: false, kind: 'too-many-attempts', retryAfterSeconds: response.error.retryAfterSeconds };
   }
-  return { ok: false, kind: 'invalid-credentials' };
+  return { ok: false, kind: 'server-error' };
 }
 
 <LoginForm onSubmit={async (values) => {

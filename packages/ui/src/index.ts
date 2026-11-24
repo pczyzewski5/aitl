@@ -1,6 +1,7 @@
 export const packageName = '@aitl/ui';
 
 export { Alert, AlertDescription, AlertTitle, alertVariants, type AlertProps, type AlertVariant } from './components/ui/alert';
+export { apiCall, type ApiCallOptions, type ApiCallResult, type ApiErrorBody, type ApiFieldErrors, type ApiMethod } from './backend/api/apiCall';
 export { ErrorSummary, type ErrorSummaryItem, type ErrorSummaryProps } from './backend/forms/error-summary';
 export { type AmountFailureReason, type AmountParseResult, parseAmountToMinor } from './backend/forms/parse-amount';
 export {
