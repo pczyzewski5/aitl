@@ -63,3 +63,7 @@ Do zrobienia: zielone checki, merge, uzupelnienie SHA w track.md.
 Wiersze PR-1 (#64, c05b1bc) i PR-#2 (#65, a4f4a6f) oznaczone jako done.
 Decyzja właściciela: `process.exit(1)` w `register()` nie dodajemy (serwer bez konfiguracji zwraca 500).
 Do zrobienia: PR-2 (krok 1.2) i PR-3 (krok 1.3) równolegle.
+
+## 2026-11-24 (Faza 1, health na scope kontenera)
+`GET /api/health` korzysta z `container.createScope()` zamiast tymczasowego pustego scope; wiersze PR-2 (#67, b765b90) i PR-3 (#68, 984b49a) oznaczone jako done.
+Do zrobienia: przegląd Opusem po Fazie 1, potem PR-4 (kroki 2.0 + 2.1) i PR-5 (krok 2.2) równolegle.
