@@ -67,3 +67,31 @@ Do zrobienia: PR-2 (krok 1.2) i PR-3 (krok 1.3) równolegle.
 ## 2026-11-24 (Faza 1, health na scope kontenera)
 `GET /api/health` korzysta z `container.createScope()` zamiast tymczasowego pustego scope; wiersze PR-2 (#67, b765b90) i PR-3 (#68, 984b49a) oznaczone jako done.
 Do zrobienia: przegląd Opusem po Fazie 1, potem PR-4 (kroki 2.0 + 2.1) i PR-5 (krok 2.2) równolegle.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 1)
+`apiHandler` przekazuje kontekst route jako trzeci argument `(request, scope, context)`; typ `ApiRouteParams<TParams>` opisuje `{ params: Promise<TParams> }` z Next 16. Test jednostkowy na typowane `params`.
+Do zrobienia: redakcja logów, serializer `err`, rejestracje kontenera, moduł `api-handler` w `app`, stałe i dokumentacja.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 2)
+Redakcja logów generowana z listy `SENSITIVE_KEYS` na głębokościach 0-2 (np. `password`, `*.password`, `*.*.password`), z wariantami wielkości liter nagłówków; sprawdzone empirycznie z pino, także dla tablic obiektów (`items[].password` łapie ścieżka głębokości 2).
+Głębokość 3+ nie jest redagowana (świadome ograniczenie kosztu ścieżek).
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 3)
+Własny serializer `err` w loggerze (`type`, `message`, `code`, `stack`): pola sterownika typu `detail` nie trafiają do logu; test na poziomie loggera i `apiHandler`.
+Pułapka: `message` błędu sterownika nadal trafia do logu (może zawierać fragment danych); świadomie zostawione do diagnostyki.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 4)
+Kontener złożony z rejestracji per koncept: `container/registrations/{core,db}.ts` (`createXRegistrations` z `satisfies`), `Cradle = CoreCradle & DbCradle`; test rozwiązuje każdy klucz w scope i porównuje klucze kontenera z plikami rejestracji.
+Kolejny koncept dopisuje własny plik rejestracji i jedną linię spread w `container.ts`.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 5)
+Jeden moduł `app/src/http/api-handler.ts` eksportuje `apiHandler` zbudowany na `container.createScope()` i loggerze z kontenera; health z niego korzysta. Test: scope z kontenera, osobny scope na wywołanie, log przez logger kontenera.
+Do zrobienia: stała statusu health, nazwa testu ponownej próby ORM, dokumentacja.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 6)
+Stała `HEALTH_STATUS_UP` w health (nieeksportowana, bo route Next dopuszcza tylko eksporty handlerów); test ponownej próby ORM opisuje błąd konfiguracji/discovery, nie awarię bazy przy init.
+Do zrobienia: dopisy w specu i BACKWARD_COMPATIBILITY.md.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 1, commit 7)
+Spec: dopisane Q36-Q38 (fail-fast bez zakończenia procesu, 200 przy sukcesie i plan na 201/Retry-After, `params` w handlerze); `BACKWARD_COMPATIBILITY.md` §2 opisuje kod `internal` (500). Istniejące decyzje bez zmian.
+Świadomie odłożone: cache ORM po zmianie URL, `orm.close()`, zmiana `serverExternalPackages`.

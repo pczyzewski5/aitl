@@ -24,6 +24,7 @@ Powierzchnia: route w `packages/app/src/app/api/<concept>/route.ts` (obecnie `GE
 - **Zmiana zgodna**: nowa route, nowe opcjonalne pole żądania, nowe pole odpowiedzi, nowy kod błędu dla nowego przypadku.
 - **Wymagana ścieżka**: dla zmiany łamiącej najpierw wprowadź nową wersję obok starej (nowa route lub nowe pole), oznacz starą jako przestarzałą w opisie PR-a i zachowaj ją co najmniej do momentu, gdy wszyscy konsumenci w repozytorium (`packages/ui/src/backend/api`, strony w `packages/app`) przejdą na nową; usunięcie starej w osobnym PR-ze. Klient (`apiCall`) i serwer (`apiHandler`) deklarują własne typy koperty, więc zmiana kształtu wymaga równoległej zmiany po obu stronach.
 - Dane użytkownika zwracane z API nie mogą ujawniać sekretów, haszy haseł ani stack trace.
+- Kod błędu `internal` (status 500, komunikat `Internal server error`) zwraca `apiHandler` dla każdego błędu spoza hierarchii `AppError` oraz dla błędu przy tworzeniu scope; ma zawsze stały komunikat bez szczegółów, a przyczyna trafia tylko do logu serwera. Klienci mogą polegać na tym kodzie i statusie; zmiana kodu, statusu albo ujawnienie szczegółów w odpowiedzi jest zmianą łamiącą.
 
 ## 3. Konfiguracja środowiska
 

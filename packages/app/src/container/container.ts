@@ -1,16 +1,11 @@
-import { asFunction, asValue, createContainer, InjectionMode, type AwilixContainer } from 'awilix';
-import { logger, parseEnv } from '@aitl/core';
-import {
-  createEntityManagerProvider,
-  createOrmConfig,
-  createOrmProvider,
-  type OrmInit,
-} from '@aitl/db';
+import { createContainer, InjectionMode, type AwilixContainer } from 'awilix';
+import type { OrmInit } from '@aitl/db';
 import type { Cradle } from './cradle';
+import { createCoreRegistrations, type EnvSource } from './registrations/core';
+import { createDbRegistrations } from './registrations/db';
 
-export const DEVELOPMENT_ENVIRONMENT = 'development';
-
-export type EnvSource = Readonly<Record<string, string | undefined>>;
+export { DEVELOPMENT_ENVIRONMENT } from './registrations/db';
+export type { EnvSource } from './registrations/core';
 
 export function createAppContainer(source: EnvSource, ormInit?: OrmInit): AwilixContainer<Cradle> {
   const container = createContainer<Cradle>({
@@ -19,18 +14,8 @@ export function createAppContainer(source: EnvSource, ormInit?: OrmInit): Awilix
   });
 
   container.register({
-    env: asFunction(() => parseEnv(source)).singleton(),
-    logger: asValue(logger),
-    ormProvider: asFunction(({ env }: Cradle) =>
-      createOrmProvider({
-        config: createOrmConfig({ databaseUrl: env.DATABASE_URL }),
-        init: ormInit,
-        shareAcrossReloads: env.NODE_ENV === DEVELOPMENT_ENVIRONMENT,
-      }),
-    ).singleton(),
-    entityManagerProvider: asFunction(({ ormProvider }: Cradle) =>
-      createEntityManagerProvider(ormProvider),
-    ).scoped(),
+    ...createCoreRegistrations(source),
+    ...createDbRegistrations(ormInit),
   });
 
   return container;

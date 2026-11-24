@@ -14,7 +14,13 @@ export type ApiErrorBody = {
   error: { code: string; message: string; fieldErrors?: FieldErrors };
 };
 
-export type ApiRouteFunction<TScope, TData> = (request: Request, scope: TScope) => Promise<TData> | TData;
+export type ApiRouteParams<TParams> = { params: Promise<TParams> };
+
+export type ApiRouteFunction<TScope, TData, TContext = unknown> = (
+  request: Request,
+  scope: TScope,
+  context: TContext,
+) => Promise<TData> | TData;
 
 function errorResponse(error: AppError): Response {
   const body: ApiErrorBody = { ok: false, error: { code: error.code, message: error.message } };
@@ -36,12 +42,12 @@ function internalErrorResponse(): Response {
 }
 
 export function createApiHandler<TScope>(createScope: () => TScope, log: Logger = defaultLogger) {
-  return function apiHandler<TData>(
-    routeFunction: ApiRouteFunction<TScope, TData>,
-  ): (request: Request) => Promise<Response> {
-    return async (request) => {
+  return function apiHandler<TData, TContext = unknown>(
+    routeFunction: ApiRouteFunction<TScope, TData, TContext>,
+  ): (request: Request, context: TContext) => Promise<Response> {
+    return async (request, context) => {
       try {
-        const data = await routeFunction(request, createScope());
+        const data = await routeFunction(request, createScope(), context);
         const body: ApiSuccessBody<TData> = { ok: true, data };
 
         return Response.json(body, { status: SUCCESS_STATUS });

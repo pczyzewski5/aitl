@@ -1,8 +1,7 @@
-import { createApiHandler } from '@aitl/core';
-import { container } from '../../../container/container';
+import { apiHandler } from '../../../http/api-handler';
 
 export const dynamic = 'force-dynamic';
 
-const apiHandler = createApiHandler(() => container.createScope());
+const HEALTH_STATUS_UP = 'up';
 
-export const GET = apiHandler(() => ({ status: 'up' }));
+export const GET = apiHandler(() => ({ status: HEALTH_STATUS_UP }));
