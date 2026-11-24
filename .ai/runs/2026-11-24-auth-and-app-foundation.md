@@ -80,3 +80,7 @@ Do zrobienia: PR, wiersz PR-4 w track.md.
 ## 2026-11-24 (PR-10a, krok 2.6a, commit 1)
 Gałąź `feature/ui-appshell-loginform` z `origin/feature/core-auth-primitives` (zależność od PR #70). `AppShell`: `logoutHref` zastąpione przez `onLogout` (przycisk wyglądający jak link, Q24) i `displayName` (Q25); stories i dokumentacja ekranów E01/E02 przepięte, stories testują przycisk, klawiaturę i długą nazwę na 320 px.
 Do zrobienia: LoginForm (500, fokus), `apiCall`, `LoadingMessage`, stan pusty, `docs/design-system.md`, PR.
+
+## 2026-11-24 (PR-10a, krok 2.6a, commit 2)
+`LoginForm`: nowy rodzaj `server-error` w `LoginFailure` z tekstem Q29 (`serverError` w messages) i fokus na polu e-mail po każdym nieudanym logowaniu (Q30), także przy wyjątku żądania; po sukcesie formularz fokusu nie rusza (h1 po zalogowaniu robi strona, Q32). Testy jednostkowe i stories (500, fokus) dodane, dokumentacja `login-form.mdx` zaktualizowana.
+Do zrobienia: `apiCall`, `LoadingMessage`, stan pusty (Q35), `docs/design-system.md`, PR.
