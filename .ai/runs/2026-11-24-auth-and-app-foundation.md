@@ -67,3 +67,8 @@ Do zrobienia: PR-2 (krok 1.2) i PR-3 (krok 1.3) równolegle.
 ## 2026-11-24 (Faza 1, health na scope kontenera)
 `GET /api/health` korzysta z `container.createScope()` zamiast tymczasowego pustego scope; wiersze PR-2 (#67, b765b90) i PR-3 (#68, 984b49a) oznaczone jako done.
 Do zrobienia: przegląd Opusem po Fazie 1, potem PR-4 (kroki 2.0 + 2.1) i PR-5 (krok 2.2) równolegle.
+
+## 2026-11-24 (PR-10b, krok 2.6b, commit 1)
+`app`: `postcss.config.mjs` (`@tailwindcss/postcss`), `src/app/globals.css` (import `@aitl/ui/src/styles.css` + `@source` na `ui/src`), import w root layout, pinowane `tailwindcss`/`@tailwindcss/postcss` 4.3.5; test integracyjny: strona linkuje CSS z tokenami i klasami `ui`.
+Pułapka: bez `@source` Tailwind nie widzi klas z `packages/ui` (poza bazą skanowania `app`); lekcja dodana. `packages/ui` bez zmian.
+Do zrobienia: PR, wiersz PR-10b w track.md.
