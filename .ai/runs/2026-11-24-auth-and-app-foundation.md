@@ -170,3 +170,7 @@ Do zrobienia: BACKWARD_COMPATIBILITY, SB-I, PR, track.md.
 ## 2026-11-24 (PR-8, krok 2.4b, commit 4)
 SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit 0 podatności, integracyjne 12 plików/78 testów; testy throttla uruchomione trzykrotnie bez flaky). Wiersz PR-8 w track.md.
 Do zrobienia: PR (base main, stos #73, #70, #72, #75, #77), zielone checki, merge po stosie, SHA w track.md.
+
+## 2026-11-24 (PR-8, krok 2.4b, commit 5)
+PR #78 (base `main`, leży na stosie #73, #70, #72, #75, #77); numer w wierszu PR-8 w track.md.
+Do zrobienia: zielone checki, merge po stosie, SHA w track.md.
