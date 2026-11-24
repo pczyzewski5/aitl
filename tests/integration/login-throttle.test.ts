@@ -334,6 +334,21 @@ describe('login throttling against PostgreSQL', () => {
       expect(afterWindow).toEqual({ failures: 1, lockedUntil: null });
     });
 
+    it('deletes only the counters not updated since the threshold', async () => {
+      const { loginThrottleRepository } = scope();
+      const stale = randomText();
+      const fresh = randomText();
+      const now = new Date();
+      const threshold = new Date(now.getTime() - MINUTE_MS);
+      await loginThrottleRepository.reserveAttempt(counterFor(stale), new Date(threshold.getTime() - SECOND_MS));
+      await loginThrottleRepository.reserveAttempt(counterFor(fresh), now);
+
+      await loginThrottleRepository.deleteStale(threshold);
+
+      expect(await findThrottle(stale)).toBeUndefined();
+      expect(await findThrottle(fresh)).toBeDefined();
+    });
+
     it('deletes the given counters only', async () => {
       const { loginThrottleRepository } = scope();
       const removed = randomText();

@@ -247,3 +247,7 @@ Do zrobienia: m1, m2, m5-m8, nity.
 ## 2026-11-24 (poprawki po przeglądzie Fazy 2, m1)
 Wabik argon2 liczony w konstruktorze hashera, odrzucony promise nie jest cache'owany (kolejne wywołanie liczy od nowa), a `register()` w `instrumentation.ts` rozgrzewa singleton `passwordHasher` przy starcie, więc pierwsze logowanie nieistniejącego e-maila nie płaci za wabik.
 Do zrobienia: m2, m5-m8, nity.
+
+## 2026-11-24 (poprawki po przeglądzie Fazy 2, m2)
+`LoginThrottleRepository.deleteStale` kasuje wiersze `login_throttles` nietknięte (`updated_at`) dłużej niż max(okno, blokada); wołane na początku `reserveAttempt`, analogicznie do `deleteExpired` sesji, po istniejącym indeksie `updated_at`. Fake dostał `updatedAt`; test na prawdziwej bazie.
+Do zrobienia: m5-m8, nity.

@@ -65,4 +65,9 @@ export class MikroOrmLoginThrottleRepository implements LoginThrottleRepository 
     const em = await this.entityManagerProvider.getEntityManager();
     await em.nativeDelete(LoginThrottle, { keyHash: { $in: [...keyHashes] } });
   }
+
+  async deleteStale(staleBefore: Date): Promise<void> {
+    const em = await this.entityManagerProvider.getEntityManager();
+    await em.nativeDelete(LoginThrottle, { updatedAt: { $lte: staleBefore } });
+  }
 }

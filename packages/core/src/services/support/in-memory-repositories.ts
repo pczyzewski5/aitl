@@ -28,6 +28,7 @@ export type StoredThrottle = {
   failures: number;
   windowStartedAt: Date;
   lockedUntil: Date | null;
+  updatedAt: Date;
 };
 
 export class InMemoryStore {
@@ -178,10 +179,11 @@ export class InMemoryLoginThrottleRepository implements LoginThrottleRepository 
     const isFresh =
       existing === undefined || (!isLocked && now.getTime() - existing.windowStartedAt.getTime() >= windowMs);
     const throttle: StoredThrottle = isFresh
-      ? { keyHash, failures: 0, windowStartedAt: now, lockedUntil: null }
+      ? { keyHash, failures: 0, windowStartedAt: now, lockedUntil: null, updatedAt: now }
       : existing;
 
     throttle.failures += 1;
+    throttle.updatedAt = now;
 
     if (!isLocked && throttle.failures >= limit) {
       throttle.lockedUntil = new Date(now.getTime() + lockMs);
@@ -194,6 +196,10 @@ export class InMemoryLoginThrottleRepository implements LoginThrottleRepository 
 
   async deleteByKeyHashes(keyHashes: readonly string[]): Promise<void> {
     this.store.throttles = this.store.throttles.filter(({ keyHash }) => !keyHashes.includes(keyHash));
+  }
+
+  async deleteStale(staleBefore: Date): Promise<void> {
+    this.store.throttles = this.store.throttles.filter(({ updatedAt }) => updatedAt > staleBefore);
   }
 }
 

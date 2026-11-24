@@ -115,11 +115,25 @@ describe('LoginThrottleService', () => {
     await expect(sut.reserveAttempt({ email, clientIp })).resolves.toBeUndefined();
   });
 
+  it('removes counters left untouched for longer than the window and the lock when a new attempt arrives', async () => {
+    await reserve(1);
+    advance(Math.max(LOGIN_THROTTLE_WINDOW_MS, LOGIN_THROTTLE_LOCK_MS) - 1);
+    await sut.reserveAttempt({ email: `${randomText()}@example.test`, clientIp });
+    expect(store.throttles).toHaveLength(4);
+
+    advance(1);
+    await sut.reserveAttempt({ email: `${randomText()}@example.test`, clientIp });
+
+    expect(store.throttles).toHaveLength(4);
+    expect(store.throttles.every(({ updatedAt }) => updatedAt > START)).toBe(true);
+  });
+
   it('falls back to the full lock time when the repository reports no end of the lock', async () => {
     const overLimit = { failures: LOGIN_FAILURE_LIMIT_PER_EMAIL + 1, lockedUntil: null };
     const repository: LoginThrottleRepository = {
       reserveAttempt: async () => overLimit,
       deleteByKeyHashes: async () => undefined,
+      deleteStale: async () => undefined,
     };
     const stubbedSut = new LoginThrottleService(repository, new SessionTokens(randomBytes(32).toString('hex')), () => now);
 

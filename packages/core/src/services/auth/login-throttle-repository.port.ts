@@ -13,4 +13,5 @@ export type ThrottleReservation = Readonly<{
 export interface LoginThrottleRepository {
   reserveAttempt(counter: ThrottleCounter, now: Date): Promise<ThrottleReservation>;
   deleteByKeyHashes(keyHashes: readonly string[]): Promise<void>;
+  deleteStale(staleBefore: Date): Promise<void>;
 }

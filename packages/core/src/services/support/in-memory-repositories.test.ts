@@ -185,4 +185,17 @@ describe('InMemoryLoginThrottleRepository', () => {
     expect(afterWindow).toEqual({ failures: 1, lockedUntil: null });
     expect(afterDelete).toEqual({ failures: 1, lockedUntil: null });
   });
+
+  it('deletes counters last updated at or before the threshold', async () => {
+    const store = new InMemoryStore();
+    const sut = new InMemoryLoginThrottleRepository(store);
+    const stale = randomText();
+    const fresh = randomText();
+    await sut.reserveAttempt(counter(stale, 3), NOW);
+    await sut.reserveAttempt(counter(fresh, 3), at(10));
+
+    await sut.deleteStale(NOW);
+
+    expect(store.throttles.map(({ keyHash }) => keyHash)).toEqual([fresh]);
+  });
 });

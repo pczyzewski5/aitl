@@ -10,6 +10,7 @@ export const LOGIN_THROTTLE_LOCK_MS = 15 * 60 * 1000;
 export const TOO_MANY_ATTEMPTS_MESSAGE = 'Too many login attempts';
 
 const MILLISECONDS_PER_SECOND = 1000;
+const STALE_AFTER_MS = Math.max(LOGIN_THROTTLE_WINDOW_MS, LOGIN_THROTTLE_LOCK_MS);
 
 export type LoginAttemptIdentity = Readonly<{ email: string; clientIp: string }>;
 
@@ -26,6 +27,8 @@ export class LoginThrottleService {
 
   async reserveAttempt(identity: LoginAttemptIdentity): Promise<void> {
     const now = this.clock();
+    await this.repository.deleteStale(new Date(now.getTime() - STALE_AFTER_MS));
+
     const counters = this.counters(identity);
     const reservations = await Promise.all(counters.map((counter) => this.repository.reserveAttempt(counter, now)));
 

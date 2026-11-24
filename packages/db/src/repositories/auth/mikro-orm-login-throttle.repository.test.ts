@@ -69,4 +69,13 @@ describe('MikroOrmLoginThrottleRepository', () => {
 
     expect(nativeDelete).toHaveBeenCalledWith(LoginThrottle, { keyHash: { $in: keyHashes } });
   });
+
+  it('deletes the counters not updated since the threshold', async () => {
+    const nativeDelete = vi.fn().mockResolvedValue(3);
+    const sut = createSut({ nativeDelete });
+
+    await sut.deleteStale(WINDOW_START);
+
+    expect(nativeDelete).toHaveBeenCalledWith(LoginThrottle, { updatedAt: { $lte: WINDOW_START } });
+  });
 });
