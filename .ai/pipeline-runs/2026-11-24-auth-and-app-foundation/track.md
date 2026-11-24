@@ -16,7 +16,7 @@ Statusy: todo / in-progress / done. Kolumny PR, SHA i SB uzupełnia agent po zak
 
 | PR | Krok | Issue | Zakres | Siatka | Zależności | Status | PR # | SHA | Wynik SB |
 |----|------|-------|--------|--------|------------|--------|------|-----|----------|
-| PR-1 | 1.1 | #18 | env Zod, logger pino z redakcją, `instrumentation.ts` (core/app) | SB-I | - | in-progress | #64 | | SB-I zielone lokalnie (typecheck, lint, coverage 100%, build, audit, integracyjne) |
+| PR-1 | 1.1 | #18 | env Zod, logger pino z redakcją, `instrumentation.ts` (core/app) | SB-I | - | done | #64 | c05b1bc | SB-I zielone (typecheck, lint, coverage 100%, build, audit, integracyjne); `process.exit(1)` w `register()` nie dodane (decyzja właściciela: zostaje 500) |
 | PR-2 | 1.2 | #18 | `createApiHandler` + health | SB-I | PR-1 | todo | | | |
 | PR-3 | 1.3 | #17 | Awilix, leniwy ORM, `serverExternalPackages` | SB-I | PR-1 | todo | | | |
 | PR-4 | 2.0 + 2.1 | #18 | standardy (JWT -> sesja serwerowa, także AGENTS.md i CODE_REVIEW.md gdzie dotyczy), `core/http/auth.ts`, `InvalidCredentialsError`, `TooManyRequestsError`, walidator login | SB-A | PR-2 | todo | | | |
@@ -30,7 +30,7 @@ Statusy: todo / in-progress / done. Kolumny PR, SHA i SB uzupełnia agent po zak
 | PR-10c | 2.6c | #19, #10 | strony `/login` i `/` (lista kont, `/?account=<id>`), redirecty, wylogowanie, fokus na h1; `needs-qa` | SB-I + SB-U | PR-8, PR-10a, PR-10b | todo | | | |
 | PR-11 | 2.7 | #11 | izolacja i druga osoba, test API dwóch sesji, E2E tylko żony; `needs-qa` | SB-I | PR-8, PR-9, PR-10c | todo | | | |
 | PR-12 | close-out | - | spec do `implemented/`, backlog, checkboxy monorepo-migration | SB-A | PR-11 | todo | | | |
-| PR-#2 | instalator | #2 | `npm run setup`, bez generowania sekretów (tylko instrukcja); follow-up o `seed:user` po PR-9 | SB-A | równolegle z Fazą 1 w osobnym worktree, merge przed PR-7 | in-progress | | | |
+| PR-#2 | instalator | #2 | `npm run setup`, bez generowania sekretów (tylko instrukcja); follow-up o `seed:user` po PR-9 | SB-A | równolegle z Fazą 1 w osobnym worktree, merge przed PR-7 | done | #65 | a4f4a6f | SB-A zielone, instalator sprawdzony dwukrotnie (idempotentność) |
 
 ## Zasady pracy
 
