@@ -51,15 +51,15 @@ describe('createOrmProvider', () => {
     expect(first).not.toBe(second);
   });
 
-  it('retries initialization after a failure, for example when the database was down', async () => {
+  it('retries initialization after a failure, for example a configuration or discovery error', async () => {
     const { orm } = createFakeOrm();
     const init = vi
       .fn<OrmInit>()
-      .mockRejectedValueOnce(new Error('connection refused'))
+      .mockRejectedValueOnce(new Error('entity discovery failed'))
       .mockResolvedValueOnce(orm);
     const sut = createOrmProvider({ config, init });
 
-    await expect(sut.forkEntityManager()).rejects.toThrow('connection refused');
+    await expect(sut.forkEntityManager()).rejects.toThrow('entity discovery failed');
     await expect(sut.forkEntityManager()).resolves.toBeDefined();
 
     expect(init).toHaveBeenCalledTimes(2);
