@@ -66,7 +66,18 @@ alias agent-audit="find . \\( -name .mcp.json -o -name CLAUDE.md -o -name AGENTS
 
 Ryzyko powstaje, gdy agent ma jednocześnie: dostęp do prywatnych danych, kontakt z niezaufaną treścią i możliwość komunikacji na zewnątrz. W typowym przebiegu agenta w AITL odcinamy pierwszą nogę: sekrety są wyłącznie w lokalnym `.env` właściciela, a agenci go nie czytają (reguły `deny` blokują narzędzie Read, hook blokuje `.env` i `~/.ssh`/`~/.aws` w Bash). Drugą nogę ogranicza praca w sandboxie i wyłącznie przez PR (chroniony `main`, wymagane checki, brak pushu na `main`), więc nawet udany prompt injection daje tylko widoczny w review diff, a nie wyciek. Reguły sandboxa sieciowego opisuje osobny PR.
 
-## 6. Do uzupełnienia przez właściciela
+## 6. Sandbox
+
+`.claude/settings.json` włącza sandbox (`sandbox.enabled`, `allowUnsandboxedCommands: false`, czyli brak ucieczki z sandboxa za zgodą w sesji). Wybory:
+
+- `filesystem.denyRead`: `~/.ssh`, `~/.aws`, `~/.config/gh`, `~/.kube`, `~/.npmrc`, `~/.pypirc`, `~/**/.env`. Skutek uboczny: komenda w sandboxie nie przeczyta `.env`, więc `npm run seed:user` (używa `--env-file-if-exists=.env`) uruchamiaj we własnym terminalu.
+- `network.allowedDomains`: `github.com` (git push/fetch), `api.github.com` (`gh`), `registry.npmjs.org` (`npm ci`, `npm audit`). `network.deniedDomains`: endpointy metadanych chmury (`169.254.169.254`, `metadata.google.internal`).
+- `network.allowLocalBinding: true`: `next start` i testy integracyjne łączą się z `127.0.0.1` i z kontenerem Postgresa na zmapowanym porcie.
+- `excludedCommands: ["docker"]`: testcontainers rozmawia z gniazdem Dockera, którego sandbox nie wpuszcza; `docker` działa poza sandboxem.
+
+Znane ograniczenia: `npx playwright install` (pobieranie przeglądarek z CDN Playwrighta) i `npm run test:storybook` lokalnie wymagają dopisania domeny CDN albo uruchomienia we własnym terminalu (CI nie jest objęty sandboxem). Testy integracyjne uruchamiają się przez Node, a nie przez `docker`, więc gniazdo Dockera może nadal być blokowane: patrz lista kontrolna w opisie PR-a. Zachowanie sandboxa nie było weryfikowane automatycznie.
+
+## 7. Do uzupełnienia przez właściciela
 
 - Skan historii sesji w `~/.claude/projects` pod kątem sekretów: do uzupełnienia przez właściciela.
 - Rotacja ewentualnie ujawnionych kluczy: do uzupełnienia przez właściciela.
