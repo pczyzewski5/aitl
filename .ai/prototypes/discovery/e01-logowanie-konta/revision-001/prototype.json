@@ -1,0 +1,16 @@
+{
+  "format": "discovery-prototype-v1",
+  "skill": "om-mockup-prototype",
+  "slug": "e01-logowanie-konta",
+  "revision": 1,
+  "revisionPath": ".ai/prototypes/discovery/e01-logowanie-konta/revision-001",
+  "previousRevision": null,
+  "brief": ".ai/specs/product-brief.md",
+  "flow": "logowanie i lista kont bankowych (E01)",
+  "panelReport": null,
+  "verification": "not-run",
+  "files": [
+    { "path": "index.html", "sha256": "a884686d2d4f55f914c0edbf07eb5cc2f2cfb134385280ea5ca62be845ac0247" },
+    { "path": "README.md", "sha256": "1e3696646bd7c7682b136290df440af316033346005908f575fe5adfab752f53" }
+  ]
+}
