@@ -1,0 +1,63 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="System projektowy/Komponenty: katalog" />
+
+# Komponenty: katalog
+
+Każdy komponent jest eksportowany z `@aitl/ui` i ma stronę dokumentacji (do czego służy, kiedy używać, kiedy nie, anatomia, warianty, stany, dostępność, treść, responsywność, API), stories i test interakcji w przeglądarce.
+
+## Elementy bazowe
+
+| Komponent | Do czego | Strona |
+|---|---|---|
+| `Button` | akcja na stronie; warianty `default`, `secondary`, `ghost`, `destructive` | [Button](?path=/docs/elementy-bazowe-button--docs) |
+| `TextLink` | przejście do innej strony | [TextLink](?path=/docs/elementy-bazowe-textlink--docs) |
+| `Input` | tekst, e-mail, hasło, kwota | [Input](?path=/docs/elementy-bazowe-input--docs) |
+| `Label`, `Field` | widoczna etykieta, podpowiedź i błąd pod polem | [Label i Field](?path=/docs/elementy-bazowe-label-i-field--docs) |
+| `Select` | natywna lista wyboru | [Select](?path=/docs/elementy-bazowe-select--docs) |
+| `Checkbox` | niezależna opcja, także stan pośredni | [Checkbox](?path=/docs/elementy-bazowe-checkbox--docs) |
+| `RadioGroup` | jedna opcja z kilku, `fieldset` z `legend` | [RadioGroup](?path=/docs/elementy-bazowe-radiogroup--docs) |
+| `Card` | powierzchnia z ramką, bez cienia | [Card](?path=/docs/elementy-bazowe-card--docs) |
+| `Badge` | krótka etykieta tekstowa: `shared`, `personal`, `neutral` | [Badge](?path=/docs/elementy-bazowe-badge--docs) |
+| `Alert` | komunikat `neutral` (`status`) lub `error` (`alert`) | [Alert](?path=/docs/elementy-bazowe-alert--docs) |
+| `Dialog` | okno modalne | [Dialog](?path=/docs/elementy-bazowe-dialog--docs) |
+| `ConfirmDialog` | potwierdzenie akcji nieodwracalnej | [ConfirmDialog](?path=/docs/elementy-bazowe-confirmdialog--docs) |
+| `Menu` | akcje jednego wiersza lub obiektu | [Menu](?path=/docs/elementy-bazowe-menu--docs) |
+| `Skeleton` | statyczne miejsce na ładującą się treść | [Skeleton](?path=/docs/elementy-bazowe-skeleton--docs) |
+| `EmptyState` | pusta sekcja z najwyżej jedną akcją | [EmptyState](?path=/docs/elementy-bazowe-emptystate--docs) |
+| `ErrorState` | sekcja, której nie udało się wczytać, z ponowieniem | [ErrorState](?path=/docs/elementy-bazowe-errorstate--docs) |
+| `ToastProvider`, `useToast` | krótkie potwierdzenie po zapisie | [Toast](?path=/docs/elementy-bazowe-toast--docs) |
+
+## Elementy produktu
+
+| Komponent | Epik | Do czego | Strona |
+|---|---|---|---|
+| `AppShell` | E01, E02, E03 | rama strony: pasek "AITL", opcjonalny "Wyloguj", kolumna do 960 px | [AppShell](?path=/docs/elementy-produktu-appshell--docs) |
+| `LoginForm` | E01 | formularz logowania ze stanami odpowiedzi API | [LoginForm](?path=/docs/elementy-produktu-e01-loginform--docs) |
+| `BankAccountList` | E01 | lista kont bankowych: ładowanie, pusto, błąd | [BankAccountList](?path=/docs/elementy-produktu-e01-bankaccountlist--docs) |
+| `AccountRemainderCard` | E03 | "ile zostanie" jednego konta, wybór aktywnego konta | [AccountRemainderCard](?path=/docs/elementy-produktu-accountremaindercard--docs) |
+| `MonthSwitcher` | E02, E03 | zmiana miesiąca | [MonthSwitcher](?path=/docs/elementy-produktu-monthswitcher--docs) |
+| `EntryTable`, `EntryRow` | E02 | tabela wpisów z flagą "Zapłacone" | [EntryTable](?path=/docs/elementy-produktu-entrytable--docs) |
+| `EntryForm`, `AmountInput` | E02 | dodanie i edycja wpisu w oknie | [EntryForm](?path=/docs/elementy-produktu-entryform--docs) |
+| `SeriesActions` | E02 | edycja, usunięcie, zakończenie serii, zmiana kwoty | [SeriesActions](?path=/docs/elementy-produktu-seriesactions--docs) |
+| `ErrorSummary`, `useFormValidation` | E01, E02 | podsumowanie błędów i walidacja formularza | [Formularz](?path=/docs/wzorce-formularz--docs) |
+
+## Wzorce
+
+| Wzorzec | Do czego |
+|---|---|
+| [Formularz](?path=/docs/wzorce-formularz--docs) | pola, walidacja, stany odpowiedzi API: sukces, oczekiwanie, błąd pola, błąd serwera, brak sieci |
+| [Lista wpisów konta](?path=/docs/wzorce-lista-wpisów-konta--docs) | lista ze stanami "pusto", "błąd", "za dużo" i miesiącem zamiast filtrów |
+| [Potwierdzenie usunięcia](?path=/docs/wzorce-potwierdzenie-usunięcia--docs) | okno z nazwą obiektu i czasownikiem, zasada fokusu po usunięciu |
+| [Przegląd miesiąca per konto](?path=/docs/wzorce-przegląd-miesiąca-per-konto--docs) | osobna karta wyniku na każde konto, nigdy suma |
+
+## Pomocnicze
+
+| Eksport | Do czego |
+|---|---|
+| `formatMoneyMinor` | formatowanie kwoty z jednostki podstawowej ("3 975,50 zł") |
+| `parseAmountToMinor` | parsowanie kwoty wpisanej w polu |
+| `addMonths`, `compareMonths`, `formatMonthLabel`, `isMonthKey`, `parseMonthKey` | klucz miesiąca `RRRR-MM` |
+| `cn` | łączenie klas Tailwinda |
+
+Elementów nieobecnych w katalogu (np. `Textarea`, `Tabs`) świadomie nie ma: patrz [Czego brakuje](?path=/docs/system-projektowy-czego-brakuje--docs).

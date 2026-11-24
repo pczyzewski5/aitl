@@ -1,0 +1,67 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="System projektowy/Jak wybrać komponent" />
+
+# Jak wybrać komponent
+
+Tabele "jeśli... to użyj...". Gdy żaden wiersz nie pasuje, nie wymyślaj komponentu: sprawdź [Czego brakuje](?path=/docs/system-projektowy-czego-brakuje--docs).
+
+## Akcja czy nawigacja
+
+| Jeśli | To użyj |
+|---|---|
+| użytkownik zapisuje, anuluje, usuwa lub przełącza miesiąc na bieżącej stronie | `Button` |
+| użytkownik przechodzi na inną stronę | `TextLink` (albo `Button` z `asChild` i `a`, gdy link ma wyglądać jak przycisk) |
+| akcji jest kilka dla jednego wiersza | `Menu` |
+| na ekranie jest kilka przycisków | jeden `default`, pozostałe `secondary` lub `ghost` |
+| akcja jest nieodwracalna | `Button` `destructive` w `ConfirmDialog` |
+
+## Pola i wybór
+
+| Jeśli | To użyj |
+|---|---|
+| wpisujesz tekst, e-mail, hasło lub kwotę | `Input` (`type`: `text`, `email`, `password`, `amount`) w `Field` |
+| pole ma etykietę, podpowiedź lub błąd | `Field` (`label`, `hint`, `error`, `optional`) |
+| wybierasz jedną wartość z długiej listy | `Select` |
+| wybierasz jedną z dwóch do kilku opcji | `RadioGroup` (poziomo dla dwóch, pionowo dla więcej) |
+| zaznaczasz niezależną opcję ("Zapłacone") | `Checkbox` |
+| potrzebujesz pola wielowierszowego | brak (`Textarea` niezbudowany): patrz [Czego brakuje](?path=/docs/system-projektowy-czego-brakuje--docs) |
+
+## Powierzchnie i komunikaty
+
+| Jeśli | To użyj |
+|---|---|
+| grupujesz treść w osobny blok | `Card` (ramka, bez cienia) |
+| oznaczasz krótką informacją, np. typ konta | `Badge` (`shared`, `personal`, `neutral`) |
+| komunikat dotyczy wyniku operacji w formularzu lub na stronie | `Alert` (`neutral` albo `error`) |
+| potwierdzasz udany zapis | `Toast` (`useToast`) |
+| błąd dotyczy jednego pola | `error` w `Field`, nie `Alert` |
+| błędów w formularzu jest kilka | `ErrorSummary` z `useFormValidation` |
+
+## Stany danych
+
+| Jeśli | To użyj |
+|---|---|
+| sekcja się ładuje | `Skeleton` w kontenerze z `aria-busy` |
+| sekcja jest pusta | `EmptyState` z najwyżej jedną akcją |
+| sekcji nie udało się wczytać | `ErrorState` z "Spróbuj ponownie" |
+| lista przekroczyła limit | stan `limit-exceeded` w `EntryTable` |
+
+## Okna
+
+| Jeśli | To użyj |
+|---|---|
+| potrzebna jest krótka, osobna interakcja (formularz wpisu) | `Dialog` |
+| użytkownik potwierdza akcję nieodwracalną | `ConfirmDialog` (przyciski nazwane czasownikiem, fokus na "Anuluj") |
+| chcesz podpowiedź lub okienko przy elemencie | brak (`Tooltip`, `Popover` niezbudowane) |
+
+## Elementy produktu
+
+| Jeśli | To użyj |
+|---|---|
+| budujesz ramę strony | `AppShell` |
+| pokazujesz listę kont bankowych | `BankAccountList` |
+| pokazujesz "ile zostanie" | jedna `AccountRemainderCard` na konto, nigdy suma |
+| zmieniasz miesiąc | `MonthSwitcher` |
+| pokazujesz wpisy konta | `EntryTable` z `SeriesActions` w slocie `actions` |
+| dodajesz lub edytujesz wpis | `EntryForm` |

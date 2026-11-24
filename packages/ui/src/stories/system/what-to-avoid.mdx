@@ -1,0 +1,60 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="System projektowy/Czego unikać" />
+
+# Czego unikać
+
+Trzy części: antywzorce produktu (wynikają z antyreferencji A1-A5 w `.ai/specs/design/2026-11-17-referencje.md`), generyczny wygląd AI i błędy implementacji. Każdy punkt mówi, co robić zamiast.
+
+## 1. Antywzorce produktu
+
+| Czego unikać | Dlaczego | Zamiast tego |
+|---|---|---|
+| Jedna łączna liczba "ile zostanie" (A4) | wynik jest osobno per konto bankowe; suma myli właścicieli różnych kont | jedna `AccountRemainderCard` na konto |
+| Kolor jako jedyny nośnik informacji (A3): kwota tylko zielona lub czerwona, aktywne konto tylko niebieską ramką | osoby niewidzące koloru tracą znaczenie | znak "+" lub "−", etykieta, `aria-pressed` i znacznik tekstowy |
+| Cień jako jedyny separator kart (A2) | granica powierzchni ma być widoczna | ramka `--border` i `bg-card`, bez `shadow-*` |
+| Dane udające prawdziwe (A5) | przykład wygląda jak realne kwoty | dopisek "(przykład)" |
+| Flaga "Zapłacone" zmieniająca sumę | decyzja produktowa: flaga nie zmienia wyniku | wynik liczy serwer, flaga tylko oznacza wpis |
+| Ozdobniki i wykrzykniki w treści | ton rzeczowy, narzędzie ma nie przeszkadzać | krótkie zdania w trybie rozkazującym |
+| Dodawanie funkcji spoza zakresu (filtry, sumy, wykresy) bez zmiany specyfikacji | miesiąc zamiast filtrów to decyzja produktu | zgłoś właścicielowi |
+
+## 2. Generyczny wygląd AI
+
+Antyreferencja A1 i antycharakter "generyczny, efekciarski". Nie robimy:
+
+- gradientów w nagłówku, tle ani na przycisku;
+- indygo ani fioletu jako koloru akcji (kolor akcji to jeden niebieski `--primary`);
+- ciemnogranatowego tła z poświatą ani `backdrop-filter`;
+- pigułki "nowość" nad nagłówkiem;
+- rzędu wielkich liczb jako ozdoby (wielka liczba to tylko wynik konta);
+- trzech identycznych kart z ikoną;
+- iskierek i ikon "AI";
+- kolorowego słowa w nagłówku;
+- wymyślonych opinii, statystyk i obietnic;
+- wyglądu banku lub korporacji (granatowe paski, ozdobne zdjęcia).
+
+Zamiast tego: jasne tło, białe powierzchnie z ramką, jeden kolor akcji, czytelna hierarchia rozmiarów (14/16/20/28 px) i tekst, który mówi, co robić.
+
+## 3. Błędy implementacji
+
+| Błąd | Skutek | Zamiast tego |
+|---|---|---|
+| Kolory zapisane jako hex lub funkcja koloru, klasy domyślnej palety Tailwinda (nazwa palety i stopień, biały i czarny) oraz wartości arbitralne w nawiasach kwadratowych | łamią tokeny; `npm run check:tokens` kończy się błędem | tokeny znaczeniowe (`bg-primary`, `text-primary-foreground`) |
+| Odstępy spoza skali 4 px (2, 6, 14 px) | rozjeżdżają siatkę | tokeny odstępów (`--space-*`) |
+| Rozmiary tekstu 12, 13 i 18 px, waga 500 | spoza skali | 14, 16, 20, 28 px; wagi 400, 600, 700 |
+| `div` zamiast `button`, `a` bez `href`, klik na `span` | brak klawiatury i semantyki | `Button`, `TextLink` |
+| Placeholder zamiast etykiety | etykieta znika po wpisaniu | `Field` z widoczną etykietą |
+| Błąd walidacji w dymku lub bez wskazania pola | użytkownik nie wie, co poprawić | `error` w `Field` pod polem, `ErrorSummary` |
+| Natywna walidacja przeglądarki (`required`) | niespójny wygląd i komunikaty | `noValidate` na formularzu, `aria-required`, `useFormValidation` |
+| Pola formularza wprost na `--background` | ramka ma 2,89:1, poniżej 3:1 | pole na `--card` lub `--form-surface` |
+| Cele klikalne poniżej 24 px | trudne do trafienia | `--control-height` (36 px); etykieta jest celem checkboxa |
+| Poziome przewijanie strony przy 320 px, długi tekst bez zawijania | treść ucięta | `wrap-anywhere`, kontener przewijany tylko dla tabeli |
+| Zahardkodowane teksty w stronie | niespójny ton, trudne tłumaczenie | `messages` komponentów |
+| Kwota jako `float` albo składana ręcznie | błędy zaokrągleń i formatu | liczby całkowite w groszach, `formatMoneyMinor` |
+| Fokus ustawiony synchronicznie po usunięciu wiersza | Radix `FocusScope` go nadpisuje | `setTimeout(0)` w efekcie, fokus na nagłówek listy |
+| Karty z `h3` bezpośrednio pod `h1` | axe: `heading-order` | ukryty `h2` sekcji |
+| Okno otwierane z pozycji menu przed jego zamknięciem | fokus nie wraca do przycisku menu | uruchom akcję po zamknięciu menu |
+| Oczekiwane kwoty w testach wpisane ręcznie ze spacją | niełamliwe spacje formatera są inne | budować oczekiwanie przez `formatMoneyMinor` |
+| Komentarze w kodzie, `any` bez uzasadnienia, martwy kod, `console.log` | niezgodne z zasadami repozytorium | czytelne nazwy, typy, usunąć |
+| Nowy komponent, token lub zależność bez zgody | system rozrasta się bez decyzji | zgłoś lukę, poczekaj na decyzję właściciela |
+| Dopisywanie stylów ciemnego motywu "na oko" | brak wartości (L3) i policzonego kontrastu | czekaj na decyzję o L3 |

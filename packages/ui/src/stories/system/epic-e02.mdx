@@ -1,0 +1,42 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="System projektowy/Epik E02: Zapis wpływów i wydatków" />
+
+# Epik E02: Zapis wpływów i wydatków
+
+Właściciel zapisuje wpływy i wydatki jednorazowe oraz cykliczne na koncie bankowym, ogląda je w wybranym miesiącu i oznacza wydatki jako zapłacone. Źródło: `.ai/specs/2026-11-17-entries-income-expenses.md`, backlog `.ai/specs/backlog.md` (E02-S01...S04).
+
+## Ekran
+
+| Ekran | Adres | Co pokazuje |
+|---|---|---|
+| [Konto z wpisami](?path=/docs/ekrany-e02-wpisy-konto-z-wpisami-account-…-month-…--docs) | `/?account=…&month=RRRR-MM` | stan w adresie, ładowanie, pusty miesiąc, błąd wczytania, limit 500 wpisów, błędy zapisu (sieć, walidacja serwera, limit, konflikty 409), jedno konto, 768 i 320 px, testy: dodanie wpisu, fokus po usunięciu, zakończenie serii, flaga "Zapłacone" a wynik |
+
+Ekran jest jedną stroną razem z przeglądem miesiąca z [E03](?path=/docs/system-projektowy-epik-e03-ile-zostanie-w-miesiącu--docs).
+
+## Elementy i wzorce
+
+| Element | Strona |
+|---|---|
+| `MonthSwitcher` | [MonthSwitcher](?path=/docs/elementy-produktu-monthswitcher--docs) |
+| `EntryTable`, `EntryRow` | [EntryTable](?path=/docs/elementy-produktu-entrytable--docs) |
+| `EntryForm`, `AmountInput` | [EntryForm](?path=/docs/elementy-produktu-entryform--docs) |
+| `SeriesActions` | [SeriesActions](?path=/docs/elementy-produktu-seriesactions--docs) |
+| `ConfirmDialog`, `Menu`, `Dialog` | [Potwierdzenie usunięcia](?path=/docs/wzorce-potwierdzenie-usunięcia--docs) |
+| `ToastProvider`, `useToast` | [Toast](?path=/docs/elementy-bazowe-toast--docs) |
+| Wzorzec listy | [Lista wpisów konta](?path=/docs/wzorce-lista-wpisów-konta--docs) |
+| Wzorzec formularza | [Formularz](?path=/docs/wzorce-formularz--docs) |
+
+## Najważniejsze reguły
+
+- Stan ekranu jest w adresie: `month` (RRRR-MM) i `account`; błędne wartości wracają do domyślnych.
+- Lista ma limit 500 wpisów i stan `limit-exceeded`; miesiąc jest najwęższym filtrem (nie ma osobnych filtrów).
+- Kwoty zawsze przez `formatMoneyMinor`, wpływ ze znakiem "+", wydatek ze znakiem "−" albo etykietą, nie sam kolor.
+- Flaga "Zapłacone" nie zmienia wyniku miesiąca; podczas zapisu pole zachowuje fokus (`aria-disabled` i `aria-busy`).
+- Usunięcie wpisu przez `ConfirmDialog` z nazwą wpisu w tytule i przyciskiem "Usuń wpis". Po usunięciu fokus idzie na nagłówek listy i pojawia się Toast "Wpis usunięty.".
+- Zakończenie serii i zmiana kwoty zostawiają wiersz, a fokus wraca na menu wiersza.
+- Błąd w oknie zostaje w oknie, z zachowanymi danymi. Toast tylko dla flagi "Zapłacone", która nie ma okna.
+
+## Luki
+
+Strony w `packages/app` jeszcze nie istnieją. Do sprawdzenia przed ich budową: czy wiersz listy niesie `seriesStartMonth` i `seriesEndMonth`. Pole daty jest zwykłym `Input` z podpowiedzią formatu. Więcej: [Czego brakuje](?path=/docs/system-projektowy-czego-brakuje--docs).

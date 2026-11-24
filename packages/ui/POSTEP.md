@@ -12,10 +12,10 @@ Etap 0 (ten plik) niczego nie instaluje i nie zmienia kodu. Zainstalowane zależ
 | 1 | Fundamenty: Storybook, tokeny, Tailwind, przełącznik motywu, Foundations, skrypt `check:tokens` | zrobiony: PR B, PR C i PR D (Foundations, `check:tokens`, joby CI); PR D do przeglądu |
 | 2 | Komponenty bazowe, partiami po ok. sześć | ZAKOŃCZONY (PR N, Toast, ostatni komponent bazowy): partia 1 (Button, Input, Label+Field, Card, Badge, Alert; PR E, F i G), partia 2 (Checkbox + `lucide-react`, Select, RadioGroup; PR H, I i J), PR K (TextLink, Skeleton, EmptyState, ErrorState), PR L (Dialog + ConfirmDialog), PR M (Menu), PR N (Toast); Textarea i Tabs celowo nie zbudowane (brak, gdy ekran zażąda); patrz sekcja "Etap 2 zakończony i plan etapu 3" |
 | 3 | Komponenty produktu, wzorce, ekrany epików | w toku: plan zatwierdzony 2026-11-18; PR O (wzorzec formularza), PR P (E01) i PR Q (przegląd miesiąca) zrobione; PR R (tabela wpisów) zrobiony i zatwierdzony; PR S (EntryForm, SeriesActions, potwierdzenia, Toast po zapisie) zrobiony i zatwierdzony; PR T (`AppShell`, ekrany E02 i E03) zrobiony, do przeglądu; etap 3 zakończony po jego zatwierdzeniu |
-| 4 | Strony, które uczą, plik dla agentów | nie rozpoczęty |
+| 4 | Strony, które uczą, plik dla agentów | zrobiony: PR U (11 stron w "System projektowy", `docs/design-system.md`, sekcja w `AGENTS.md`), do przeglądu |
 | 5 | Sprawdzenie i raport | nie rozpoczęty |
 
-Następny krok: właściciel przegląda PR T (`AppShell`, ekrany "Konto z wpisami" i "Przegląd miesiąca", propozycje w pliku tokenów, sekcja "AppShell i ekrany pełnoekranowe (PR T)"); po jego zatwierdzeniu etap 3 jest zakończony, a po "dalej" właściciela zaczyna się etap 4 (strony, które uczą, plik dla agentów).
+Następny krok: właściciel przegląda PR U (etap 4, patrz sekcja "Notatki z PR U"); wcześniej PR T (`AppShell`, ekrany "Konto z wpisami" i "Przegląd miesiąca", propozycje w pliku tokenów, sekcja "AppShell i ekrany pełnoekranowe (PR T)"); po jego zatwierdzeniu etap 3 jest zakończony, a po "dalej" właściciela zaczyna się etap 4 (strony, które uczą, plik dla agentów).
 
 ## Materiały (źródła)
 
@@ -457,3 +457,10 @@ Obowiązujące dla T: stan ekranu w adresie (`?account=…&month=RRRR-MM`); jedn
 - Pozostałe wzorce: nowych nie dodano, bo nic z ekranów ich nie wymagało; reguła fokusu po usunięciu trafiła do wzorca "Potwierdzenie usunięcia".
 - Pułapki (lekcje w `.ai/lessons/`): Radix FocusScope nadpisuje fokus ustawiony synchronicznie po usunięciu wiersza; oczekiwane kwoty w story budować przez `formatMoneyMinor`; karty (`h3`) pod `h1` wymagają ukrytego `h2` dla axe; współdzielony harness story musi być w `excludeStories`.
 - Do decyzji właściciela: patrz plik tokenów (tabela propozycji PR T), zwłaszcza: czy karty zastępują `BankAccountList` na `/`, zapasowy wybór konta przy błędzie kart, kontener 960 px dla wszystkich stron, historia przeglądarki dla zmian adresu.
+
+## Notatki z PR U (etap 4: strony, które uczą, plik dla agentów)
+
+- Strony w `packages/ui/src/stories/system/` (menu "System projektowy", kolejność przez `storySort` w `preview.ts`): Start (charakter w trzech zdaniach, pięć kroków, tabela "czego użyć"), Komponenty (katalog), Jak wybrać komponent, Użycie i dostępność, Treść i komunikaty, Czego unikać (antywzorce produktu, generyczny wygląd AI, błędy implementacji), Czego brakuje (pokrycie backlogu, luki), Współtworzenie, Epiki E01, E02, E03. Dawna strona "Wprowadzenie" zastąpiona stroną Start.
+- Plik dla agentów: `docs/design-system.md` (reguły oznaczone REGUŁA, PRZYKŁAD, LUKA), odwołanie w lokalnym `AGENTS.md` (decyzja właściciela nr 4). Opisuje tylko to, co istnieje w kodzie (nazwy eksportów i propsów sprawdzone w źródłach).
+- Linki między stronami to `?path=/docs/<id>`; identyfikatory sprawdzone względem `index.json` zbudowanego Storybooka (skrypt jednorazowy, poza repo). `check:tokens` skanuje też `.mdx`, więc przykładów zakazanych wartości nie wpisujemy w dokumentacji literalnie.
+- Do decyzji właściciela: czy plik `docs/design-system.md` ma być utrzymywany ręcznie (dziś tak), czy wymagać jego aktualizacji w checklistcie PR-a; czy etap 5 ma zawierać test agentem na ekranie z backlogu.

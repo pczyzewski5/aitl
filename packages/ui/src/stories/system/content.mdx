@@ -1,0 +1,69 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="System projektowy/Treść i komunikaty" />
+
+# Treść i komunikaty
+
+Treść jest częścią interfejsu. Ton wywodzi się z referencji R01.7: polski, rzeczowy, krótki, bez marketingu. Gotowe teksty komponentów są w plikach `messages` i można je nadpisać propsem `messages`.
+
+## Ton
+
+- Po polsku, w trybie rozkazującym ("Podaj datę", "Sprawdź adres e-mail"), do użytkownika na "Ty" tylko tam, gdzie to konieczne ("Nie masz jeszcze żadnego konta bankowego").
+- Krótko i konkretnie. Bez ozdobników, wykrzykników, "Ups!", obietnic i żargonu technicznego.
+- Jedna myśl na zdanie. Najpierw co się stało, potem co zrobić.
+- Dane przykładowe zawsze z dopiskiem "(przykład)", np. "Czynsz (przykład)".
+
+## Przyciski
+
+| Reguła | Dobrze | Źle |
+|---|---|---|
+| Czasownik opisujący efekt, nie "OK" | "Zapisz wpis", "Dodaj wpis", "Usuń wpis" | "OK", "Tak", "Wyślij" |
+| Przy akcji nieodwracalnej nazwa obiektu i czasownik | "Usuń wpis" w oknie "Usunąć wpis „Czynsz (przykład)”?" | "Usuń" w oknie "Czy na pewno?" |
+| Rezygnacja zawsze "Anuluj" | "Anuluj" | "Nie", "Zamknij" |
+| Stan trwania nazwany tym samym czasownikiem | "Logowanie…" | "Proszę czekać" |
+| Ponowienie | "Spróbuj ponownie" | "Odśwież" |
+
+## Błędy
+
+Błąd mówi, co się stało i co zrobić. Stoi pod polem, którego dotyczy, albo w oknie lub formularzu, w którym wystąpił, a dane użytkownika zostają.
+
+| Sytuacja | Dobrze | Źle |
+|---|---|---|
+| Puste pole | "Wpisz adres e-mail, np. jan@example.com." | "Pole wymagane" |
+| Zły format kwoty | "Kwota ma niepoprawny format. Wpisz same cyfry z przecinkiem lub kropką, np. 12,50." | "Błąd" |
+| Zła data | "Podaj datę wpisu w formacie RRRR-MM-DD, np. 2026-11-18." | "Niepoprawna data!" |
+| Logowanie | "Nie udało się zalogować. Sprawdź adres e-mail i hasło, a potem spróbuj ponownie." | "Zły login lub hasło" (zdradza za dużo i nie pomaga) |
+| Błąd sieci | "Sprawdź połączenie z internetem i spróbuj ponownie." | "Wystąpił nieoczekiwany błąd" |
+| Blokada logowania | "Zbyt wiele prób logowania. Spróbuj ponownie za 30 sekund." | "Konto zablokowane" |
+
+Podsumowanie błędów formularza ma tytuł mówiący, co zrobić ("Popraw dane logowania, żeby się zalogować"), a każdy punkt prowadzi do pola.
+
+## Puste stany
+
+Pusty stan mówi, dlaczego jest pusto i co można zrobić, z najwyżej jedną akcją.
+
+| Miejsce | Tytuł | Opis |
+|---|---|---|
+| Lista kont | "Nie masz jeszcze żadnego konta bankowego" | "Gdy konto zostanie Ci przypisane, zobaczysz je tutaj." |
+| Tabela wpisów | "W tym miesiącu nie ma jeszcze żadnych wpisów" | "Dodaj pierwszy wpływ albo wydatek, żeby zobaczyć go na liście." |
+
+Stan pusty nie jest błędem: nie używa `Alert` ani `ErrorState`.
+
+## Formaty
+
+| Rzecz | Format | Uwagi |
+|---|---|---|
+| Kwota | "3 975,50 zł" | zawsze przez `formatMoneyMinor`; spacje w kwocie są niełamliwe |
+| Znak kwoty | "+3 975,50 zł" wpływ (opcja `sign: 'always'`), "−120,00 zł" wydatek (znak minus U+2212) | znak lub etykieta, nigdy sam kolor |
+| Waluta | PLN, "zł" | w formularzu sufiks "PLN" i podpowiedź "Kwoty są w złotych (PLN)" |
+| Data wpisu | RRRR-MM-DD, np. 2026-11-18 | w podpowiedzi zawsze przykład |
+| Miesiąc | klucz `RRRR-MM`, etykieta przez `formatMonthLabel(key, monthNames)` | np. "listopad 2026" |
+| Opcjonalność | "(opcjonalne)" przy etykiecie | zamiast gwiazdki przy wymaganych |
+| Typ konta | "Wspólne", "Osobiste" | tekst w `Badge`, kolor tylko wspiera |
+| Wpis cykliczny | "Co miesiąc", "Dzień miesiąca: 5" | |
+
+## Zasady dla autorów tekstów
+
+- Tytuł okna z pytaniem kończy się znakiem zapytania i zawiera nazwę obiektu.
+- Tekst na przycisku mieści się w jednej linii przy 320 px albo zawija się bez ucinania.
+- Nie powtarzamy tytułu w opisie. Nie budujemy zdań z części tekstu i zmiennej, jeśli język wymaga odmiany: komponent przyjmuje funkcję tekstu (np. `limitExceededDescription(limit)`).
