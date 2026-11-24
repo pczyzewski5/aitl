@@ -22,7 +22,7 @@ Skrypt `scripts/setup.ts` wykonuje kolejno poniższe kroki i dla każdego wypisu
 
 Ponowne uruchomienie jest bezpieczne. Skrypt nie generuje sekretów i nigdy nie usuwa wolumenów Dockera. Jeśli PostgreSQL odrzuci dane logowania (stary wolumen), skrypt podpowie `docker compose down -v`, ale musisz to wykonać sam, wiedząc, że usuwa lokalne dane.
 
-Po instalacji uzupełnij w `.env` sekrety (gdy pojawią się w `.env.example`: `SESSION_SECRET` i hasło konta seedowego), a następnie uruchom aplikację: `npm run dev -w @aitl/app`.
+Po instalacji uzupełnij w `.env` sekrety (`SEED_PASSWORD` oraz pozostałe puste zmienne z `.env.example`), utwórz konto użytkownika (sekcja "Konta użytkowników") i uruchom aplikację: `npm run dev -w @aitl/app`.
 
 ### Ścieżka 2: ręcznie
 
@@ -34,10 +34,24 @@ cp .env.example .env
 docker compose up -d postgres
 docker compose exec -T postgres pg_isready -U aitl -d aitl
 npm run migration:up -w @aitl/db
+npm run seed:user -- --email <e-mail> --name <nazwa>
 npm run dev -w @aitl/app
 ```
 
-Przed `cp` sprawdź, czy `.env` już nie istnieje (nie nadpisuj go). Polecenie `pg_isready` powtarzaj, aż zwróci sukces. Pozostałe kroki są idempotentne.
+Przed `cp` sprawdź, czy `.env` już nie istnieje (nie nadpisuj go). Polecenie `pg_isready` powtarzaj, aż zwróci sukces. Pozostałe kroki są idempotentne. Przed `seed:user` ustaw `SEED_PASSWORD` w `.env`.
+
+### Konta użytkowników
+
+Aplikacja nie ma publicznej rejestracji, konta powstają komendą `npm run seed:user` (logika w `packages/app/src/seed/`, cienki wrapper w `scripts/seed-user.ts`):
+
+```bash
+npm run seed:user -- --email wlasciciel@example.com --name "Właściciel"
+npm run seed:user -- --email druga.osoba@example.com --name "Druga osoba" --shared-only
+```
+
+- Pierwsza komenda tworzy użytkownika, konto wspólne ("Wspólne") i jego konto osobiste ("Osobiste"). Z `--shared-only` użytkownik jest członkiem tylko konta wspólnego, bez osobistego. Nazwy kont można zmienić opcjami `--shared-account-name` i `--personal-account-name`.
+- Hasło pochodzi wyłącznie ze zmiennej `SEED_PASSWORD` (w `.env.example` puste, wartość wpisz w lokalnym `.env`), nigdy z argumentów ani z logów. Minimum to 8 znaków, przy `NODE_ENV=production` 12.
+- Komenda jest idempotentna. Ponowne uruchomienie z innym hasłem niż zapisane niczego nie zmienia: wypisuje ostrzeżenie i kończy się kodem 1 (kod 2 oznacza błędne argumenty lub hasło).
 
 ## Stack technologiczny
 
