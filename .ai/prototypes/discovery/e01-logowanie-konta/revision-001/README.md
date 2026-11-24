@@ -18,7 +18,7 @@ Dane są fikcyjne (przykład): Paweł (pawel@example.com), Żona (zona@example.c
 
 ## Ekrany i stany (z zatwierdzonej mapy ekranów)
 
-Źródło: `.ai/specs/design/2026-11-24-mapa-ekranow-e01.md` (zatwierdzona przez właściciela produktu 2026-11-24, P1-P17) oraz spec `.ai/specs/2026-11-17-auth-and-app-foundation.md` (decyzje Q23-Q28).
+Źródło: `.ai/specs/design/2026-11-24-mapa-ekranow-e01.md` (zatwierdzona przez właściciela produktu 2026-11-24, P1-P17) oraz spec `.ai/specs/implemented/2026-11-17-auth-and-app-foundation.md` (decyzje Q23-Q28).
 
 | Ekran / stan | Akcja w prototypie | Następny stan | Odniesienie |
 |---|---|---|---|

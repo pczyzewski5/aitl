@@ -1,7 +1,7 @@
 # Ile zostanie w miesiącu (E03)
 
 Status: DRAFT po decyzjach właściciela, bez otwartych pytań.
-Źródła: epik #8 (E03), historia #16, zadanie #23; `.ai/specs/product-brief.md` (R01, R02, R03, A01, D01); `.ai/specs/2026-11-17-entries-income-expenses.md` (E02: encja `Entry`, `findActiveInMonth`, `core/months`, `MonthSwitcher`, reguła aktywności); `.ai/specs/2026-11-17-auth-and-app-foundation.md` (`BankAccountService.listForUser`, sesja, `apiHandler`); `AGENTS.md`; `BACKWARD_COMPATIBILITY.md`.
+Źródła: epik #8 (E03), historia #16, zadanie #23; `.ai/specs/product-brief.md` (R01, R02, R03, A01, D01); `.ai/specs/2026-11-17-entries-income-expenses.md` (E02: encja `Entry`, `findActiveInMonth`, `core/months`, `MonthSwitcher`, reguła aktywności); `.ai/specs/implemented/2026-11-17-auth-and-app-foundation.md` (`BankAccountService.listForUser`, sesja, `apiHandler`); `AGENTS.md`; `BACKWARD_COMPATIBILITY.md`.
 
 ## 📝 TLDR
 

@@ -6,7 +6,7 @@ Cele:
 - Izolacja i druga osoba: test własności przez route, niezależne sesje, E2E żony (#11)
 - Instalator `npm run setup` (#2) jako osobny PR równoległy do Fazy 1
 
-Spec: [.ai/specs/2026-11-17-auth-and-app-foundation.md](../specs/2026-11-17-auth-and-app-foundation.md)
+Spec: [.ai/specs/implemented/2026-11-17-auth-and-app-foundation.md](../specs/implemented/2026-11-17-auth-and-app-foundation.md)
 Postęp i plan PR-ów: [.ai/pipeline-runs/2026-11-24-auth-and-app-foundation/track.md](../pipeline-runs/2026-11-24-auth-and-app-foundation/track.md)
 Status: in-progress
 
@@ -239,6 +239,30 @@ SB-I: po merge #76 padły 2 testy `seed.test.ts` (brak `SESSION_SECRET` wymagane
 ## 2026-11-24 (PR-11, krok 2.7, commit 3)
 Dopisek do commitu 2 (wpis urwał się na znaku procentu): coverage 100 procent, build, audit 0 podatności, integracyjne 105/105. PR #80 (base main, etykieta needs-qa, stos #70, #72, #73, #75, #76, #77, #78, #74, #71, #79); wiersz PR-11 uzupełniony numerem.
 Do zrobienia: zielone checki, merge po stosie, SHA w track.md.
+
+## 2026-11-24 (PR-12, close-out, commit 1)
+Baza: `feature/e01-closeout` z `origin/feature/second-user-isolation` (#80, stos #70, #72, #73, #75, #76, #77, #78, #74, #71, #79). Spec auth-and-app-foundation przeniesiony `git mv` do `.ai/specs/implemented/` (bez zmiany nazwy); poprawione linki w track.md, nagłówku tego dziennika, specach E02 i E03, mapie ekranów, README prototypu, RAPORT.md, POSTEP.md i plikach `.mdx` w `packages/ui`. Stare wpisy w `.ai/runs/2026-11-02-project-bootstrap.md` zostawione bez zmian (historia).
+Do zrobienia: sekcja odchyleń w specu, backlog, checkboxy monorepo-migration, track.md.
+
+## 2026-11-24 (PR-12, close-out, commit 2)
+Do speca (w `implemented/`) dopisana sekcja "Odchylenia od specu w implementacji": seed (wrapper w root `scripts/`, hasło tylko z `SEED_PASSWORD`, nazwy kont z opcji CLI, bez stdin, wymaga `SESSION_SECRET`), `GET /api/auth/me`, `loadEnvConfig` (Q39), CSRF (Q40), dwa liczniki throttla (5 i 20), `TRUSTED_PROXY_HOPS`, 400 dla nie-UUID w `/api/bank-accounts/{id}`. Wartości sprawdzone w kodzie (`seed-config.ts`, `login-throttle.service.ts`).
+Do zrobienia: backlog, checkboxy monorepo-migration, track.md, PR.
+
+## 2026-11-24 (PR-12, close-out, commit 3)
+`.ai/specs/backlog.md`: sekcja "Status implementacji E01" (E01, S01, S02, #17-#20) według stanu PR-ów z `gh pr list`; tabela backlogu i issues na GitHubie bez zmian, bo tabela nie ma kolumny statusu.
+Do zrobienia: checkboxy monorepo-migration, track.md, PR.
+
+## 2026-11-24 (PR-12, close-out, commit 4)
+`2026-11-02-monorepo-migration.md`: odhaczone tylko to, co istnieje w kodzie: Faza 4 (kontener Awilix, rejestracje `core`/`db`, test `container.test.ts`), w 4b `apiHandler`, `auth`, `env`, `logger` oraz w Fazie 5 Tailwind w `app` (#71, jeszcze niezmergowany). Linie rozdzielone, bo `makeCrudRoute`, `ui/backend/{tables}` i shadcn dla panelu admina nie powstały i zostają niezaznaczone.
+Do zrobienia: track.md, PR.
+
+## 2026-11-24 (PR-12, close-out, commit 5)
+track.md: numery PR-10a (#74) i PR-10b (#71), nowy wiersz PR-3b (#73, poprawki po review Fazy 1, nieujęty wcześniej w tabeli) i wiersz PR-12 (in-progress, bez SHA). Statusy wszystkich PR-ów z `gh pr list`: zmergowane tylko PR-1, PR-2, PR-3 i instalator #2; reszta otwarta. SB-A zielone lokalnie (typecheck, lint, coverage 100%, build, audit 0 podatności).
+Status dziennika zostaje `in-progress`: `done` dopiero po merge wszystkich PR-ów. Do zrobienia: PR, numer PR-12 w track.md, po merge stosu SHA i status done.
+
+## 2026-11-24 (PR-12, close-out, commit 6)
+PR #81 otwarty (base main, stos #70, #72, #73, #75, #76, #77, #78, #74, #71, #79, #80); numer w wierszu PR-12 w track.md.
+Do zrobienia: zielone checki, po merge stosu przestawić bazę, SHA w track.md, `Status: done` w dzienniku po merge wszystkich PR-ów.
 
 ## 2026-11-24 (poprawki po przeglądzie Fazy 2, M1)
 Gałąź `feature/phase-2-review-fixes` z szczytu stosu (#80). Throttle: zamiast `assertNotLocked` + `recordFailure` jeden atomowy upsert `reserveAttempt` (`RETURNING`) przed weryfikacją hasła; próba ponad próg -> 429 bez argon2; aktywna blokada nie jest przesuwana, okno nie odnawia się w trakcie blokady. Test równoległy: 10 błędnych prób = dokładnie 5 x 401 i 5 x 429 (stary kod: 10 x 401).
