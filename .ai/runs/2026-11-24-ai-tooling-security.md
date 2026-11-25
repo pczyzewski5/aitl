@@ -22,3 +22,8 @@ Do zrobienia: ręczny test właściciela (curl/git clone/npm/cat ~/.ssh oraz `np
 ## 2026-11-24 (zamknięcie zadania)
 PR #84 i #85 zmergowane do `main`. Status `done`.
 Do zrobienia przez właściciela: skan `~/.claude/projects/` z rotacją, menedżer sekretów, testy z laboratorium, test ręczny sandboxa, "Require review from Code Owners".
+
+## 2026-11-25 (kontrole ręczne)
+Dodane: `scripts/keychain-env.sh` z testem (`keychain:init`, `dev:secure`), wpisy w README i wypełniona sekcja 7 w `docs/security-notes.md` (skan sesji, rotacja, menedżer sekretów, test prompt injection, decyzja o Code Owners).
+Decyzje: skan bez realnych sekretów, rotacji brak; Code Owners świadomie nie włączone (solo, autor nie zatwierdzi własnego PR-a, `enforce_admins`); test prompt injection sprawdził tylko odporność modelu.
+Do zrobienia przez właściciela: `npm run keychain:init`, usunięcie linii `SESSION_SECRET` z lokalnego pliku środowiskowego, testy z laboratorium kursu, checkboxy na stronie kursu.

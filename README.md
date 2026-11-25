@@ -38,7 +38,7 @@ npm run seed:user -- --email <e-mail> --name <nazwa>
 npm run dev -w @aitl/app
 ```
 
-Przed `cp` sprawdź, czy `.env` już nie istnieje (nie nadpisuj go). Polecenie `pg_isready` powtarzaj, aż zwróci sukces. Pozostałe kroki są idempotentne. Przed `seed:user` ustaw `SESSION_SECRET` i `SEED_PASSWORD` w `.env`. `SESSION_SECRET` ma mieć co najmniej 32 znaki (wymusza to walidacja przy starcie), zalecany jest losowy, np. `openssl rand -hex 32` (64 znaki hex).
+Przed `cp` sprawdź, czy `.env` już nie istnieje (nie nadpisuj go). Polecenie `pg_isready` powtarzaj, aż zwróci sukces. Pozostałe kroki są idempotentne. Przed `seed:user` ustaw `SESSION_SECRET` i `SEED_PASSWORD` w `.env`. `SESSION_SECRET` ma mieć co najmniej 32 znaki (wymusza to walidacja przy starcie), zalecany jest losowy, np. `openssl rand -hex 32` (64 znaki hex). Na macOS możesz zamiast tego trzymać `SESSION_SECRET` w pęku kluczy: `npm run keychain:init` generuje i zapisuje sekret, a `npm run dev:secure` uruchamia aplikację z sekretem ze środowiska (szczegóły w `docs/security-notes.md`).
 
 ### Konta użytkowników
 
