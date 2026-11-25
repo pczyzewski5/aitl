@@ -64,18 +64,13 @@ alias agent-audit="find . \\( -name .mcp.json -o -name CLAUDE.md -o -name AGENTS
 
 ## 5. Śmiertelna trójka (lethal trifecta)
 
-Ryzyko powstaje, gdy agent ma jednocześnie: dostęp do prywatnych danych, kontakt z niezaufaną treścią i możliwość komunikacji na zewnątrz. W typowym przebiegu agenta w AITL odcinamy pierwszą nogę: sekrety są wyłącznie w lokalnym `.env` właściciela, a agenci go nie czytają (reguły `deny` blokują narzędzie Read, hook blokuje `.env` i `~/.ssh`/`~/.aws` w Bash). Drugą nogę ogranicza praca w sandboxie i wyłącznie przez PR (chroniony `main`, wymagane checki, brak pushu na `main`), więc nawet udany prompt injection daje tylko widoczny w review diff, a nie wyciek. Reguły sandboxa sieciowego opisuje osobny PR.
+Ryzyko powstaje, gdy agent ma jednocześnie: dostęp do prywatnych danych, kontakt z niezaufaną treścią i możliwość komunikacji na zewnątrz. W typowym przebiegu agenta w AITL odcinamy pierwszą nogę: sekrety są wyłącznie w lokalnym `.env` właściciela, a agenci go nie czytają (reguły `deny` blokują narzędzie Read, hook blokuje `.env` i `~/.ssh`/`~/.aws` w Bash). Skutki ogranicza praca wyłącznie przez PR (chroniony `main`, wymagane checki, brak pushu na `main`), więc udany prompt injection daje widoczny w review diff. Warstwy sieciowej nie ma: sandbox został wyłączony (sekcja 6).
 
-## 6. Sandbox
+## 6. Sandbox (przetestowany i wyłączony)
 
-`.claude/settings.json` włącza sandbox (`sandbox.enabled`, `allowUnsandboxedCommands: false`, czyli brak ucieczki z sandboxa za zgodą w sesji). Wybory:
+Sandbox Claude Code (PR #85) został przetestowany i usunięty z `.claude/settings.json`. Powód: pracujemy solo, na własnym repo, bez obcych PR-ów i skilli, a koszt przewyższał zysk. Blokada odczytu `~/.ssh` i `~/.config/gh` zatrzymywała `git` i `gh` (`known_hosts`, konfiguracja `gh`), a obejście przez `excludedCommands` nie zadziałało w sesji agenta. Testcontainers i skrypty czytające lokalną konfigurację także wymagały wyjątków.
 
-- `filesystem.denyRead`: `~/.ssh`, `~/.aws`, `~/.config/gh`, `~/.kube`, `~/.npmrc`, `~/.pypirc`, `~/**/.env`. Skutek uboczny: komenda w sandboxie nie przeczyta `.env`, więc `npm run seed:user` (używa `--env-file-if-exists=.env`) uruchamiaj we własnym terminalu.
-- `network.allowedDomains`: `github.com` (git push/fetch), `api.github.com` (`gh`), `registry.npmjs.org` (`npm ci`, `npm audit`). `network.deniedDomains`: endpointy metadanych chmury (`169.254.169.254`, `metadata.google.internal`).
-- `network.allowLocalBinding: true`: `next start` i testy integracyjne łączą się z `127.0.0.1` i z kontenerem Postgresa na zmapowanym porcie.
-- `excludedCommands: ["docker"]`: testcontainers rozmawia z gniazdem Dockera, którego sandbox nie wpuszcza; `docker` działa poza sandboxem.
-
-Znane ograniczenia: `npx playwright install` (pobieranie przeglądarek z CDN Playwrighta) i `npm run test:storybook` lokalnie wymagają dopisania domeny CDN albo uruchomienia we własnym terminalu (CI nie jest objęty sandboxem). Testy integracyjne uruchamiają się przez Node, a nie przez `docker`, więc gniazdo Dockera może nadal być blokowane: patrz lista kontrolna w opisie PR-a. Zachowanie sandboxa nie było weryfikowane automatycznie.
+Zostają warstwy: reguły `permissions.deny` na pliki z sekretami, klucze `~/.ssh` i `~/.aws`, hook PreToolUse, chroniony `main` z wymaganymi checkami oraz CODEOWNERS. Sandbox warto włączyć ponownie przy pracy z niezaufanym kodem (obce repo, cudze PR-y, nowe skille lub serwery MCP), bo wtedy realnie ogranicza dwie nogi śmiertelnej trójki.
 
 ## 7. Ręczne kontrole właściciela (wykonane 2026-11-25)
 
