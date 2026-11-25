@@ -99,4 +99,21 @@ Wnioski:
 - Modele (Haiku i Sonnet) bronią się dobrze przed prostym prompt injection, ale 01 i 02 pokazują, że wykonanie kodu przez konfigurację repo (hook, MCP) nie zależy od modelu. Obrona to przegląd plików (`agent-audit`) i nieuruchamianie obcych repo bez kontenera.
 - Granice poza modelem zadziałały: uprawnienia przy skillu, reguły `deny` na plik z sekretami, hook PreToolUse.
 - Z trzech nóg trifekty w typowym przebiegu agenta w AITL brakuje dostępu do prywatnych danych (reguły `deny` i hook blokują pliki z sekretami i klucze). Niezaufana treść i komunikacja na zewnątrz (`git push`, `gh`) są dostępne, więc pozostałe zabezpieczenie to praca wyłącznie przez PR z chronionym `main`.
-- Nie wykonano: alias `agent-audit` na dwóch obcych repozytoriach, uruchomienie obcego repo w kontenerze, skan Snyk Agent Scan (wymaga konta i tokenu), test na Codexie.
+- Nie wykonano: skan Snyk Agent Scan (wymaga konta i tokenu), test na Codexie.
+
+## 9. Audyt repozytoriów, skilli i kontener (2026-11-25)
+
+**Audyt plików konfiguracyjnych agenta** (polecenie z `agent-audit` i `agent-audit-hot` z laboratorium, tylko odczyt):
+
+| Repozytorium | Pliki konfiguracji agenta | Gorące miejsca (hooki, `enableAllProjectMcpServers`, `allow`, `npx`, `curl`) |
+|---|---|---|
+| `sample` | brak | brak |
+| `release-conductor` | `AGENTS.md`, `CLAUDE.md` | brak |
+| obcy projekt z laboratorium (`01-repo-hook`) | `.claude/settings.json` | **hook `SessionStart` wykonujący komendę** (celowo złośliwy) |
+
+**Obcy projekt w kontenerze.** Projekt z laboratorium uruchomiony w kontenerze `node:24-alpine` z katalogiem projektu zamontowanym tylko do odczytu i bez montowania katalogów domowych: w kontenerze nie ma katalogu kluczy SSH ani katalogu sesji agenta, a zapis do projektu kończy się błędem `Read-only file system`. Hook z projektu nie dosięga więc ani kluczy, ani historii sesji. Zasada: obce repo oglądamy i uruchamiamy w kontenerze, nie bezpośrednio na laptopie.
+
+**Skille w `.agents/skills/`.** 72 skille z `open-mercato/skills` (źródło i hash każdego zapisane w `skills-lock.json`), żaden bez pliku `SKILL.md`.
+- Skan wzorców (dynamiczny kontekst z wykrzyknikiem, `curl`, `wget`, `base64`, `sudo`, `rm -rf`, odwołania do kluczy SSH i AWS, frazy typu "nie mów użytkownikowi") i obejrzenie linii każdego trafienia: wszystkie to dokumentacja integracji z trackerami, helpery z czyszczeniem katalogu tymczasowego albo reguły obronne ("ignore previous instructions" występuje jako instrukcja, żeby jej NIE wykonywać). Dynamiczny kontekst: 0 prawdziwych wywołań (3 trafienia to znaki w tabelach i kodzie). Frontmatter bez `hooks:` i bez szerokich `allowed-tools`.
+- Skrypty w skillach (14 plików `.mjs`/`.js`/`.sh`/`.py`): hosty zewnętrzne to wyłącznie `github.com`, `pypi.org`, `api.osv.dev`, `crates.io`, `127.0.0.1` i przestrzenie nazw XML. Jedyny skrypt dotykający wzorców sekretów (`om-share-this-session/scripts/prepare-share-bundle.mjs`) używa ich do odfiltrowywania i redakcji, a nie do odczytu. Jedyny katalog hooków (`om-harness/hooks`) zawiera osłony blokujące push i zmiany testów.
+- Ograniczenie: to skan wzorców plus przegląd trafień i skryptów, a nie pełna lektura wszystkich 72 skilli. Treści instrukcji (jak w `pdf-generator`) skan nie wykrywa; przed użyciem nowego skilla trzeba go przeczytać.
