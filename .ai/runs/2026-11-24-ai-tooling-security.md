@@ -22,3 +22,7 @@ Do zrobienia: ręczny test właściciela (curl/git clone/npm/cat ~/.ssh oraz `np
 ## 2026-11-24 (zamknięcie zadania)
 PR #84 i #85 zmergowane do `main`. Status `done`.
 Do zrobienia przez właściciela: skan `~/.claude/projects/` z rotacją, menedżer sekretów, testy z laboratorium, test ręczny sandboxa, "Require review from Code Owners".
+
+## 2026-11-25 (usunięcie sandboxa)
+Usunięty blok `sandbox` z `.claude/settings.json`; sekcja 6 w `docs/security-notes.md` opisuje decyzję, `.claude/hooks/README.md` nie wspomina już o sandboxie.
+Powód: sandbox przetestowany, blokował `git` i `gh` (denyRead na `~/.ssh` i `~/.config/gh`), `excludedCommands` nie działało w sesji agenta; przy pracy solo koszt przewyższał zysk. Reguły deny, hook, chroniony `main` i CODEOWNERS zostają.
