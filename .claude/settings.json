@@ -14,19 +14,6 @@
       "Read(~/.aws/**)"
     ]
   },
-  "sandbox": {
-    "enabled": true,
-    "allowUnsandboxedCommands": false,
-    "excludedCommands": ["docker"],
-    "filesystem": {
-      "denyRead": ["~/.ssh", "~/.aws", "~/.config/gh", "~/.kube", "~/.npmrc", "~/.pypirc", "~/**/.env"]
-    },
-    "network": {
-      "allowLocalBinding": true,
-      "allowedDomains": ["github.com", "api.github.com", "registry.npmjs.org"],
-      "deniedDomains": ["169.254.169.254", "metadata.google.internal"]
-    }
-  },
   "hooks": {
     "PreToolUse": [
       {

@@ -12,7 +12,7 @@
 
 ## Czego NIE łapie
 
-Hook to prosty filtr tekstowy, a nie sandbox. Da się go obejść, np.:
+Hook to prosty filtr tekstowy, a nie izolacja systemowa. Da się go obejść, np.:
 
 - `python3 -c "import shutil; shutil.rmtree('x')"`, `find . -delete`, `find . -exec rm -r {} +`, `perl`, `node -e` czyli kasowanie i czytanie plików interpreterem zamiast `rm`/`cat`.
 - `awk '{print}' ~/.ssh/id_rsa` jest łapane (ścieżka), ale `cd ~ && cat .ssh/id_rsa` albo ścieżka złożona ze zmiennych (`d=.ss; cat ~/$d"h"/id_rsa`) już nie.
@@ -20,7 +20,7 @@ Hook to prosty filtr tekstowy, a nie sandbox. Da się go obejść, np.:
 - Zakodowane komendy (`echo cm0gLXJm | base64 -d | sh`).
 - Odczyt `.env` narzędziem Read (to pokrywają reguły `permissions.deny`, a nie ten hook).
 
-Dlatego hook to jedna warstwa obrony, obok reguł `deny` i sandboxa.
+Dlatego hook to jedna warstwa obrony, obok reguł `deny` i ochrony `main`.
 
 ## Praca z hookiem
 
