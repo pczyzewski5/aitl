@@ -26,3 +26,8 @@ Do zrobienia przez właściciela: skan `~/.claude/projects/` z rotacją, menedż
 ## 2026-11-25 (usunięcie sandboxa)
 Usunięty blok `sandbox` z `.claude/settings.json`; sekcja 6 w `docs/security-notes.md` opisuje decyzję, `.claude/hooks/README.md` nie wspomina już o sandboxie.
 Powód: sandbox przetestowany, blokował `git` i `gh` (denyRead na `~/.ssh` i `~/.config/gh`), `excludedCommands` nie działało w sesji agenta; przy pracy solo koszt przewyższał zysk. Reguły deny, hook, chroniony `main` i CODEOWNERS zostają.
+
+## 2026-11-25 (kontrole ręczne)
+Dodane: `scripts/keychain-env.sh` z testem (`keychain:init`, `dev:secure`), wpisy w README i wypełniona sekcja 7 w `docs/security-notes.md` (skan sesji, rotacja, menedżer sekretów, test prompt injection, decyzja o Code Owners).
+Decyzje: skan bez realnych sekretów, rotacji brak; Code Owners świadomie nie włączone (solo, autor nie zatwierdzi własnego PR-a, `enforce_admins`); test prompt injection sprawdził tylko odporność modelu.
+Do zrobienia przez właściciela: `npm run keychain:init`, usunięcie linii `SESSION_SECRET` z lokalnego pliku środowiskowego, testy z laboratorium kursu, checkboxy na stronie kursu.

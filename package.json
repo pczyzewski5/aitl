@@ -18,7 +18,9 @@
     "setup": "node scripts/setup.ts",
     "prepare": "git config core.hooksPath .githooks",
     "check:tokens": "npm run check:tokens --workspace @aitl/ui",
-    "seed:user": "node --import tsx --env-file-if-exists=.env scripts/seed-user.ts"
+    "seed:user": "node --import tsx --env-file-if-exists=.env scripts/seed-user.ts",
+    "keychain:init": "bash scripts/keychain-env.sh init",
+    "dev:secure": "bash scripts/keychain-env.sh run npm run dev --workspace @aitl/app"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
